@@ -20,25 +20,38 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01189', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01189', methods=['GET'])
 	def BenchmarkTest01189_get():
+		response = make_response(render_template('web/codeinj-00/BenchmarkTest01189.html'))
+		response.set_cookie('BenchmarkTest01189', '%27RESPONSE+%2B%3D+%5C%27ECHOOO%5C%27%27',
+			max_age=60*3,
+			secure=True,
+			path=request.path,
+			domain='localhost')
+		return response
 		return BenchmarkTest01189_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01189', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01189', methods=['POST'])
 	def BenchmarkTest01189_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01189")
-
-		bar = param + '_SafeStuff'
+		import urllib.parse
+		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest01189", "noCookieValueSupplied"))
 
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
-		)
+		if not param.startswith('\'') or not param.endswith('\'') or '\'' in param[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
+
+		try:
+			exec(param)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(param)}\''
+			)
 
 		return RESPONSE
+
 

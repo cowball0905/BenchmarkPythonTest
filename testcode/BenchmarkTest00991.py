@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00991', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00991', methods=['GET'])
 	def BenchmarkTest00991_get():
 		return BenchmarkTest00991_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00991', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00991', methods=['POST'])
 	def BenchmarkTest00991_post():
 		RESPONSE = ""
 
@@ -41,31 +41,12 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
-
-		import pathlib
 		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
+		import flask
 
-		if not str(p).startswith(str(testfiles)):
-			RESPONSE += (
-				"Invalid Path."
-			)
-			return RESPONSE
-		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		return flask.redirect(bar)
 
 		return RESPONSE
 

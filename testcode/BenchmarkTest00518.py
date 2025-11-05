@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00518', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00518', methods=['GET'])
 	def BenchmarkTest00518_get():
 		return BenchmarkTest00518_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00518', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00518', methods=['POST'])
 	def BenchmarkTest00518_post():
 		RESPONSE = ""
 
@@ -32,40 +32,20 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		bar = param + '_SafeStuff'
 
-		import hashlib, base64
-		import io, helpers.utils
+		import yaml
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		try:
+			yobj = yaml.safe_load(bar)
 
-		if len(input) == 0:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				yobj['text']
 			)
-			return RESPONSE
-
-		hash = hashlib.new('sha512')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
+			)
 
 		return RESPONSE
 

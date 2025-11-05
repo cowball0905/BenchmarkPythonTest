@@ -20,42 +20,30 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00361', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00361', methods=['GET'])
 	def BenchmarkTest00361_get():
 		return BenchmarkTest00361_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00361', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00361', methods=['POST'])
 	def BenchmarkTest00361_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00361")
-		if not param:
-			param = ""
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00361" in request.form.getlist(name):
+				param = name
+				break
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = param
 
-		import flask
-		import urllib.parse
+		import os
+		import helpers.utils
 
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
-			RESPONSE += (
-				'Error parsing URL.'
-			)
-			return RESPONSE
-
-		return flask.redirect(bar)
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
 

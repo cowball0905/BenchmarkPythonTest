@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00286', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00286', methods=['GET'])
 	def BenchmarkTest00286_get():
 		return BenchmarkTest00286_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00286', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00286', methods=['POST'])
 	def BenchmarkTest00286_post():
 		RESPONSE = ""
 
@@ -35,28 +35,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		import configparser
+		
+		bar = 'safe!'
+		conf59255 = configparser.ConfigParser()
+		conf59255.add_section('section59255')
+		conf59255.set('section59255', 'keyA-59255', 'a-Value')
+		conf59255.set('section59255', 'keyB-59255', param)
+		bar = conf59255.get('section59255', 'keyB-59255')
 
-		import codecs
-		import helpers.utils
 
-		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
-			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
-			)
-
-			RESPONSE += (
-				" And file already exists."
-			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+		)
 
 		return RESPONSE
 

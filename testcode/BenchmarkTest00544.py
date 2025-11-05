@@ -20,33 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00544', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00544', methods=['GET'])
 	def BenchmarkTest00544_get():
 		return BenchmarkTest00544_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00544', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00544', methods=['POST'])
 	def BenchmarkTest00544_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00544")
-		if not param:
-		    param = ""
-
-		import configparser
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00544")
 		
-		bar = 'safe!'
-		conf19542 = configparser.ConfigParser()
-		conf19542.add_section('section19542')
-		conf19542.set('section19542', 'keyA-19542', 'a_Value')
-		conf19542.set('section19542', 'keyB-19542', param)
-		bar = conf19542.get('section19542', 'keyA-19542')
+		if headers:
+			param = headers[0]
+
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
+
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
 		try:
-			exec(bar)
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
 		except:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
+
 
 		return RESPONSE
 

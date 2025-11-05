@@ -20,58 +20,28 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01024', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01024', methods=['GET'])
 	def BenchmarkTest01024_get():
 		return BenchmarkTest01024_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01024', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01024', methods=['POST'])
 	def BenchmarkTest01024_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01024" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01024"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01024") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
-		import secrets
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest01024'[13:]
-		user = f'SafeRobbie{num}'
-		cookie = f'rememberMe{num}'
-		value = str(secrets.randbelow(2**32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

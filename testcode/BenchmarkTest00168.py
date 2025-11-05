@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00168', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00168', methods=['GET'])
 	def BenchmarkTest00168_get():
 		return BenchmarkTest00168_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00168', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00168', methods=['POST'])
 	def BenchmarkTest00168_post():
 		RESPONSE = ""
 
@@ -32,26 +32,25 @@ def init(app):
 		if not param:
 			param = ""
 
+		bar = param
+
+		import os
+		import subprocess
 		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
 
-		import flask
-		import urllib.parse
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
+		else:
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {bar}")
 
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
-			RESPONSE += (
-				'Error parsing URL.'
-			)
-			return RESPONSE
-
-		return flask.redirect(bar)
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
+		RESPONSE += (
+			helpers.utils.commandOutput(proc)
+		)
 
 		return RESPONSE
 

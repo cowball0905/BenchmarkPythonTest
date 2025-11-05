@@ -20,42 +20,37 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00842', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00842', methods=['GET'])
 	def BenchmarkTest00842_get():
 		return BenchmarkTest00842_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00842', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00842', methods=['POST'])
 	def BenchmarkTest00842_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00842")
-		param = ""
-		if values:
-			param = values[0]
-
-		num = 106
+		import helpers.separate_request
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00842")
+		if not param:
+			param = ""
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00842'[13:]
-		user = f'SafeTheo{num}'
-		cookie = f'rememberMe{num}'
-		value = secrets.token_hex(32)
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
 		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			bar = param
+
+		import pathlib
+		import helpers.utils
+
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

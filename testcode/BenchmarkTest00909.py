@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00909', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00909', methods=['GET'])
 	def BenchmarkTest00909_get():
 		return BenchmarkTest00909_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00909', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00909', methods=['POST'])
 	def BenchmarkTest00909_post():
 		RESPONSE = ""
 
@@ -35,34 +35,31 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf47722 = configparser.ConfigParser()
-		conf47722.add_section('section47722')
-		conf47722.set('section47722', 'keyA-47722', 'a_Value')
-		conf47722.set('section47722', 'keyB-47722', param)
-		bar = conf47722.get('section47722', 'keyA-47722')
+		map47722 = {}
+		map47722['keyA-47722'] = 'a-Value'
+		map47722['keyB-47722'] = param
+		map47722['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map47722['keyB-47722']
+		bar = map47722['keyA-47722']
 
-		import lxml.etree
+		import pickle
+		import base64
 		import helpers.utils
 
-		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+		helpers.utils.sharedstr = "no pickles to be seen here"
 
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
+		try:
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				'Unpickling failed!'
 			)
+			return RESPONSE
+
+		RESPONSE += (
+			f'shared string is {helpers.utils.sharedstr}'
+		)
 
 		return RESPONSE
 

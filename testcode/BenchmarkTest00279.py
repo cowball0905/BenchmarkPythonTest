@@ -20,35 +20,35 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00279', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00279', methods=['GET'])
 	def BenchmarkTest00279_get():
 		return BenchmarkTest00279_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00279', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00279', methods=['POST'])
 	def BenchmarkTest00279_post():
 		RESPONSE = ""
 
-		values = request.form.getlist("BenchmarkTest00279")
-		param = ""
-		if values:
-			param = values[0]
-
-		import html
+		import helpers.separate_request
 		
-		bar = html.escape(param)
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_form_parameter("BenchmarkTest00279")
+		if not param:
+			param = ""
 
-		import yaml
+		import configparser
+		
+		bar = 'safe!'
+		conf59781 = configparser.ConfigParser()
+		conf59781.add_section('section59781')
+		conf59781.set('section59781', 'keyA-59781', 'a-Value')
+		conf59781.set('section59781', 'keyB-59781', param)
+		bar = conf59781.get('section59781', 'keyB-59781')
 
-		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
 
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

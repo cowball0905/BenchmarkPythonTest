@@ -20,49 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest01167', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest01167', methods=['GET'])
 	def BenchmarkTest01167_get():
 		return BenchmarkTest01167_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest01167', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest01167', methods=['POST'])
 	def BenchmarkTest01167_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01167")
 
-		import configparser
+		import markupsafe
 		
-		bar = 'safe!'
-		conf23263 = configparser.ConfigParser()
-		conf23263.add_section('section23263')
-		conf23263.set('section23263', 'keyA-23263', 'a-Value')
-		conf23263.set('section23263', 'keyB-23263', param)
-		bar = conf23263.get('section23263', 'keyB-23263')
+		bar = markupsafe.escape(param)
 
-		import platform
-		import subprocess
+		from flask import make_response
+		import io
 		import helpers.utils
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
 
-			RESPONSE += (
-				helpers.utils.commandOutput(proc)
-			)
-		except IOError:
-			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
-			)
+		RESPONSE += (
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+		)
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=False,
+			httponly=True)
 
 		return RESPONSE
 

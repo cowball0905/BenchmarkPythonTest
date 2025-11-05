@@ -20,49 +20,25 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00084', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00084', methods=['GET'])
 	def BenchmarkTest00084_get():
-		response = make_response(render_template('web/deserialization-00/BenchmarkTest00084.html'))
-		response.set_cookie('BenchmarkTest00084', 'gASVNwAAAAAAAACMCF9fbWFpbl9flIwOc2FmZV90b19waWNrbGWUk5QpgZR9lCiMAWGUjANmb2-UjAFilEtjdWIu',
-			max_age=60*3,
-			secure=True,
-			path=request.path,
-			domain='localhost')
-		return response
 		return BenchmarkTest00084_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00084', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00084', methods=['POST'])
 	def BenchmarkTest00084_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00084", "noCookieValueSupplied"))
+		param = request.form.get("BenchmarkTest00084")
+		if not param:
+			param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
-
-		import pickle
 		import base64
-		import helpers.utils
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
-
-		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
-			RESPONSE += (
-				'Unpickling failed!'
-			)
-			return RESPONSE
 
 		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
+			f'Parameter value: {bar}'
 		)
 
 		return RESPONSE

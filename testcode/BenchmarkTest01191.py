@@ -20,35 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest01191', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01191', methods=['GET'])
 	def BenchmarkTest01191_get():
 		return BenchmarkTest01191_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest01191', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01191', methods=['POST'])
 	def BenchmarkTest01191_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01191")
+		param = request.form.get("BenchmarkTest01191")
+		if not param:
+			param = ""
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
 
-		import helpers.db_sqlite
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		sql = f'SELECT username from USERS where password = ?'
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql, (bar,))
-		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
-		)
-		con.close()
+		if '\'' in param:
+			RESPONSE += (
+				"Employee ID must not contain apostrophes"
+			)
+			return RESPONSE
+
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{param}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
+
 

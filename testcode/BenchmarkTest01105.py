@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01105', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01105', methods=['GET'])
 	def BenchmarkTest01105_get():
 		return BenchmarkTest01105_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01105', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01105', methods=['POST'])
 	def BenchmarkTest01105_post():
 		RESPONSE = ""
 
@@ -33,15 +33,38 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		map12023 = {}
+		map12023['keyA-12023'] = 'a-Value'
+		map12023['keyB-12023'] = param
+		map12023['keyC'] = 'another-Value'
+		bar = map12023['keyB-12023']
 
+		import helpers.ldap
+		import ldap3
 
-		otherarg = "static text"
-		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
-		)
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(uid={bar}))'
+		try:
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
+
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except IOError:
+			RESPONSE += (
+				"Error processing LDAP query."
+			)
 
 		return RESPONSE
 

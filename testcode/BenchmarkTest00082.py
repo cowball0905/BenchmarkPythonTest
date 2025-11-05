@@ -23,7 +23,7 @@ def init(app):
 	@app.route('/benchmark/deserialization-00/BenchmarkTest00082', methods=['GET'])
 	def BenchmarkTest00082_get():
 		response = make_response(render_template('web/deserialization-00/BenchmarkTest00082.html'))
-		response.set_cookie('BenchmarkTest00082', 'gASVNwAAAAAAAACMCF9fbWFpbl9flIwOc2FmZV90b19waWNrbGWUk5QpgZR9lCiMAWGUjANmb2-UjAFilEtjdWIu',
+		response.set_cookie('BenchmarkTest00082', 'name%3A+safe+data%0Atext%3A+act+like+this+is+conf+data',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -38,27 +38,31 @@ def init(app):
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00082", "noCookieValueSupplied"))
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import pickle
-		import base64
-		import helpers.utils
-
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		import yaml
 
 		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
+			yobj = yaml.safe_load(bar)
+
+			RESPONSE += (
+				yobj['text']
+			)
 		except:
 			RESPONSE += (
-				'Unpickling failed!'
+				"There was an error loading the configuration"
 			)
-			return RESPONSE
-
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
 
 		return RESPONSE
 

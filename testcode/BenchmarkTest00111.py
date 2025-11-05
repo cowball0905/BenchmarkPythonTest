@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00111', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00111', methods=['GET'])
 	def BenchmarkTest00111_get():
 		return BenchmarkTest00111_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00111', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00111', methods=['POST'])
 	def BenchmarkTest00111_post():
 		RESPONSE = ""
 
@@ -32,35 +32,39 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		import lxml.etree
+		import helpers.utils
 
 		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
-			parser.setFeature(xml.sax.handler.feature_external_ges, True)
+			if '\'' in bar:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
 
-			doc = xml.dom.minidom.parseString(bar, parser)
-
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
 			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
 		except:
 			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

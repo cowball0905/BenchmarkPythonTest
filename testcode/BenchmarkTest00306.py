@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00306', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00306', methods=['GET'])
 	def BenchmarkTest00306_get():
 		return BenchmarkTest00306_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00306', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00306', methods=['POST'])
 	def BenchmarkTest00306_post():
 		RESPONSE = ""
 
@@ -35,15 +35,33 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = param
 
+		import lxml.etree
+		import helpers.utils
+		import io
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
-		)
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			strIO = io.StringIO()
+			strIO.write('/Employees/Employee[@emplid=\'')
+			strIO.write(bar)
+			strIO.write('\']')
+			query = strIO.getvalue()
+
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

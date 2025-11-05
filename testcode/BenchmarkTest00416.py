@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00416', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00416', methods=['GET'])
 	def BenchmarkTest00416_get():
 		return BenchmarkTest00416_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00416', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00416', methods=['POST'])
 	def BenchmarkTest00416_post():
 		RESPONSE = ""
 
@@ -47,25 +47,13 @@ def init(app):
 			case _:
 				bar = 'bob\'s your uncle'
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest00416'[13:]
-		user = f'SafeToby{num}'
-		cookie = f'rememberMe{num}'
-		value = base64.b64encode(secrets.token_bytes(32))
+		RESPONSE += (
+			'The value of the bar parameter is now in a custom header.'
+		)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00416': bar}))
+		
 
 		return RESPONSE
 

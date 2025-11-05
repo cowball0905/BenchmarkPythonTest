@@ -20,41 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00450', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00450', methods=['GET'])
 	def BenchmarkTest00450_get():
 		return BenchmarkTest00450_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00450', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00450', methods=['POST'])
 	def BenchmarkTest00450_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00450" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("BenchmarkTest00450")
+		if not param:
+		    param = ""
 
-		import html
+		import helpers.ThingFactory
 		
-		bar = html.escape(param)
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import flask
-		import urllib.parse
+		import pathlib
+		import helpers.utils
 
 		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = (testfiles / bar).resolve()
+
+			if not str(p).startswith(str(testfiles)):
 				RESPONSE += (
-					'Invalid URL.'
+					"Invalid Path."
 				)
 				return RESPONSE
-		except:
-			RESPONSE += (
-				'Error parsing URL.'
-			)
-			return RESPONSE
 
-		return flask.redirect(bar)
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
+			)
+		except OSError:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

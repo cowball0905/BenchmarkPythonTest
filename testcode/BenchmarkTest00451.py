@@ -20,30 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00451', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00451', methods=['GET'])
 	def BenchmarkTest00451_get():
 		return BenchmarkTest00451_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00451', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00451', methods=['POST'])
 	def BenchmarkTest00451_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00451" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("BenchmarkTest00451")
+		if not param:
+		    param = ""
 
-		bar = param
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import flask
+		import helpers.utils
 
-		flask.session['userid'] = bar
+		fileName = None
+		fd = None
 
-		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
-		)
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

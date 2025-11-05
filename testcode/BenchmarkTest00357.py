@@ -20,47 +20,55 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00357', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00357', methods=['GET'])
 	def BenchmarkTest00357_get():
 		return BenchmarkTest00357_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00357', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00357', methods=['POST'])
 	def BenchmarkTest00357_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00357")
-		if not param:
-			param = ""
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00357" in request.form.getlist(name):
+				param = name
+				break
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		map28537 = {}
+		map28537['keyA-28537'] = 'a-Value'
+		map28537['keyB-28537'] = param
+		map28537['keyC'] = 'another-Value'
+		bar = map28537['keyB-28537']
 
-		from flask import make_response
-		import io
 		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		fileName = None
+		fd = None
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not include \'../\''
+			)
+			return RESPONSE
 
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=True,
-			httponly=True)
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

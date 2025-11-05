@@ -20,33 +20,58 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00969', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00969', methods=['GET'])
 	def BenchmarkTest00969_get():
 		return BenchmarkTest00969_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00969', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00969', methods=['POST'])
 	def BenchmarkTest00969_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00969")
-		if not param:
-			param = ""
-
-		import configparser
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00969" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00969"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00969") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = 'safe!'
-		conf16616 = configparser.ConfigParser()
-		conf16616.add_section('section16616')
-		conf16616.set('section16616', 'keyA-16616', 'a-Value')
-		conf16616.set('section16616', 'keyB-16616', param)
-		bar = conf16616.get('section16616', 'keyB-16616')
+		param = urllib.parse.unquote_plus(param)
 
-		import flask
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		return flask.redirect(bar)
+		import secrets
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00969'[13:]
+		user = f'SafeRicky{num}'
+		cookie = f'rememberMe{num}'
+		value = str(secrets.randbits(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

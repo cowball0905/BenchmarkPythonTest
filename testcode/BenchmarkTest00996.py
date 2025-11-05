@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00996', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00996', methods=['GET'])
 	def BenchmarkTest00996_get():
 		return BenchmarkTest00996_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00996', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00996', methods=['POST'])
 	def BenchmarkTest00996_post():
 		RESPONSE = ""
 
@@ -41,20 +41,26 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		map4033 = {}
+		map4033['keyA-4033'] = 'a-Value'
+		map4033['keyB-4033'] = param
+		map4033['keyC'] = 'another-Value'
+		bar = map4033['keyB-4033']
 
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Eval argument must be a plain string literal."
+			)
+			return RESPONSE		
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
-		)
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

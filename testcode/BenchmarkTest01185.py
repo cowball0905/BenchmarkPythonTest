@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01185', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01185', methods=['GET'])
 	def BenchmarkTest01185_get():
 		return BenchmarkTest01185_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01185', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01185', methods=['POST'])
 	def BenchmarkTest01185_post():
 		RESPONSE = ""
 
@@ -32,20 +32,26 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01185")
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		map61399 = {}
+		map61399['keyA-61399'] = 'a-Value'
+		map61399['keyB-61399'] = param
+		map61399['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map61399['keyB-61399']
+		bar = map61399['keyA-61399']
 
+		import yaml
 
-		otherarg = "static text"
-		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
-		)
+		try:
+			yobj = yaml.safe_load(bar)
+
+			RESPONSE += (
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
+			)
 
 		return RESPONSE
 

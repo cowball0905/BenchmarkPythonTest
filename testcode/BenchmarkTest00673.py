@@ -20,49 +20,38 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00673', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00673', methods=['GET'])
 	def BenchmarkTest00673_get():
 		return BenchmarkTest00673_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00673', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00673', methods=['POST'])
 	def BenchmarkTest00673_post():
 		RESPONSE = ""
 
+		param = request.args.get("BenchmarkTest00673")
+		if not param:
+			param = ""
+
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
+
 		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		fileName = None
+		fd = None
 
-		import random
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00673'[13:]
-		user = f'SafeIsaac{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().randint(0, 2**32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

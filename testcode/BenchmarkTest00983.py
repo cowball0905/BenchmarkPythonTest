@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00983', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00983', methods=['GET'])
 	def BenchmarkTest00983_get():
 		return BenchmarkTest00983_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00983', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00983', methods=['POST'])
 	def BenchmarkTest00983_post():
 		RESPONSE = ""
 
@@ -41,28 +41,40 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		import codecs
-		import helpers.utils
+		import hashlib, base64
+		import io, helpers.utils
 
-		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
+		if len(input) == 0:
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				'Cannot generate hash: Input was empty.'
 			)
+			return RESPONSE
 
-			RESPONSE += (
-				" And file already exists."
-			)
+		hash = hashlib.sha1()
+		hash.update(input)
 
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

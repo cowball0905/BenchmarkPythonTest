@@ -20,36 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00962', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00962', methods=['GET'])
 	def BenchmarkTest00962_get():
 		return BenchmarkTest00962_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00962', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00962', methods=['POST'])
 	def BenchmarkTest00962_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00962")
-		if not param:
-			param = ""
-
-		num = 106
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00962" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00962"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00962") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		param = urllib.parse.unquote_plus(param)
 
-		import re
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		regex = r'(abc)*(bcd)+'
+		import random
+		from helpers.utils import mysession
 
-		if re.match(regex, bar) is not None:
+		num = 'BenchmarkTest00962'[13:]
+		user = f'Isaac{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.randint(0, 2**32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'String matches!'
+				f'Welcome back: {user}<br/>'
 			)
 		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				'String does not match.'
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

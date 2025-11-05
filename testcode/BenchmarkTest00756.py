@@ -20,51 +20,28 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00756', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00756', methods=['GET'])
 	def BenchmarkTest00756_get():
 		return BenchmarkTest00756_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00756', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00756', methods=['POST'])
 	def BenchmarkTest00756_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00756")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00756")
+		param = ""
+		if values:
+			param = values[0]
 
-		string15397 = ''
-		data12 = ''
-		copy = string15397
-		string15397 = ''
-		string15397 += param
-		copy += 'SomeOKString'
-		bar = copy
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import hashlib, base64
-		import io, helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.new('sha384')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
+		otherarg = "static text"
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
 		)
-		f.close()
 
 		return RESPONSE
 

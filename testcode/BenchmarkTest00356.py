@@ -20,49 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00356', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00356', methods=['GET'])
 	def BenchmarkTest00356_get():
 		return BenchmarkTest00356_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00356', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00356', methods=['POST'])
 	def BenchmarkTest00356_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00356" in request.form.getlist(name):
+				param = name
+				break
+
+		import configparser
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00356")
-		if not param:
-			param = ""
+		bar = 'safe!'
+		conf97183 = configparser.ConfigParser()
+		conf97183.add_section('section97183')
+		conf97183.set('section97183', 'keyA-97183', 'a-Value')
+		conf97183.set('section97183', 'keyB-97183', param)
+		bar = conf97183.get('section97183', 'keyB-97183')
 
-		map97183 = {}
-		map97183['keyA-97183'] = 'a-Value'
-		map97183['keyB-97183'] = param
-		map97183['keyC'] = 'another-Value'
-		bar = map97183['keyB-97183']
-
-		from flask import make_response
-		import io
 		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		fileName = None
+		fd = None
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
-
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=True,
-			httponly=True)
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

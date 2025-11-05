@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00604', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00604', methods=['GET'])
 	def BenchmarkTest00604_get():
 		return BenchmarkTest00604_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00604', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00604', methods=['POST'])
 	def BenchmarkTest00604_post():
 		RESPONSE = ""
 
@@ -42,24 +42,14 @@ def init(app):
 		bar = map92506['keyB-92506']
 		bar = map92506['keyA-92506']
 
-		import secrets
-		from helpers.utils import mysession
+		import flask
 
-		num = 'BenchmarkTest00604'[13:]
-		user = f'SafeRobbie{num}'
-		cookie = f'rememberMe{num}'
-		value = str(secrets.randbelow(2**32))
+		flask.session[bar] = '12345'
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		RESPONSE += (
+			f'Item: \'{escape_for_html(bar)}'
+			'\' with value: 12345 saved in session.'
+		)
 
 		return RESPONSE
 

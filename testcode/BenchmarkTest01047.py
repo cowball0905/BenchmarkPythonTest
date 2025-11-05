@@ -20,54 +20,43 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01047', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest01047', methods=['GET'])
 	def BenchmarkTest01047_get():
 		return BenchmarkTest01047_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01047', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest01047', methods=['POST'])
 	def BenchmarkTest01047_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01047" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01047"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01047") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		bar = param
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import hashlib, base64
-		import io, helpers.utils
+		import lxml.etree
+		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
 
-		if len(input) == 0:
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-			return RESPONSE
-
-		hash = hashlib.new('sha1')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

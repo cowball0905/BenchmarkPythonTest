@@ -20,38 +20,48 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00768', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00768', methods=['GET'])
 	def BenchmarkTest00768_get():
 		return BenchmarkTest00768_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00768', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00768', methods=['POST'])
 	def BenchmarkTest00768_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00768")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00768")
+		param = ""
+		if values:
+			param = values[0]
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
+		import lxml.etree
+		import helpers.utils
 
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			run_query = lxml.etree.XPath(query)
+			nodes = run_query(root)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00768': bar}))
-		
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00714', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00714', methods=['GET'])
 	def BenchmarkTest00714_get():
 		return BenchmarkTest00714_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00714', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00714', methods=['POST'])
 	def BenchmarkTest00714_post():
 		RESPONSE = ""
 
@@ -32,37 +32,35 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf37992 = configparser.ConfigParser()
-		conf37992.add_section('section37992')
-		conf37992.set('section37992', 'keyA-37992', 'a_Value')
-		conf37992.set('section37992', 'keyB-37992', param)
-		bar = conf37992.get('section37992', 'keyA-37992')
+		bar = "This should never happen"
+		if 'should' not in bar:
+		        bar = "Ifnot case passed"
 
-		import pathlib
-		import helpers.utils
+		import hashlib, base64
+		import io, helpers.utils
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / bar).resolve()
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-			if not str(p).startswith(str(testfiles)):
-				RESPONSE += (
-					"Invalid Path."
-				)
-				return RESPONSE
-
+		if len(input) == 0:
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
+				'Cannot generate hash: Input was empty.'
 			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+			return RESPONSE
+
+		hash = hashlib.new('md5')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

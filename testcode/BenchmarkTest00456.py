@@ -20,30 +20,38 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00456', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00456', methods=['GET'])
 	def BenchmarkTest00456_get():
 		return BenchmarkTest00456_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00456', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00456', methods=['POST'])
 	def BenchmarkTest00456_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00456" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("Referer")
+		if not param:
+		    param = ""
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		try:
-			exec(bar)
-		except:
-			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
-			)
+
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
+		RESPONSE += (
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+		)
 
 		return RESPONSE
 

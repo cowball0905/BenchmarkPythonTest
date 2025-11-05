@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00202', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00202', methods=['GET'])
 	def BenchmarkTest00202_get():
 		return BenchmarkTest00202_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00202', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00202', methods=['POST'])
 	def BenchmarkTest00202_post():
 		RESPONSE = ""
 
@@ -33,29 +33,30 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		map34857 = {}
+		map34857['keyA-34857'] = 'a-Value'
+		map34857['keyB-34857'] = param
+		map34857['keyC'] = 'another-Value'
+		bar = map34857['keyB-34857']
 
-		import pathlib
+		import elementpath
+		import xml.etree.ElementTree as ET
 		import helpers.utils
 
 		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = testfiles / bar
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-		except OSError:
+		except:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

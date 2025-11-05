@@ -20,45 +20,61 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00979', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00979', methods=['GET'])
 	def BenchmarkTest00979_get():
 		return BenchmarkTest00979_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00979', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00979', methods=['POST'])
 	def BenchmarkTest00979_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00979")
-		if not param:
-			param = ""
-
-		num = 86
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00979" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00979"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00979") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		param = urllib.parse.unquote_plus(param)
 
-		import os
-		import subprocess
-		import helpers.utils
+		import configparser
+		
+		bar = 'safe!'
+		conf49721 = configparser.ConfigParser()
+		conf49721.add_section('section49721')
+		conf49721.set('section49721', 'keyA-49721', 'a-Value')
+		conf49721.set('section49721', 'keyB-49721', param)
+		bar = conf49721.get('section49721', 'keyB-49721')
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
-		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
+		import hashlib, base64
+		import io, helpers.utils
 
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		if len(input) == 0:
+			RESPONSE += (
+				'Cannot generate hash: Input was empty.'
+			)
+			return RESPONSE
+
+		hash = hashlib.new('sha1')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			helpers.utils.commandOutput(proc)
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
 		)
+		f.close()
 
 		return RESPONSE
 

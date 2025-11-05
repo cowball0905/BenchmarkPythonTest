@@ -20,45 +20,56 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00645', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00645', methods=['GET'])
 	def BenchmarkTest00645_get():
 		return BenchmarkTest00645_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00645', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00645', methods=['POST'])
 	def BenchmarkTest00645_post():
 		RESPONSE = ""
 
-		param = ""
-		headers = request.headers.getlist("BenchmarkTest00645")
-		
-		if headers:
-			param = headers[0]
-
-		map23670 = {}
-		map23670['keyA-23670'] = 'a-Value'
-		map23670['keyB-23670'] = param
-		map23670['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map23670['keyB-23670']
-		bar = map23670['keyA-23670']
-
-		import pickle
-		import base64
 		import helpers.utils
+		param = ""
+		
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
+		
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
+		import random
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00645'[13:]
+		user = f'SafeRandall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'Unpickling failed!'
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

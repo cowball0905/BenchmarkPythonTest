@@ -20,30 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01148', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01148', methods=['GET'])
 	def BenchmarkTest01148_get():
 		return BenchmarkTest01148_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01148', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01148', methods=['POST'])
 	def BenchmarkTest01148_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01148")
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
+		import random
+		import base64
+		from helpers.utils import mysession
 
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
+		num = 'BenchmarkTest01148'[13:]
+		user = f'SafeBarbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
 
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest01148': bar}))
-		
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00067', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00067', methods=['GET'])
 	def BenchmarkTest00067_get():
-		response = make_response(render_template('web/intoverflow-00/BenchmarkTest00067.html'))
-		response.set_cookie('BenchmarkTest00067', 'x',
+		response = make_response(render_template('web/redirect-00/BenchmarkTest00067.html'))
+		response.set_cookie('BenchmarkTest00067', 'http%3A%2F%2Flocalhost%3A5000%2F',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,7 +31,7 @@ def init(app):
 		return response
 		return BenchmarkTest00067_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00067', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00067', methods=['POST'])
 	def BenchmarkTest00067_post():
 		RESPONSE = ""
 
@@ -42,18 +42,9 @@ def init(app):
 		tmp = base64.b64encode(param.encode('utf-8'))
 		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import re
+		import flask
 
-		regex = r'(a+)+$'
-
-		if re.match(regex, bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+		return flask.redirect(bar)
 
 		return RESPONSE
 

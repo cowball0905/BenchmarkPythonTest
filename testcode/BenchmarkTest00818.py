@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00818', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00818', methods=['GET'])
 	def BenchmarkTest00818_get():
 		return BenchmarkTest00818_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00818', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00818', methods=['POST'])
 	def BenchmarkTest00818_post():
 		RESPONSE = ""
 
@@ -33,20 +33,35 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		import helpers.db_sqlite
+		from flask import make_response
+		import io
+		import helpers.utils
 
-		sql = f'SELECT username from USERS where password = \'{bar}\''
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql)
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
+
 		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
 		)
-		con.close()
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=True,
+			httponly=True)
 
 		return RESPONSE
 

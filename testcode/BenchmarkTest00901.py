@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00901', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00901', methods=['GET'])
 	def BenchmarkTest00901_get():
 		return BenchmarkTest00901_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00901', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00901', methods=['POST'])
 	def BenchmarkTest00901_post():
 		RESPONSE = ""
 
@@ -35,29 +35,23 @@ def init(app):
 		if not param:
 			param = ""
 
-		string39670 = 'help'
-		string39670 += param
-		string39670 += 'snapes on a plane'
-		bar = string39670[4:-17]
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Eval argument must be a plain string literal."
+			)
+			return RESPONSE		
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				eval(bar)
 			)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

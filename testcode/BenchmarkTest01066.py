@@ -20,47 +20,49 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01066', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01066', methods=['GET'])
 	def BenchmarkTest01066_get():
 		return BenchmarkTest01066_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01066', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01066', methods=['POST'])
 	def BenchmarkTest01066_post():
 		RESPONSE = ""
 
-		import urllib.parse
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
+
+		possible = "ABC"
+		guess = possible[1]
 		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01066" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01066"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01066") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import configparser
-		
-		bar = 'safe!'
-		conf63904 = configparser.ConfigParser()
-		conf63904.add_section('section63904')
-		conf63904.set('section63904', 'keyA-63904', 'a_Value')
-		conf63904.set('section63904', 'keyB-63904', param)
-		bar = conf63904.get('section63904', 'keyA-63904')
+		import secrets
+		from helpers.utils import mysession
 
-		import re
+		num = 'BenchmarkTest01066'[13:]
+		user = f'SafeRicky{num}'
+		cookie = f'rememberMe{num}'
+		value = str(secrets.randbits(32))
 
-		regex = r'(abc)*(bcd)+'
-
-		if re.match(regex, bar) is not None:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'String matches!'
+				f'Welcome back: {user}<br/>'
 			)
 		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				'String does not match.'
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

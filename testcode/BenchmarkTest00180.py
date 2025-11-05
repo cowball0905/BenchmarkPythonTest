@@ -20,48 +20,36 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00180', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00180', methods=['GET'])
 	def BenchmarkTest00180_get():
 		return BenchmarkTest00180_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00180', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00180', methods=['POST'])
 	def BenchmarkTest00180_post():
 		RESPONSE = ""
 
-		param = request.form.get("BenchmarkTest00180")
-		if not param:
-			param = ""
+		values = request.form.getlist("BenchmarkTest00180")
+		param = ""
+		if values:
+			param = values[0]
 
 		import configparser
 		
 		bar = 'safe!'
 		conf84140 = configparser.ConfigParser()
 		conf84140.add_section('section84140')
-		conf84140.set('section84140', 'keyA-84140', 'a-Value')
+		conf84140.set('section84140', 'keyA-84140', 'a_Value')
 		conf84140.set('section84140', 'keyB-84140', param)
-		bar = conf84140.get('section84140', 'keyB-84140')
+		bar = conf84140.get('section84140', 'keyA-84140')
 
-		import platform
-		import subprocess
+		import os
 		import helpers.utils
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
 		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
-
-		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
-
-			RESPONSE += (
-				helpers.utils.commandOutput(proc)
-			)
-		except IOError:
-			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
-			)
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
 

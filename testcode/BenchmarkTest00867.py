@@ -20,45 +20,43 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00867', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00867', methods=['GET'])
 	def BenchmarkTest00867_get():
 		return BenchmarkTest00867_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00867', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00867', methods=['POST'])
 	def BenchmarkTest00867_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00867")
-		param = ""
-		if values:
-			param = values[0]
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00867")
+		if not param:
+			param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import flask
-		import urllib.parse
+		import random
+		from helpers.utils import mysession
 
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
+		num = 'BenchmarkTest00867'[13:]
+		user = f'Isaac{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.randint(0, 2**32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'Error parsing URL.'
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		return flask.redirect(bar)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

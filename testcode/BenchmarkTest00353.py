@@ -20,35 +20,33 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00353', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00353', methods=['GET'])
 	def BenchmarkTest00353_get():
 		return BenchmarkTest00353_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00353', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00353', methods=['POST'])
 	def BenchmarkTest00353_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00353" in request.form.getlist(name):
+				param = name
+				break
+
+		import configparser
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00353")
-		if not param:
-			param = ""
+		bar = 'safe!'
+		conf28092 = configparser.ConfigParser()
+		conf28092.add_section('section28092')
+		conf28092.set('section28092', 'keyA-28092', 'a_Value')
+		conf28092.set('section28092', 'keyB-28092', param)
+		bar = conf28092.get('section28092', 'keyA-28092')
 
-		bar = param + '_SafeStuff'
 
-		import re
-
-		regex = r'(abc)*(bcd)+'
-
-		if re.match(regex, bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

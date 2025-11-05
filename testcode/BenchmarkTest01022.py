@@ -20,57 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01022', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01022', methods=['GET'])
 	def BenchmarkTest01022_get():
 		return BenchmarkTest01022_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01022', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01022', methods=['POST'])
 	def BenchmarkTest01022_post():
 		RESPONSE = ""
 
-		import urllib.parse
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
+
+		import configparser
 		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01022" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01022"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01022") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		bar = 'safe!'
+		conf45923 = configparser.ConfigParser()
+		conf45923.add_section('section45923')
+		conf45923.set('section45923', 'keyA-45923', 'a_Value')
+		conf45923.set('section45923', 'keyB-45923', param)
+		bar = conf45923.get('section45923', 'keyA-45923')
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		import helpers.utils
 
-		import random
-		from helpers.utils import mysession
+		fileName = None
+		fd = None
 
-		num = 'BenchmarkTest01022'[13:]
-		user = f'Isaac{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.randint(0, 2**32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

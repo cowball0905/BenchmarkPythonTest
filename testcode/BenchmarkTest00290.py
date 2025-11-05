@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00290', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00290', methods=['GET'])
 	def BenchmarkTest00290_get():
 		return BenchmarkTest00290_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00290', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00290', methods=['POST'])
 	def BenchmarkTest00290_post():
 		RESPONSE = ""
 
@@ -35,48 +35,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
+		num = 106
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import helpers.utils
+		import helpers.db_sqlite
 
-		fileName = None
-		fd = None
-
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not include \'../\''
-			)
-			return RESPONSE
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (bar,))
+		RESPONSE += (
+			helpers.db_sqlite.results(cur, sql)
+		)
+		con.close()
 
 		return RESPONSE
 

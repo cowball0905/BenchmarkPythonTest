@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01099', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest01099', methods=['GET'])
 	def BenchmarkTest01099_get():
 		return BenchmarkTest01099_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01099', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest01099', methods=['POST'])
 	def BenchmarkTest01099_post():
 		RESPONSE = ""
 
@@ -33,31 +33,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
+		num = 106
 		
-		bar = 'safe!'
-		conf28092 = configparser.ConfigParser()
-		conf28092.add_section('section28092')
-		conf28092.set('section28092', 'keyA-28092', 'a-Value')
-		conf28092.set('section28092', 'keyB-28092', param)
-		bar = conf28092.get('section28092', 'keyB-28092')
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import pathlib
-		import helpers.utils
+		import flask
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
+		flask.session[bar] = '12345'
 
-		if not str(p).startswith(str(testfiles)):
-			RESPONSE += (
-				"Invalid Path."
-			)
-			return RESPONSE
-		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		RESPONSE += (
+			f'Item: \'{escape_for_html(bar)}'
+			'\' with value: 12345 saved in session.'
+		)
 
 		return RESPONSE
 

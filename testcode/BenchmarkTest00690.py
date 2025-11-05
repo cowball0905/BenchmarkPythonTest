@@ -20,60 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00690', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00690', methods=['GET'])
 	def BenchmarkTest00690_get():
 		return BenchmarkTest00690_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00690', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00690', methods=['POST'])
 	def BenchmarkTest00690_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		param = request.args.get("BenchmarkTest00690")
+		if not param:
+			param = ""
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		map62435 = {}
+		map62435['keyA-62435'] = 'a-Value'
+		map62435['keyB-62435'] = param
+		map62435['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map62435['keyB-62435']
+		bar = map62435['keyA-62435']
 
-		from flask import make_response
-		import io
+		import lxml.etree
 		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
-
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=False,
-			httponly=True)
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

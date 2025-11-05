@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00493', methods=['GET'])
+	@app.route('/benchmark/hash-00/BenchmarkTest00493', methods=['GET'])
 	def BenchmarkTest00493_get():
 		return BenchmarkTest00493_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00493', methods=['POST'])
+	@app.route('/benchmark/hash-00/BenchmarkTest00493', methods=['POST'])
 	def BenchmarkTest00493_post():
 		RESPONSE = ""
 
@@ -36,24 +36,31 @@ def init(app):
 		
 		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import random
-		from helpers.utils import mysession
+		import hashlib, base64
+		import io, helpers.utils
 
-		num = 'BenchmarkTest00493'[13:]
-		user = f'Randy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.getrandbits(32))
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		if len(input) == 0:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				'Cannot generate hash: Input was empty.'
 			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			return RESPONSE
+
+		hash = hashlib.sha1()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

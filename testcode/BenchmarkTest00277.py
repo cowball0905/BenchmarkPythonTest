@@ -20,40 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00277', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00277', methods=['GET'])
 	def BenchmarkTest00277_get():
 		return BenchmarkTest00277_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00277', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00277', methods=['POST'])
 	def BenchmarkTest00277_post():
 		RESPONSE = ""
 
-		values = request.form.getlist("BenchmarkTest00277")
-		param = ""
-		if values:
-			param = values[0]
-
-		import markupsafe
+		import helpers.separate_request
 		
-		bar = markupsafe.escape(param)
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_form_parameter("BenchmarkTest00277")
+		if not param:
+			param = ""
 
-		import pickle
 		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
+
+		import pathlib
 		import helpers.utils
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
-
 		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
-			RESPONSE += (
-				'Unpickling failed!'
-			)
-			return RESPONSE
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = (testfiles / bar).resolve()
 
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+			if not str(p).startswith(str(testfiles)):
+				RESPONSE += (
+					"Invalid Path."
+				)
+				return RESPONSE
+
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
+			)
+		except OSError:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

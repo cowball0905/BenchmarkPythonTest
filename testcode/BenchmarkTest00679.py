@@ -20,58 +20,30 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00679', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00679', methods=['GET'])
 	def BenchmarkTest00679_get():
 		return BenchmarkTest00679_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00679', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00679', methods=['POST'])
 	def BenchmarkTest00679_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		param = request.args.get("BenchmarkTest00679")
+		if not param:
+			param = ""
 
-		map12476 = {}
-		map12476['keyA-12476'] = 'a-Value'
-		map12476['keyB-12476'] = param
-		map12476['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map12476['keyB-12476']
-		bar = map12476['keyA-12476']
+		bar = param
 
-		import hashlib, base64
-		import io, helpers.utils
+		import helpers.db_sqlite
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.new('sha512')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
+		sql = f'SELECT username from USERS where password = \'{bar}\''
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql)
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			helpers.db_sqlite.results(cur, sql)
 		)
-		f.close()
+		con.close()
 
 		return RESPONSE
 

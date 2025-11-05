@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00728', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00728', methods=['GET'])
 	def BenchmarkTest00728_get():
 		return BenchmarkTest00728_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00728', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00728', methods=['POST'])
 	def BenchmarkTest00728_post():
 		RESPONSE = ""
 
@@ -32,35 +32,36 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		map59492 = {}
+		map59492['keyA-59492'] = 'a-Value'
+		map59492['keyB-59492'] = param
+		map59492['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map59492['keyB-59492']
+		bar = map59492['keyA-59492']
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		from flask import make_response
+		import io
+		import helpers.utils
 
-		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-			doc = xml.dom.minidom.parseString(bar, parser)
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
 
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
+		RESPONSE += (
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+		)
 
-			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
-			)
-		except:
-			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
-			)
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=True,
+			httponly=True)
 
 		return RESPONSE
 

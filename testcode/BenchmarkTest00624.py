@@ -20,48 +20,48 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00624', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00624', methods=['GET'])
 	def BenchmarkTest00624_get():
 		return BenchmarkTest00624_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00624', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00624', methods=['POST'])
 	def BenchmarkTest00624_post():
 		RESPONSE = ""
 
-		param = ""
-		headers = request.headers.getlist("BenchmarkTest00624")
-		
-		if headers:
-			param = headers[0]
-
 		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
+		param = ""
+		
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
+		
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		import hashlib, base64
-		import io, helpers.utils
+		map72992 = {}
+		map72992['keyA-72992'] = 'a-Value'
+		map72992['keyB-72992'] = param
+		map72992['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map72992['keyB-72992']
+		bar = map72992['keyA-72992']
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		import pathlib
+		import helpers.utils
 
-		if len(input) == 0:
+		try:
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = testfiles / bar
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-			return RESPONSE
-
-		hash = hashlib.sha384()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		except OSError:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

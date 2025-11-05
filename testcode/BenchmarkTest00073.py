@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00073', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00073', methods=['GET'])
 	def BenchmarkTest00073_get():
-		response = make_response(render_template('web/redirect-00/BenchmarkTest00073.html'))
-		response.set_cookie('BenchmarkTest00073', 'http%3A%2F%2Flocalhost%3A5000%2F',
+		response = make_response(render_template('web/codeinj-00/BenchmarkTest00073.html'))
+		response.set_cookie('BenchmarkTest00073', '%27ECHOOO%27',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,21 +31,29 @@ def init(app):
 		return response
 		return BenchmarkTest00073_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00073', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00073', methods=['POST'])
 	def BenchmarkTest00073_post():
 		RESPONSE = ""
 
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00073", "noCookieValueSupplied"))
 
-		string41416 = 'help'
-		string41416 += param
-		string41416 += 'snapes on a plane'
-		bar = string41416[4:-17]
+		bar = param
 
-		import flask
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Eval argument must be a plain string literal."
+			)
+			return RESPONSE		
 
-		return flask.redirect(bar)
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

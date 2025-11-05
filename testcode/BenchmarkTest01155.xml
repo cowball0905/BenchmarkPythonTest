@@ -1,7 +1,7 @@
 <test-metadata>
   <benchmark-version>0.1</benchmark-version>
-  <category>redirect</category>
+  <category>hash</category>
   <test-number>01155</test-number>
-  <vulnerability>false</vulnerability>
-  <cwe>601</cwe>
+  <vulnerability>true</vulnerability>
+  <cwe>328</cwe>
 </test-metadata>

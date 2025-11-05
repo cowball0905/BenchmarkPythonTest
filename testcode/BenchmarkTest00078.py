@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00078', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00078', methods=['GET'])
 	def BenchmarkTest00078_get():
-		response = make_response(render_template('web/codeinj-00/BenchmarkTest00078.html'))
-		response.set_cookie('BenchmarkTest00078', '%27ECHOOO%27',
+		response = make_response(render_template('web/deserialization-00/BenchmarkTest00078.html'))
+		response.set_cookie('BenchmarkTest00078', 'gASVNwAAAAAAAACMCF9fbWFpbl9flIwOc2FmZV90b19waWNrbGWUk5QpgZR9lCiMAWGUjANmb2-UjAFilEtjdWIu',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,30 +31,39 @@ def init(app):
 		return response
 		return BenchmarkTest00078_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00078', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00078', methods=['POST'])
 	def BenchmarkTest00078_post():
 		RESPONSE = ""
 
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00078", "noCookieValueSupplied"))
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		import configparser
+		
+		bar = 'safe!'
+		conf9895 = configparser.ConfigParser()
+		conf9895.add_section('section9895')
+		conf9895.set('section9895', 'keyA-9895', 'a_Value')
+		conf9895.set('section9895', 'keyB-9895', param)
+		bar = conf9895.get('section9895', 'keyA-9895')
+
+		import pickle
+		import base64
+		import helpers.utils
+
+		helpers.utils.sharedstr = "no pickles to be seen here"
 
 		try:
-			RESPONSE += (
-				eval(bar)
-			)
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				'Unpickling failed!'
 			)
+			return RESPONSE
+
+		RESPONSE += (
+			f'shared string is {helpers.utils.sharedstr}'
+		)
 
 		return RESPONSE
 

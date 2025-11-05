@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00830', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00830', methods=['GET'])
 	def BenchmarkTest00830_get():
 		return BenchmarkTest00830_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00830', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00830', methods=['POST'])
 	def BenchmarkTest00830_post():
 		RESPONSE = ""
 
@@ -33,28 +33,35 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import lxml.etree
-		import helpers.utils
+		import helpers.ldap
+		import ldap3
 
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(uid={bar}))'
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
 
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except IOError:
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				"Error processing LDAP query."
 			)
 
 		return RESPONSE

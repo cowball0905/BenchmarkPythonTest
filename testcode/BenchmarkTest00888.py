@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00888', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00888', methods=['GET'])
 	def BenchmarkTest00888_get():
 		return BenchmarkTest00888_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00888', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00888', methods=['POST'])
 	def BenchmarkTest00888_post():
 		RESPONSE = ""
 
@@ -35,26 +35,40 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		import pathlib
-		import helpers.utils
+		import hashlib, base64
+		import io, helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		if not str(p).startswith(str(testfiles)):
+		if len(input) == 0:
 			RESPONSE += (
-				"Invalid Path."
+				'Cannot generate hash: Input was empty.'
 			)
 			return RESPONSE
-		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+
+		hash = hashlib.sha512()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

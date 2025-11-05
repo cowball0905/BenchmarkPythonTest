@@ -20,40 +20,37 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00367', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00367', methods=['GET'])
 	def BenchmarkTest00367_get():
 		return BenchmarkTest00367_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00367', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00367', methods=['POST'])
 	def BenchmarkTest00367_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00367" in request.form.getlist(name):
+				param = name
+				break
+
+		possible = "ABC"
+		guess = possible[1]
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00367")
-		if not param:
-			param = ""
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
 
-		import pickle
-		import base64
-		import helpers.utils
-
-		helpers.utils.sharedstr = "no pickles to be seen here"
-
-		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
-			RESPONSE += (
-				'Unpickling failed!'
-			)
-			return RESPONSE
-
+		otherarg = "static text"
 		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
+			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
 		)
 
 		return RESPONSE

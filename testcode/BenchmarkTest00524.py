@@ -20,47 +20,54 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00524', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00524', methods=['GET'])
 	def BenchmarkTest00524_get():
 		return BenchmarkTest00524_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00524', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00524', methods=['POST'])
 	def BenchmarkTest00524_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00524")
-		if not param:
-		    param = ""
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00524")
+		
+		if headers:
+			param = headers[0]
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		string51755 = 'help'
+		string51755 += param
+		string51755 += 'snapes on a plane'
+		bar = string51755[4:-17]
 
-		import hashlib, base64
-		import io, helpers.utils
+		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		fileName = None
+		fd = None
 
-		if len(input) == 0:
+		if '../' in bar:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				'File name must not include \'../\''
 			)
 			return RESPONSE
 
-		hash = hashlib.sha512()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

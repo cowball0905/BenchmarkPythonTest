@@ -20,36 +20,38 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01237', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest01237', methods=['GET'])
 	def BenchmarkTest01237_get():
 		return BenchmarkTest01237_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01237', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest01237', methods=['POST'])
 	def BenchmarkTest01237_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01237")
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		map45981 = {}
-		map45981['keyA-45981'] = 'a-Value'
-		map45981['keyB-45981'] = param
-		map45981['keyC'] = 'another-Value'
-		bar = map45981['keyB-45981']
 
-		import re
+		import os
+		import subprocess
+		import helpers.utils
 
-		regex = r'(abc)*(bcd)+'
-
-		if re.match(regex, bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
 		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {param}")
+
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
+		RESPONSE += (
+			helpers.utils.commandOutput(proc)
+		)
 
 		return RESPONSE
+
 

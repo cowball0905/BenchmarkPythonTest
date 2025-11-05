@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00101', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00101', methods=['GET'])
 	def BenchmarkTest00101_get():
 		return BenchmarkTest00101_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00101', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00101', methods=['POST'])
 	def BenchmarkTest00101_post():
 		RESPONSE = ""
 
@@ -32,15 +32,21 @@ def init(app):
 		if not param:
 			param = ""
 
-		import html
-		
-		bar = html.escape(param)
+		string96050 = 'help'
+		string96050 += param
+		string96050 += 'snapes on a plane'
+		bar = string96050[4:-17]
 
+		import helpers.db_sqlite
 
-		otherarg = "static text"
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (bar,))
 		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+			helpers.db_sqlite.results(cur, sql)
 		)
+		con.close()
 
 		return RESPONSE
 

@@ -20,33 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00965', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00965', methods=['GET'])
 	def BenchmarkTest00965_get():
 		return BenchmarkTest00965_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00965', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00965', methods=['POST'])
 	def BenchmarkTest00965_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00965")
-		if not param:
-			param = ""
-
-		import helpers.ThingFactory
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00965" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00965"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00965") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		param = urllib.parse.unquote_plus(param)
 
+		map27056 = {}
+		map27056['keyA-27056'] = 'a-Value'
+		map27056['keyB-27056'] = param
+		map27056['keyC'] = 'another-Value'
+		bar = map27056['keyB-27056']
 
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
+		import random
+		from helpers.utils import mysession
 
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00965': bar}))
-		
+		num = 'BenchmarkTest00965'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

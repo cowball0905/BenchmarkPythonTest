@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00508', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00508', methods=['GET'])
 	def BenchmarkTest00508_get():
 		return BenchmarkTest00508_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00508', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00508', methods=['POST'])
 	def BenchmarkTest00508_post():
 		RESPONSE = ""
 
@@ -32,27 +32,23 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import random
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00508'[13:]
-		user = f'SafeNancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				"Eval argument must be a plain string literal."
 			)
-		else:
-			mysession[cookie] = value
+			return RESPONSE		
+
+		try:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

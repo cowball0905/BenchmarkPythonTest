@@ -20,41 +20,49 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00960', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00960', methods=['GET'])
 	def BenchmarkTest00960_get():
 		return BenchmarkTest00960_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00960', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00960', methods=['POST'])
 	def BenchmarkTest00960_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00960")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00960" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00960"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00960") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import re
+		import random
+		import base64
+		from helpers.utils import mysession
 
-		regex = r'(abc)*(bcd)+'
+		num = 'BenchmarkTest00960'[13:]
+		user = f'Barbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.randbytes(32)))
 
-		if re.match(regex, bar) is not None:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'String matches!'
+				f'Welcome back: {user}<br/>'
 			)
 		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				'String does not match.'
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

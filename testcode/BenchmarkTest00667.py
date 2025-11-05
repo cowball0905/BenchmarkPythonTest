@@ -20,48 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00667', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00667', methods=['GET'])
 	def BenchmarkTest00667_get():
 		return BenchmarkTest00667_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00667', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00667', methods=['POST'])
 	def BenchmarkTest00667_post():
 		RESPONSE = ""
 
+		param = request.args.get("BenchmarkTest00667")
+		if not param:
+			param = ""
+
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
+
 		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
-
-		import base64
-		import secrets
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00667'[13:]
-		user = f'SafeTheo{num}'
-		cookie = f'rememberMe{num}'
-		value = secrets.token_hex(32)
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		if '../' in bar:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				'File name must not contain \'../\''
 			)
-		else:
-			mysession[cookie] = value
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

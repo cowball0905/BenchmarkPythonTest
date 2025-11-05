@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00613', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00613', methods=['GET'])
 	def BenchmarkTest00613_get():
 		return BenchmarkTest00613_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00613', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00613', methods=['POST'])
 	def BenchmarkTest00613_post():
 		RESPONSE = ""
 
@@ -39,28 +39,30 @@ def init(app):
 		bar = 'safe!'
 		conf66153 = configparser.ConfigParser()
 		conf66153.add_section('section66153')
-		conf66153.set('section66153', 'keyA-66153', 'a-Value')
+		conf66153.set('section66153', 'keyA-66153', 'a_Value')
 		conf66153.set('section66153', 'keyB-66153', param)
-		bar = conf66153.get('section66153', 'keyB-66153')
+		bar = conf66153.get('section66153', 'keyA-66153')
 
-		import random
-		import base64
-		from helpers.utils import mysession
+		import platform
+		import subprocess
+		import helpers.utils
 
-		num = 'BenchmarkTest00613'[13:]
-		user = f'SafeBarbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
 		else:
-			mysession[cookie] = value
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
+
+		try:
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				helpers.utils.commandOutput(proc)
+			)
+		except IOError:
+			RESPONSE += (
+				"Problem executing cmdi - subprocess.run(list) Test Case"
 			)
 
 		return RESPONSE

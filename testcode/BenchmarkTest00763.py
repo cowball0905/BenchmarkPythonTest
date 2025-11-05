@@ -20,33 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00763', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00763', methods=['GET'])
 	def BenchmarkTest00763_get():
 		return BenchmarkTest00763_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00763', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00763', methods=['POST'])
 	def BenchmarkTest00763_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00763")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00763")
+		param = ""
+		if values:
+			param = values[0]
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		map26131 = {}
+		map26131['keyA-26131'] = 'a-Value'
+		map26131['keyB-26131'] = param
+		map26131['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map26131['keyB-26131']
+		bar = map26131['keyA-26131']
 
-		import re
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		regex = re.compile(r'^(([a-z])+.)+')
-
-		if regex.match(bar) is not None:
+		if '\'' in bar:
 			RESPONSE += (
-				'String matches!'
+				"Employee ID must not contain apostrophes"
 			)
-		else:
+			return RESPONSE
+
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				'String does not match.'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

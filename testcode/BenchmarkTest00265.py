@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00265', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00265', methods=['GET'])
 	def BenchmarkTest00265_get():
 		return BenchmarkTest00265_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00265', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00265', methods=['POST'])
 	def BenchmarkTest00265_post():
 		RESPONSE = ""
 
@@ -33,26 +33,28 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf1676 = configparser.ConfigParser()
-		conf1676.add_section('section1676')
-		conf1676.set('section1676', 'keyA-1676', 'a-Value')
-		conf1676.set('section1676', 'keyB-1676', param)
-		bar = conf1676.get('section1676', 'keyB-1676')
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		import re
-
-		regex = re.compile(r'^(([a-z])+.)+')
-
-		if regex.match(bar) is not None:
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
 			RESPONSE += (
-				'String matches!'
+				"Eval argument must be a plain string literal."
 			)
-		else:
+			return RESPONSE		
+
+		try:
 			RESPONSE += (
-				'String does not match.'
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

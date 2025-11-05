@@ -20,40 +20,56 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00085', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00085', methods=['GET'])
 	def BenchmarkTest00085_get():
-		response = make_response(render_template('web/deserialization-00/BenchmarkTest00085.html'))
-		response.set_cookie('BenchmarkTest00085', 'name%3A+safe+data%0Atext%3A+act+like+this+is+conf+data',
-			max_age=60*3,
-			secure=True,
-			path=request.path,
-			domain='localhost')
-		return response
 		return BenchmarkTest00085_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00085', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00085', methods=['POST'])
 	def BenchmarkTest00085_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00085", "noCookieValueSupplied"))
+		param = request.form.get("BenchmarkTest00085")
+		if not param:
+			param = ""
 
-		import markupsafe
-		
-		bar = markupsafe.escape(param)
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import yaml
+		import helpers.utils
+
+		fileName = None
+		fd = None
+
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not include \'../\''
+			)
+			return RESPONSE
 
 		try:
-			yobj = yaml.safe_load(bar)
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				yobj['text']
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
-		except:
+		except IOError as e:
 			RESPONSE += (
-				"There was an error loading the configuration"
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

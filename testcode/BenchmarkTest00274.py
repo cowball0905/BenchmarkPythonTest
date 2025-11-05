@@ -20,40 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00274', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00274', methods=['GET'])
 	def BenchmarkTest00274_get():
 		return BenchmarkTest00274_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00274', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00274', methods=['POST'])
 	def BenchmarkTest00274_post():
 		RESPONSE = ""
 
-		values = request.form.getlist("BenchmarkTest00274")
-		param = ""
-		if values:
-			param = values[0]
-
-		possible = "ABC"
-		guess = possible[1]
+		import helpers.separate_request
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_form_parameter("BenchmarkTest00274")
+		if not param:
+			param = ""
+
+		bar = param
+
+		import helpers.utils
 
 		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				eval(bar)
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-		except:
+		except IOError as e:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00470', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00470', methods=['GET'])
 	def BenchmarkTest00470_get():
 		return BenchmarkTest00470_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00470', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00470', methods=['POST'])
 	def BenchmarkTest00470_post():
 		RESPONSE = ""
 
@@ -32,25 +32,34 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = param
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import codecs
+		import lxml.etree
 		import helpers.utils
 
 		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			run_query = lxml.etree.XPath(query)
+			nodes = run_query(root)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-
+		except:
 			RESPONSE += (
-				" And file already exists."
-			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

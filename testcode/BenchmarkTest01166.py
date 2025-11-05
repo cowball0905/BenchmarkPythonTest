@@ -20,40 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest01166', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest01166', methods=['GET'])
 	def BenchmarkTest01166_get():
 		return BenchmarkTest01166_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest01166', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest01166', methods=['POST'])
 	def BenchmarkTest01166_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01166")
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		bar = param
 
-		import os
-		import subprocess
+		from flask import make_response
+		import io
 		import helpers.utils
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
-		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
+
 		RESPONSE += (
-			helpers.utils.commandOutput(proc)
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
 		)
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=False,
+			httponly=True)
 
 		return RESPONSE
 

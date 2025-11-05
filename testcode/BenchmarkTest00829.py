@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00829', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00829', methods=['GET'])
 	def BenchmarkTest00829_get():
 		return BenchmarkTest00829_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00829', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00829', methods=['POST'])
 	def BenchmarkTest00829_post():
 		RESPONSE = ""
 
@@ -33,32 +33,36 @@ def init(app):
 		if values:
 			param = values[0]
 
-		map9338 = {}
-		map9338['keyA-9338'] = 'a-Value'
-		map9338['keyB-9338'] = param
-		map9338['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map9338['keyB-9338']
-		bar = map9338['keyA-9338']
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import lxml.etree
-		import helpers.utils
+		import helpers.ldap
+		import ldap3
 
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
 
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				"Error processing LDAP query."
 			)
 
 		return RESPONSE

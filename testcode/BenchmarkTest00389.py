@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00389', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00389', methods=['GET'])
 	def BenchmarkTest00389_get():
 		return BenchmarkTest00389_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00389', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00389', methods=['POST'])
 	def BenchmarkTest00389_post():
 		RESPONSE = ""
 
@@ -34,20 +34,32 @@ def init(app):
 				param = name
 				break
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		string11647 = ''
+		data12 = ''
+		copy = string11647
+		string11647 = ''
+		string11647 += param
+		copy += 'SomeOKString'
+		bar = copy
 
+		import random
+		from helpers.utils import mysession
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
-		)
+		num = 'BenchmarkTest00389'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

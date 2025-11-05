@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00599', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00599', methods=['GET'])
 	def BenchmarkTest00599_get():
 		return BenchmarkTest00599_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00599', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00599', methods=['POST'])
 	def BenchmarkTest00599_post():
 		RESPONSE = ""
 
@@ -38,25 +38,9 @@ def init(app):
 		
 		bar = html.escape(param)
 
-		import random
-		import base64
-		from helpers.utils import mysession
+		import flask
 
-		num = 'BenchmarkTest00599'[13:]
-		user = f'Barbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.randbytes(32)))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		return flask.redirect(bar)
 
 		return RESPONSE
 

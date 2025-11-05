@@ -20,54 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00621', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00621', methods=['GET'])
 	def BenchmarkTest00621_get():
 		return BenchmarkTest00621_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00621', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00621', methods=['POST'])
 	def BenchmarkTest00621_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00621")
 		
-		if headers:
-			param = headers[0]
-
-		import configparser
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
 		
-		bar = 'safe!'
-		conf63980 = configparser.ConfigParser()
-		conf63980.add_section('section63980')
-		conf63980.set('section63980', 'keyA-63980', 'a_Value')
-		conf63980.set('section63980', 'keyB-63980', param)
-		bar = conf63980.get('section63980', 'keyA-63980')
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		import hashlib, base64
-		import io, helpers.utils
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		import pathlib
+		import helpers.utils
 
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.sha1()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

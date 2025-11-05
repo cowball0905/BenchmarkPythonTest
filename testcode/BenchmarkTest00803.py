@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00803', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00803', methods=['GET'])
 	def BenchmarkTest00803_get():
 		return BenchmarkTest00803_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00803', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00803', methods=['POST'])
 	def BenchmarkTest00803_post():
 		RESPONSE = ""
 
@@ -33,45 +33,26 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf88103 = configparser.ConfigParser()
-		conf88103.add_section('section88103')
-		conf88103.set('section88103', 'keyA-88103', 'a_Value')
-		conf88103.set('section88103', 'keyB-88103', param)
-		bar = conf88103.get('section88103', 'keyA-88103')
+		bar = param
 
-		import platform
-		import codecs
-		import helpers.utils
-		from urllib.parse import urlparse
-		from urllib.request import url2pathname
+		import random
+		from helpers.utils import mysession
 
-		startURIslashes = ""
+		num = 'BenchmarkTest00803'[13:]
+		user = f'SafeIsaac{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().randint(0, 2**32))
 
-		if platform.system() == "Windows":
-			startURIslashes = "/"
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
 		else:
-			startURIslashes = "//"
-
-		try:
-			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+			mysession[cookie] = value
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
-
-			RESPONSE += (
-				" And file already exists."
-			)
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
-		except IOError:
-			pass
 
 		return RESPONSE
 

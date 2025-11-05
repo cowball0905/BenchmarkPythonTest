@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00891', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00891', methods=['GET'])
 	def BenchmarkTest00891_get():
 		return BenchmarkTest00891_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00891', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00891', methods=['POST'])
 	def BenchmarkTest00891_post():
 		RESPONSE = ""
 
@@ -35,37 +35,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import pathlib
-		import helpers.utils
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / bar).resolve()
+		RESPONSE += (
+			'The value of the bar parameter is now in a custom header.'
+		)
 
-			if not str(p).startswith(str(testfiles)):
-				RESPONSE += (
-					"Invalid Path."
-				)
-				return RESPONSE
-
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00891': bar}))
+		
 
 		return RESPONSE
 

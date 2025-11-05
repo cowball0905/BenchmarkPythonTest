@@ -20,32 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00173', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00173', methods=['GET'])
 	def BenchmarkTest00173_get():
 		return BenchmarkTest00173_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00173', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00173', methods=['POST'])
 	def BenchmarkTest00173_post():
 		RESPONSE = ""
 
-		param = request.form.get("BenchmarkTest00173")
-		if not param:
-			param = ""
+		values = request.form.getlist("BenchmarkTest00173")
+		param = ""
+		if values:
+			param = values[0]
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		import configparser
+		
+		bar = 'safe!'
+		conf69285 = configparser.ConfigParser()
+		conf69285.add_section('section69285')
+		conf69285.set('section69285', 'keyA-69285', 'a_Value')
+		conf69285.set('section69285', 'keyB-69285', param)
+		bar = conf69285.get('section69285', 'keyA-69285')
+
+		import codecs
+		import helpers.utils
 
 		try:
-			exec(bar)
-		except:
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+			)
+
+			RESPONSE += (
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
 			)
 
 		return RESPONSE

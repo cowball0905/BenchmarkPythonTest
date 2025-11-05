@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00291', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00291', methods=['GET'])
 	def BenchmarkTest00291_get():
 		return BenchmarkTest00291_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00291', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00291', methods=['POST'])
 	def BenchmarkTest00291_post():
 		RESPONSE = ""
 
@@ -35,29 +35,38 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
+		import elementpath
+		import xml.etree.ElementTree as ET
 		import helpers.utils
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-		except IOError as e:
+		except:
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

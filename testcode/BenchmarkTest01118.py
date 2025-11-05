@@ -20,52 +20,38 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01118', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01118', methods=['GET'])
 	def BenchmarkTest01118_get():
 		return BenchmarkTest01118_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01118', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01118', methods=['POST'])
 	def BenchmarkTest01118_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01118")
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import lxml.etree
 		import helpers.utils
-		import io
+
+		fileName = None
+		fd = None
 
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			strIO = io.StringIO()
-			strIO.write('/Employees/Employee[@emplid=\'')
-			strIO.write(bar)
-			strIO.write('\']')
-			query = strIO.getvalue()
-
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

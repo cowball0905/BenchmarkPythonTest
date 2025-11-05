@@ -10,14 +10,14 @@
 </head>
 <body>
 <form action="/benchmark/hash-00/BenchmarkTest00146" method="POST" id="FormBenchmarkTest00146" autocomplete="off">
- <div><label>Select your habits and edit the parameter [name,value]:</label></div><br>
-	<div><input type="checkbox" name="BenchmarkTest00146" value="someSecret" checked >Reading. [BenchmarkTest00146, someSecret]</div>
-	<div><input type="checkbox" name="BenchmarkTest00146" value="Movies" >Movies. [BenchmarkTest00146, Movies]</div>
-	<div><input type="checkbox" name="BenchmarkTest00146" value="Writing" >Writing. [BenchmarkTest00146, Writing]</div>
-	<div><input type="checkbox" name="BenchmarkTest00146" value="Singing" >Singing. [BenchmarkTest00146, Singing]</div>
-	<div><label>Parameter foo, value:</label><input type="text" id="foo" name="foo" value="bar" ></div><br>
-	<div><input type="submit" value="Submit" ></div>
- </form>
- 
+    <p>Please make your car selection, and edit the value to be sent [value]:</p>
+	<select name="BenchmarkTest00146" multiple>
+	    <option value="someSecret" selected>Audi. [someSecret]</option>
+	    <option value="Ford">Ford. [Ford]</option>
+	    <option value="Opel">Opel. [Opel]</option>
+        <option value="Subaru">Subaru. [Subaru]</option>
+	</select><br><br>
+    <input type="submit" value="Submit" >
+</form>
 </body>
 </html>

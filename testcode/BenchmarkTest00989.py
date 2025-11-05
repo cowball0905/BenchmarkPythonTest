@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00989', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00989', methods=['GET'])
 	def BenchmarkTest00989_get():
 		return BenchmarkTest00989_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00989', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00989', methods=['POST'])
 	def BenchmarkTest00989_post():
 		RESPONSE = ""
 
@@ -46,15 +46,28 @@ def init(app):
 		thing = helpers.ThingFactory.createThing()
 		bar = thing.doSomething(param)
 
-		import pathlib
+		from flask import make_response
+		import io
 		import helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = testfiles / bar
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
+
+		RESPONSE += (
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+		)
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=True,
+			httponly=True)
 
 		return RESPONSE
 

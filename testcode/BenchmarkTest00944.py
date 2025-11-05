@@ -20,50 +20,59 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00944', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00944', methods=['GET'])
 	def BenchmarkTest00944_get():
 		return BenchmarkTest00944_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00944', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00944', methods=['POST'])
 	def BenchmarkTest00944_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00944")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00944" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00944"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00944") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		import hashlib, base64
-		import io, helpers.utils
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
 
-		if len(input) == 0:
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
-			return RESPONSE
-
-		hash = hashlib.new('sha1')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		except:
+			RESPONSE += (
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+			)
 
 		return RESPONSE
 

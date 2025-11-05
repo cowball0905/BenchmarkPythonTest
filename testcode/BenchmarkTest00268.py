@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00268', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00268', methods=['GET'])
 	def BenchmarkTest00268_get():
 		return BenchmarkTest00268_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00268', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00268', methods=['POST'])
 	def BenchmarkTest00268_post():
 		RESPONSE = ""
 
@@ -33,19 +33,35 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = param + '_SafeStuff'
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import re
+		import helpers.ldap
+		import ldap3
 
-		regex = r'(a+)+$'
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(uid={bar}))'
+		try:
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
 
-		if re.match(regex, bar) is not None:
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except IOError:
 			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
+				"Error processing LDAP query."
 			)
 
 		return RESPONSE

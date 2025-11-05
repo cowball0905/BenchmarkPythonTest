@@ -20,27 +20,43 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01188', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01188', methods=['GET'])
 	def BenchmarkTest01188_get():
+		response = make_response(render_template('web/pathtraver-01/BenchmarkTest01188.html'))
+		response.set_cookie('BenchmarkTest01188', 'FileName',
+			max_age=60*3,
+			secure=True,
+			path=request.path,
+			domain='localhost')
+		return response
 		return BenchmarkTest01188_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01188', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01188', methods=['POST'])
 	def BenchmarkTest01188_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01188")
-
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		import urllib.parse
+		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest01188", "noCookieValueSupplied"))
 
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
-		)
+		import helpers.utils
+
+		fileName = None
+		fd = None
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{param}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
+
 

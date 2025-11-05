@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00301', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00301', methods=['GET'])
 	def BenchmarkTest00301_get():
 		return BenchmarkTest00301_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00301', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00301', methods=['POST'])
 	def BenchmarkTest00301_post():
 		RESPONSE = ""
 
@@ -35,30 +35,34 @@ def init(app):
 		if not param:
 			param = ""
 
-		map13001 = {}
-		map13001['keyA-13001'] = 'a-Value'
-		map13001['keyB-13001'] = param
-		map13001['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map13001['keyB-13001']
-		bar = map13001['keyA-13001']
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
+		import lxml.etree
 		import helpers.utils
 
-		fileName = None
-		fd = None
-
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'rb') as fd:
-				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-				)
-		except IOError as e:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			run_query = lxml.etree.XPath(query)
+			nodes = run_query(root)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

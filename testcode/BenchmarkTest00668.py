@@ -20,52 +20,32 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00668', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00668', methods=['GET'])
 	def BenchmarkTest00668_get():
 		return BenchmarkTest00668_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00668', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00668', methods=['POST'])
 	def BenchmarkTest00668_post():
 		RESPONSE = ""
 
+		param = request.args.get("BenchmarkTest00668")
+		if not param:
+			param = ""
+
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
+
+		import pathlib
 		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
-
-		import random
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00668'[13:]
-		user = f'SafeRandy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().getrandbits(32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

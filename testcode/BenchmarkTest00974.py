@@ -20,33 +20,54 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00974', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00974', methods=['GET'])
 	def BenchmarkTest00974_get():
 		return BenchmarkTest00974_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00974', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00974', methods=['POST'])
 	def BenchmarkTest00974_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00974")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00974" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00974"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00974") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		string11433 = ''
+		data12 = ''
+		copy = string11433
+		string11433 = ''
+		string11433 += param
+		copy += 'SomeOKString'
+		bar = copy
 
-		import flask
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
-		flask.session['userid'] = bar
+		num = 'BenchmarkTest00974'[13:]
+		user = f'SafeTheo{num}'
+		cookie = f'rememberMe{num}'
+		value = secrets.token_hex(32)
 
-		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
-		)
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

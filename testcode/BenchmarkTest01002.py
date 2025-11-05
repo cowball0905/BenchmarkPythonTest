@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01002', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01002', methods=['GET'])
 	def BenchmarkTest01002_get():
 		return BenchmarkTest01002_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01002', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01002', methods=['POST'])
 	def BenchmarkTest01002_post():
 		RESPONSE = ""
 
@@ -41,21 +41,27 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		string19987 = ''
-		data12 = ''
-		copy = string19987
-		string19987 = ''
-		string19987 += param
-		copy += 'SomeOKString'
-		bar = copy
+		import configparser
+		
+		bar = 'safe!'
+		conf19987 = configparser.ConfigParser()
+		conf19987.add_section('section19987')
+		conf19987.set('section19987', 'keyA-19987', 'a-Value')
+		conf19987.set('section19987', 'keyB-19987', param)
+		bar = conf19987.get('section19987', 'keyB-19987')
 
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
 
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
-		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
-		)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

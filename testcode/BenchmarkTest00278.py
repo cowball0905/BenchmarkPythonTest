@@ -20,40 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00278', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00278', methods=['GET'])
 	def BenchmarkTest00278_get():
 		return BenchmarkTest00278_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00278', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00278', methods=['POST'])
 	def BenchmarkTest00278_post():
 		RESPONSE = ""
 
-		values = request.form.getlist("BenchmarkTest00278")
-		param = ""
-		if values:
-			param = values[0]
-
-		num = 106
+		import helpers.separate_request
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_form_parameter("BenchmarkTest00278")
+		if not param:
+			param = ""
 
-		import os
-		import subprocess
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
+
 		import helpers.utils
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
-		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
+		fileName = None
+		fd = None
 
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
-		RESPONSE += (
-			helpers.utils.commandOutput(proc)
-		)
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

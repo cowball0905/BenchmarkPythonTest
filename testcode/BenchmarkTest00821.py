@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00821', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00821', methods=['GET'])
 	def BenchmarkTest00821_get():
 		return BenchmarkTest00821_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00821', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00821', methods=['POST'])
 	def BenchmarkTest00821_post():
 		RESPONSE = ""
 
@@ -34,7 +34,7 @@ def init(app):
 			param = values[0]
 
 		possible = "ABC"
-		guess = possible[1]
+		guess = possible[0]
 		
 		match guess:
 			case 'A':
@@ -46,16 +46,9 @@ def init(app):
 			case _:
 				bar = 'bob\'s your uncle'
 
-		import helpers.db_sqlite
+		import flask
 
-		sql = f'SELECT username from USERS where password = ?'
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql, (bar,))
-		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
-		)
-		con.close()
+		return flask.redirect(bar)
 
 		return RESPONSE
 

@@ -20,41 +20,30 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00172', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00172', methods=['GET'])
 	def BenchmarkTest00172_get():
 		return BenchmarkTest00172_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00172', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00172', methods=['POST'])
 	def BenchmarkTest00172_post():
 		RESPONSE = ""
 
-		param = request.form.get("BenchmarkTest00172")
-		if not param:
-			param = ""
+		values = request.form.getlist("BenchmarkTest00172")
+		param = ""
+		if values:
+			param = values[0]
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
 
-		try:
-			RESPONSE += (
-				eval(bar)
-			)
-		except:
-			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
-			)
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00201', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00201', methods=['GET'])
 	def BenchmarkTest00201_get():
 		return BenchmarkTest00201_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00201', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00201', methods=['POST'])
 	def BenchmarkTest00201_post():
 		RESPONSE = ""
 
@@ -33,27 +33,33 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 86
+		import configparser
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = 'safe!'
+		conf2705 = configparser.ConfigParser()
+		conf2705.add_section('section2705')
+		conf2705.set('section2705', 'keyA-2705', 'a-Value')
+		conf2705.set('section2705', 'keyB-2705', param)
+		bar = conf2705.get('section2705', 'keyB-2705')
 
-		import pathlib
+		import elementpath
+		import xml.etree.ElementTree as ET
 		import helpers.utils
 
 		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = testfiles / bar
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-		except OSError:
+		except:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

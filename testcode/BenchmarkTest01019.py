@@ -20,54 +20,41 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01019', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01019', methods=['GET'])
 	def BenchmarkTest01019_get():
 		return BenchmarkTest01019_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01019', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01019', methods=['POST'])
 	def BenchmarkTest01019_post():
 		RESPONSE = ""
 
-		import urllib.parse
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
+
+		possible = "ABC"
+		guess = possible[1]
 		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01019" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01019"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01019") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import configparser
-		
-		bar = 'safe!'
-		conf49778 = configparser.ConfigParser()
-		conf49778.add_section('section49778')
-		conf49778.set('section49778', 'keyA-49778', 'a_Value')
-		conf49778.set('section49778', 'keyB-49778', param)
-		bar = conf49778.get('section49778', 'keyA-49778')
+		import pathlib
+		import helpers.utils
 
-		import random
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest01019'[13:]
-		user = f'Nancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.normalvariate())[2:]
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

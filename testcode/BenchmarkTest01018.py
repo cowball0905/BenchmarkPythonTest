@@ -20,49 +20,37 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01018', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01018', methods=['GET'])
 	def BenchmarkTest01018_get():
 		return BenchmarkTest01018_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01018', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01018', methods=['POST'])
 	def BenchmarkTest01018_post():
 		RESPONSE = ""
 
-		import urllib.parse
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
+
+		import configparser
 		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01018" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01018"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01018") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		bar = 'safe!'
+		conf85812 = configparser.ConfigParser()
+		conf85812.add_section('section85812')
+		conf85812.set('section85812', 'keyA-85812', 'a_Value')
+		conf85812.set('section85812', 'keyB-85812', param)
+		bar = conf85812.get('section85812', 'keyA-85812')
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		import pathlib
+		import helpers.utils
 
-		import random
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest01018'[13:]
-		user = f'Randy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.getrandbits(32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

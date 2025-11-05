@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00193', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00193', methods=['GET'])
 	def BenchmarkTest00193_get():
 		return BenchmarkTest00193_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00193', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00193', methods=['POST'])
 	def BenchmarkTest00193_post():
 		RESPONSE = ""
 
@@ -33,24 +33,29 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = param
-
-		import pathlib
-		import helpers.utils
-
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
-
-		if not str(p).startswith(str(testfiles)):
-			RESPONSE += (
-				"Invalid Path."
-			)
-			return RESPONSE
+		possible = "ABC"
+		guess = possible[0]
 		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
+
+		import helpers.db_sqlite
+
+		sql = f'SELECT username from USERS where password = \'{bar}\''
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql)
+		RESPONSE += (
+			helpers.db_sqlite.results(cur, sql)
+		)
+		con.close()
 
 		return RESPONSE
 

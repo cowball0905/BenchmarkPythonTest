@@ -20,48 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00176', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00176', methods=['GET'])
 	def BenchmarkTest00176_get():
 		return BenchmarkTest00176_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00176', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00176', methods=['POST'])
 	def BenchmarkTest00176_post():
 		RESPONSE = ""
 
-		param = request.form.get("BenchmarkTest00176")
-		if not param:
-			param = ""
+		values = request.form.getlist("BenchmarkTest00176")
+		param = ""
+		if values:
+			param = values[0]
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import helpers.ldap
-		import ldap3
+		import helpers.utils
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
-		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+		fileName = None
+		fd = None
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
+		if '../' in bar:
 			RESPONSE += (
-				"Error processing LDAP query."
+				'File name must not include \'../\''
 			)
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00288', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00288', methods=['GET'])
 	def BenchmarkTest00288_get():
 		return BenchmarkTest00288_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00288', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00288', methods=['POST'])
 	def BenchmarkTest00288_post():
 		RESPONSE = ""
 
@@ -35,49 +35,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = param
 
-		import platform
-		import codecs
-		import helpers.utils
-		from urllib.parse import urlparse
-		from urllib.request import url2pathname
+		import helpers.db_sqlite
 
-		startURIslashes = ""
-
-		if platform.system() == "Windows":
-			startURIslashes = "/"
-		else:
-			startURIslashes = "//"
-
-		try:
-			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
-			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
-			)
-
-			RESPONSE += (
-				" And file already exists."
-			)
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
-		except IOError:
-			pass
+		sql = f'SELECT username from USERS where password = \'{bar}\''
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql)
+		RESPONSE += (
+			helpers.db_sqlite.results(cur, sql)
+		)
+		con.close()
 
 		return RESPONSE
 

@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00076', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00076', methods=['GET'])
 	def BenchmarkTest00076_get():
-		response = make_response(render_template('web/trustbound-00/BenchmarkTest00076.html'))
-		response.set_cookie('BenchmarkTest00076', 'my_user_id',
+		response = make_response(render_template('web/codeinj-00/BenchmarkTest00076.html'))
+		response.set_cookie('BenchmarkTest00076', '%27RESPONSE+%2B%3D+%5C%27ECHOOO%5C%27%27',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,30 +31,32 @@ def init(app):
 		return response
 		return BenchmarkTest00076_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00076', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00076', methods=['POST'])
 	def BenchmarkTest00076_post():
 		RESPONSE = ""
 
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00076", "noCookieValueSupplied"))
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		import flask
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
 
-		flask.session['userid'] = bar
-
-		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
-		)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

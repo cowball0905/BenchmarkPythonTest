@@ -20,36 +20,64 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00954', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00954', methods=['GET'])
 	def BenchmarkTest00954_get():
 		return BenchmarkTest00954_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00954', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00954', methods=['POST'])
 	def BenchmarkTest00954_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00954")
-		if not param:
-			param = ""
-
-		import html
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00954" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00954"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00954") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = html.escape(param)
+		param = urllib.parse.unquote_plus(param)
 
-		import re
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		regex = re.compile(r'^(([a-z])+.)+')
+		import lxml.etree
+		import helpers.utils
+		import io
 
-		if regex.match(bar) is not None:
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			strIO = io.StringIO()
+			strIO.write('/Employees/Employee[@emplid=\'')
+			strIO.write(bar)
+			strIO.write('\']')
+			query = strIO.getvalue()
+
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				'String matches!'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-		else:
+		except:
 			RESPONSE += (
-				'String does not match.'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

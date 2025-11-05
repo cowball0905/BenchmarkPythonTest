@@ -20,58 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00625', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00625', methods=['GET'])
 	def BenchmarkTest00625_get():
 		return BenchmarkTest00625_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00625', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00625', methods=['POST'])
 	def BenchmarkTest00625_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00625")
 		
-		if headers:
-			param = headers[0]
-
-		possible = "ABC"
-		guess = possible[0]
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		import hashlib, base64
-		import io, helpers.utils
+		import configparser
+		
+		bar = 'safe!'
+		conf88021 = configparser.ConfigParser()
+		conf88021.add_section('section88021')
+		conf88021.set('section88021', 'keyA-88021', 'a_Value')
+		conf88021.set('section88021', 'keyB-88021', param)
+		bar = conf88021.get('section88021', 'keyA-88021')
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		import helpers.utils
 
-		if len(input) == 0:
+		fileName = None
+		fd = None
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
-			return RESPONSE
-
-		hash = hashlib.sha512()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
 
 		return RESPONSE
 

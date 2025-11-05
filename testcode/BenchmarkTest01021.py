@@ -20,46 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01021', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01021', methods=['GET'])
 	def BenchmarkTest01021_get():
 		return BenchmarkTest01021_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01021', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01021', methods=['POST'])
 	def BenchmarkTest01021_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01021" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01021"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01021") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		bar = param
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import random
-		from helpers.utils import mysession
+		import pathlib
+		import helpers.utils
 
-		num = 'BenchmarkTest01021'[13:]
-		user = f'Isaac{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.randint(0, 2**32))
+		try:
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = (testfiles / bar).resolve()
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			if not str(p).startswith(str(testfiles)):
+				RESPONSE += (
+					"Invalid Path."
+				)
+				return RESPONSE
+
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-		else:
-			mysession[cookie] = value
+		except OSError:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

@@ -20,45 +20,56 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00442', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00442', methods=['GET'])
 	def BenchmarkTest00442_get():
 		return BenchmarkTest00442_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00442', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00442', methods=['POST'])
 	def BenchmarkTest00442_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00442" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("BenchmarkTest00442")
+		if not param:
+		    param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		map88735 = {}
+		map88735['keyA-88735'] = 'a-Value'
+		map88735['keyB-88735'] = param
+		map88735['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map88735['keyB-88735']
+		bar = map88735['keyA-88735']
 
-		import re
+		import platform
+		import codecs
+		import helpers.utils
+		from urllib.parse import urlparse
+		from urllib.request import url2pathname
 
-		regex = re.compile(r'a*bcde[e-z]+')
+		startURIslashes = ""
 
-		if regex.match(bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
+		if platform.system() == "Windows":
+			startURIslashes = "/"
 		else:
+			startURIslashes = "//"
+
+		try:
+			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+
 			RESPONSE += (
-				'String does not match.'
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
+
+			RESPONSE += (
+				" And file already exists."
+			)
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
+			)
+		except IOError:
+			pass
 
 		return RESPONSE
 

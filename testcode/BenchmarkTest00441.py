@@ -20,34 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00441', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00441', methods=['GET'])
 	def BenchmarkTest00441_get():
 		return BenchmarkTest00441_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00441', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00441', methods=['POST'])
 	def BenchmarkTest00441_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00441" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("BenchmarkTest00441")
+		if not param:
+		    param = ""
 
+		string8943 = 'help'
+		string8943 += param
+		string8943 += 'snapes on a plane'
+		bar = string8943[4:-17]
+
+		import codecs
 		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
 
-		import re
+		try:
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
-		regex = re.compile(r'a*bcde[e-z]+')
-
-		if regex.match(bar) is not None:
 			RESPONSE += (
-				'String matches!'
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
-		else:
+
 			RESPONSE += (
-				'String does not match.'
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
 			)
 
 		return RESPONSE

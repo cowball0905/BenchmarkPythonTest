@@ -20,31 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00468', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00468', methods=['GET'])
 	def BenchmarkTest00468_get():
 		return BenchmarkTest00468_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00468', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00468', methods=['POST'])
 	def BenchmarkTest00468_post():
 		RESPONSE = ""
 
-		param = request.headers.get("Referer")
+		param = request.headers.get("BenchmarkTest00468")
 		if not param:
 		    param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf70980 = configparser.ConfigParser()
-		conf70980.add_section('section70980')
-		conf70980.set('section70980', 'keyA-70980', 'a_Value')
-		conf70980.set('section70980', 'keyB-70980', param)
-		bar = conf70980.get('section70980', 'keyA-70980')
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
+		import lxml.etree
+		import helpers.utils
 
-		RESPONSE += (
-			f'Parameter value: {bar}'
-		)
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
+
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

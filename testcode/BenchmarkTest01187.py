@@ -20,30 +20,55 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01187', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01187', methods=['GET'])
 	def BenchmarkTest01187_get():
+		response = make_response(render_template('web/pathtraver-01/BenchmarkTest01187.html'))
+		response.set_cookie('BenchmarkTest01187', 'FileName',
+			max_age=60*3,
+			secure=True,
+			path=request.path,
+			domain='localhost')
+		return response
 		return BenchmarkTest01187_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01187', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01187', methods=['POST'])
 	def BenchmarkTest01187_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01187")
-
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		import urllib.parse
+		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest01187", "noCookieValueSupplied"))
 
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
-		)
+		import helpers.utils
+
+		fileName = None
+		fd = None
+
+		if '../' in param:
+			RESPONSE += (
+				'File name must not include \'../\''
+			)
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{param}'
+			fd = open(fileName, 'rb')
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
+
 

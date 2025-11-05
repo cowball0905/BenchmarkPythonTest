@@ -20,39 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01236', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01236', methods=['GET'])
 	def BenchmarkTest01236_get():
 		return BenchmarkTest01236_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01236', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01236', methods=['POST'])
 	def BenchmarkTest01236_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01236")
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf58555 = configparser.ConfigParser()
-		conf58555.add_section('section58555')
-		conf58555.set('section58555', 'keyA-58555', 'a-Value')
-		conf58555.set('section58555', 'keyB-58555', param)
-		bar = conf58555.get('section58555', 'keyB-58555')
 
-		import re
+		import helpers.ldap
+		import ldap3
 
-		regex = r'(abc)*(bcd)+'
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(uid={param}))'
+		try:
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
 
-		if re.match(regex, bar) is not None:
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except IOError:
 			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
+				"Error processing LDAP query."
 			)
 
 		return RESPONSE
+
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00307', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00307', methods=['GET'])
 	def BenchmarkTest00307_get():
 		return BenchmarkTest00307_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00307', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00307', methods=['POST'])
 	def BenchmarkTest00307_post():
 		RESPONSE = ""
 
@@ -35,19 +35,35 @@ def init(app):
 		if not param:
 			param = ""
 
-		map54500 = {}
-		map54500['keyA-54500'] = 'a-Value'
-		map54500['keyB-54500'] = param
-		map54500['keyC'] = 'another-Value'
-		bar = map54500['keyB-54500']
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
+		import lxml.etree
+		import helpers.utils
+		import io
 
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
-		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
-		)
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			strIO = io.StringIO()
+			strIO.write('/Employees/Employee[@emplid=\'')
+			strIO.write(bar)
+			strIO.write('\']')
+			query = strIO.getvalue()
+
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

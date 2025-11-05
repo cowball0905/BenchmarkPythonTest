@@ -20,28 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00784', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00784', methods=['GET'])
 	def BenchmarkTest00784_get():
 		return BenchmarkTest00784_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00784', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00784', methods=['POST'])
 	def BenchmarkTest00784_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00784")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00784")
+		param = ""
+		if values:
+			param = values[0]
 
-		string6416 = 'help'
-		string6416 += param
-		string6416 += 'snapes on a plane'
-		bar = string6416[4:-17]
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		try:
-			exec(bar)
-		except:
+		import random
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00784'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

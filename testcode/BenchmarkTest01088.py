@@ -20,58 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest01088', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01088', methods=['GET'])
 	def BenchmarkTest01088_get():
 		return BenchmarkTest01088_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest01088', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01088', methods=['POST'])
 	def BenchmarkTest01088_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01088" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01088"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01088") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		superstring = f'25760{param}abcd'
+		bar = superstring[len('25760'):len(superstring)-5]
 
-		import helpers.ldap
-		import ldap3
+		import hashlib, base64
+		import io, helpers.utils
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
-		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except:
+		if len(input) == 0:
 			RESPONSE += (
-				"Error processing LDAP query."
+				'Cannot generate hash: Input was empty.'
 			)
+			return RESPONSE
+
+		hash = hashlib.new('sha384')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

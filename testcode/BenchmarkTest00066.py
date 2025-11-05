@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00066', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00066', methods=['GET'])
 	def BenchmarkTest00066_get():
-		response = make_response(render_template('web/intoverflow-00/BenchmarkTest00066.html'))
-		response.set_cookie('BenchmarkTest00066', 'x',
+		response = make_response(render_template('web/securecookie-00/BenchmarkTest00066.html'))
+		response.set_cookie('BenchmarkTest00066', 'whatever',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,7 +31,7 @@ def init(app):
 		return response
 		return BenchmarkTest00066_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00066', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00066', methods=['POST'])
 	def BenchmarkTest00066_post():
 		RESPONSE = ""
 
@@ -42,18 +42,28 @@ def init(app):
 		if 'should' in bar:
 			bar = param
 
-		import re
+		from flask import make_response
+		import io
+		import helpers.utils
 
-		regex = re.compile(r'^(([a-z])+.)+')
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		if regex.match(bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
+
+		RESPONSE += (
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+		)
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=False,
+			httponly=True)
 
 		return RESPONSE
 

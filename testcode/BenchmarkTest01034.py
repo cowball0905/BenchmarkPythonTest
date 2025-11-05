@@ -20,26 +20,18 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01034', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest01034', methods=['GET'])
 	def BenchmarkTest01034_get():
 		return BenchmarkTest01034_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01034', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest01034', methods=['POST'])
 	def BenchmarkTest01034_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01034" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01034"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01034") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
 		import configparser
 		
@@ -50,24 +42,25 @@ def init(app):
 		conf51694.set('section51694', 'keyB-51694', param)
 		bar = conf51694.get('section51694', 'keyA-51694')
 
-		import random
-		from helpers.utils import mysession
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		num = 'BenchmarkTest01034'[13:]
-		user = f'SafeNancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-		else:
-			mysession[cookie] = value
+		except:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
+
 
 		return RESPONSE
 

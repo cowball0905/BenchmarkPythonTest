@@ -20,26 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00469', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00469', methods=['GET'])
 	def BenchmarkTest00469_get():
 		return BenchmarkTest00469_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00469', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00469', methods=['POST'])
 	def BenchmarkTest00469_post():
 		RESPONSE = ""
 
-		param = request.headers.get("Referer")
+		param = request.headers.get("BenchmarkTest00469")
 		if not param:
 		    param = ""
 
-		import markupsafe
+		num = 106
 		
-		bar = markupsafe.escape(param)
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
+		import lxml.etree
+		import helpers.utils
 
-		RESPONSE += (
-			f'Parameter value: {bar}'
-		)
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
+
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

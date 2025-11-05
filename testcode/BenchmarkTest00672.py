@@ -20,48 +20,43 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00672', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00672', methods=['GET'])
 	def BenchmarkTest00672_get():
 		return BenchmarkTest00672_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00672', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00672', methods=['POST'])
 	def BenchmarkTest00672_post():
 		RESPONSE = ""
 
+		param = request.args.get("BenchmarkTest00672")
+		if not param:
+			param = ""
+
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
+
 		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
 
-		map52958 = {}
-		map52958['keyA-52958'] = 'a-Value'
-		map52958['keyB-52958'] = param
-		map52958['keyC'] = 'another-Value'
-		bar = map52958['keyB-52958']
+		fileName = None
+		fd = None
 
-		import random
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00672'[13:]
-		user = f'SafeIsaac{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().randint(0, 2**32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

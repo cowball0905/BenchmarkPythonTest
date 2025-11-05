@@ -20,54 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00681', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00681', methods=['GET'])
 	def BenchmarkTest00681_get():
 		return BenchmarkTest00681_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00681', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00681', methods=['POST'])
 	def BenchmarkTest00681_post():
 		RESPONSE = ""
 
+		param = request.args.get("BenchmarkTest00681")
+		if not param:
+			param = ""
+
+		string15959 = 'help'
+		string15959 += param
+		string15959 += 'snapes on a plane'
+		bar = string15959[4:-17]
+
+		import elementpath
+		import xml.etree.ElementTree as ET
 		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		import hashlib, base64
-		import io, helpers.utils
-
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-			return RESPONSE
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
-		hash = hashlib.sha1()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
 
 		return RESPONSE
 

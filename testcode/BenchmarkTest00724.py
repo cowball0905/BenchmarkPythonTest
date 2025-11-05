@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00724', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00724', methods=['GET'])
 	def BenchmarkTest00724_get():
 		return BenchmarkTest00724_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00724', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00724', methods=['POST'])
 	def BenchmarkTest00724_post():
 		RESPONSE = ""
 
@@ -32,29 +32,39 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		string94426 = ''
+		data12 = ''
+		copy = string94426
+		string94426 = ''
+		string94426 += param
+		copy += 'SomeOKString'
+		bar = copy
 
-		import helpers.db_sqlite
+		import hashlib, base64
+		import io, helpers.utils
 
-		sql = f'SELECT username from USERS where password = \'{bar}\''
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql)
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		if len(input) == 0:
+			RESPONSE += (
+				'Cannot generate hash: Input was empty.'
+			)
+			return RESPONSE
+
+		hash = hashlib.sha384()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
 		)
-		con.close()
+		f.close()
 
 		return RESPONSE
 

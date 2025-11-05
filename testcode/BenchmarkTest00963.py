@@ -20,32 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00963', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00963', methods=['GET'])
 	def BenchmarkTest00963_get():
 		return BenchmarkTest00963_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00963', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00963', methods=['POST'])
 	def BenchmarkTest00963_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00963")
-		if not param:
-			param = ""
-
-		import html
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00963" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00963"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00963") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = html.escape(param)
+		param = urllib.parse.unquote_plus(param)
 
+		bar = param + '_SafeStuff'
 
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
+		import random
+		from helpers.utils import mysession
 
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00963': bar}))
-		
+		num = 'BenchmarkTest00963'[13:]
+		user = f'Isaac{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.randint(0, 2**32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

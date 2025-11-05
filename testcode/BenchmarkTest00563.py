@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00563', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00563', methods=['GET'])
 	def BenchmarkTest00563_get():
 		return BenchmarkTest00563_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00563', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00563', methods=['POST'])
 	def BenchmarkTest00563_post():
 		RESPONSE = ""
 
@@ -34,42 +34,28 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		map4123 = {}
-		map4123['keyA-4123'] = 'a-Value'
-		map4123['keyB-4123'] = param
-		map4123['keyC'] = 'another-Value'
-		bar = map4123['keyB-4123']
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import platform
-		import codecs
-		import helpers.utils
-		from urllib.parse import urlparse
-		from urllib.request import url2pathname
+		import random
+		from helpers.utils import mysession
 
-		startURIslashes = ""
+		num = 'BenchmarkTest00563'[13:]
+		user = f'Nancy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.normalvariate())[2:]
 
-		if platform.system() == "Windows":
-			startURIslashes = "/"
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
 		else:
-			startURIslashes = "//"
-
-		try:
-			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+			mysession[cookie] = value
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
-
-			RESPONSE += (
-				" And file already exists."
-			)
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
-		except IOError:
-			pass
 
 		return RESPONSE
 

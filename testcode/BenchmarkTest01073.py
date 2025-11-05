@@ -20,53 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01073', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01073', methods=['GET'])
 	def BenchmarkTest01073_get():
 		return BenchmarkTest01073_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01073', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01073', methods=['POST'])
 	def BenchmarkTest01073_post():
 		RESPONSE = ""
 
-		import urllib.parse
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
+
+		num = 86
 		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01073" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01073"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01073") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		import random
+		from helpers.utils import mysession
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		num = 'BenchmarkTest01073'[13:]
+		user = f'SafeRandy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().getrandbits(32))
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
-
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=True,
-			httponly=True)
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

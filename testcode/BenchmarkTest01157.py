@@ -20,40 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01157', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01157', methods=['GET'])
 	def BenchmarkTest01157_get():
 		return BenchmarkTest01157_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01157', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01157', methods=['POST'])
 	def BenchmarkTest01157_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01157")
 
-		possible = "ABC"
-		guess = possible[0]
+		num = 106
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		try:
+		import hashlib, base64
+		import io, helpers.utils
+
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		if len(input) == 0:
 			RESPONSE += (
-				eval(bar)
+				'Cannot generate hash: Input was empty.'
 			)
-		except:
-			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
-			)
+			return RESPONSE
+
+		hash = hashlib.new('sha512')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

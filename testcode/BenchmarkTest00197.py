@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00197', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00197', methods=['GET'])
 	def BenchmarkTest00197_get():
 		return BenchmarkTest00197_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00197', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00197', methods=['POST'])
 	def BenchmarkTest00197_post():
 		RESPONSE = ""
 
@@ -33,31 +33,25 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
-
-		import pathlib
-		import helpers.utils
-
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
-
-		if not str(p).startswith(str(testfiles)):
-			RESPONSE += (
-				"Invalid Path."
-			)
-			return RESPONSE
+		import configparser
 		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		bar = 'safe!'
+		conf11823 = configparser.ConfigParser()
+		conf11823.add_section('section11823')
+		conf11823.set('section11823', 'keyA-11823', 'a_Value')
+		conf11823.set('section11823', 'keyB-11823', param)
+		bar = conf11823.get('section11823', 'keyA-11823')
+
+		import helpers.db_sqlite
+
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (bar,))
+		RESPONSE += (
+			helpers.db_sqlite.results(cur, sql)
+		)
+		con.close()
 
 		return RESPONSE
 

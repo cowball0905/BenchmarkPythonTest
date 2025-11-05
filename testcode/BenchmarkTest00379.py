@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00379', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00379', methods=['GET'])
 	def BenchmarkTest00379_get():
 		return BenchmarkTest00379_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00379', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00379', methods=['POST'])
 	def BenchmarkTest00379_post():
 		RESPONSE = ""
 
@@ -34,36 +34,39 @@ def init(app):
 				param = name
 				break
 
-		import helpers.ThingFactory
+		possible = "ABC"
+		guess = possible[1]
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
+		import lxml.etree
 		import helpers.utils
 
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not contain \'../\''
-			)
-			return RESPONSE
-
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			run_query = lxml.etree.XPath(query)
+			nodes = run_query(root)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-		except IOError as e:
+		except:
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

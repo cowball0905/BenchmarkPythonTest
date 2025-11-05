@@ -20,40 +20,29 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01165', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01165', methods=['GET'])
 	def BenchmarkTest01165_get():
 		return BenchmarkTest01165_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01165', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01165', methods=['POST'])
 	def BenchmarkTest01165_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01165")
 
-		import html
-		
-		bar = html.escape(param)
-
-		import pickle
 		import base64
-		import helpers.utils
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
-
-		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
-			RESPONSE += (
-				'Unpickling failed!'
-			)
-			return RESPONSE
 
 		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
+			'The value of the bar parameter is now in a custom header.'
 		)
+
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest01165': bar}))
+		
 
 		return RESPONSE
 

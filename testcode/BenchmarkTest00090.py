@@ -32,38 +32,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
+		import helpers.ThingFactory
 		
-		bar = 'safe!'
-		conf28405 = configparser.ConfigParser()
-		conf28405.add_section('section28405')
-		conf28405.set('section28405', 'keyA-28405', 'a-Value')
-		conf28405.set('section28405', 'keyB-28405', param)
-		bar = conf28405.get('section28405', 'keyB-28405')
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
+		import pathlib
 		import helpers.utils
 
-		fileName = None
-		fd = None
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

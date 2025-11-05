@@ -20,36 +20,35 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00280', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00280', methods=['GET'])
 	def BenchmarkTest00280_get():
 		return BenchmarkTest00280_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00280', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00280', methods=['POST'])
 	def BenchmarkTest00280_post():
 		RESPONSE = ""
 
-		values = request.form.getlist("BenchmarkTest00280")
-		param = ""
-		if values:
-			param = values[0]
-
-		import helpers.ThingFactory
+		import helpers.separate_request
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_form_parameter("BenchmarkTest00280")
+		if not param:
+			param = ""
 
-		import yaml
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
 
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

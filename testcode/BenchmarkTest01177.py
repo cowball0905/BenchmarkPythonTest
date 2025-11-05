@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01177', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01177', methods=['GET'])
 	def BenchmarkTest01177_get():
 		return BenchmarkTest01177_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01177', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01177', methods=['POST'])
 	def BenchmarkTest01177_post():
 		RESPONSE = ""
 
@@ -32,22 +32,31 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01177")
 
-		map58184 = {}
-		map58184['keyA-58184'] = 'a-Value'
-		map58184['keyB-58184'] = param
-		map58184['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map58184['keyB-58184']
-		bar = map58184['keyA-58184']
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import os
-		import helpers.utils
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
 
-		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-		if os.path.exists(fileName):
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

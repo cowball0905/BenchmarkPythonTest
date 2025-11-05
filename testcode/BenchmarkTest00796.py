@@ -20,33 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00796', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00796', methods=['GET'])
 	def BenchmarkTest00796_get():
 		return BenchmarkTest00796_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00796', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00796', methods=['POST'])
 	def BenchmarkTest00796_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00796")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00796")
+		param = ""
+		if values:
+			param = values[0]
 
-		num = 106
+		import configparser
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = 'safe!'
+		conf28277 = configparser.ConfigParser()
+		conf28277.add_section('section28277')
+		conf28277.set('section28277', 'keyA-28277', 'a-Value')
+		conf28277.set('section28277', 'keyB-28277', param)
+		bar = conf28277.get('section28277', 'keyB-28277')
 
-		import yaml
+		import random
+		from helpers.utils import mysession
 
-		try:
-			yobj = yaml.safe_load(bar)
+		num = 'BenchmarkTest00796'[13:]
+		user = f'SafeNancy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().normalvariate())[2:]
 
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				yobj['text']
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				"There was an error loading the configuration"
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

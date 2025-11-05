@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00070', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00070', methods=['GET'])
 	def BenchmarkTest00070_get():
-		response = make_response(render_template('web/intoverflow-00/BenchmarkTest00070.html'))
-		response.set_cookie('BenchmarkTest00070', 'x',
+		response = make_response(render_template('web/redirect-00/BenchmarkTest00070.html'))
+		response.set_cookie('BenchmarkTest00070', 'http%3A%2F%2Flocalhost%3A5000%2F',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,7 +31,7 @@ def init(app):
 		return response
 		return BenchmarkTest00070_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00070', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00070', methods=['POST'])
 	def BenchmarkTest00070_post():
 		RESPONSE = ""
 
@@ -42,18 +42,23 @@ def init(app):
 		
 		bar = markupsafe.escape(param)
 
-		import re
+		import flask
+		import urllib.parse
 
-		regex = r'(abc)*(bcd)+'
+		try:
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
+		except:
+			RESPONSE += (
+				'Error parsing URL.'
+			)
+			return RESPONSE
 
-		if re.match(regex, bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+		return flask.redirect(bar)
 
 		return RESPONSE
 

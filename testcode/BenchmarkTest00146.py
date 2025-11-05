@@ -55,7 +55,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha384')
+		hash = hashlib.sha384()
 		hash.update(input)
 
 		result = hash.digest()

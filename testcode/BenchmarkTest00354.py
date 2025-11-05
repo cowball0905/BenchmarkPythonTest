@@ -28,27 +28,20 @@ def init(app):
 	def BenchmarkTest00354_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00354")
-		if not param:
-			param = ""
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00354" in request.form.getlist(name):
+				param = name
+				break
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
 
 		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
+			f'Parameter value: {bar}'
 		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00354': bar}))
-		
 
 		return RESPONSE
 

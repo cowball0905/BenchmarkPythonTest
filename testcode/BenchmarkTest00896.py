@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00896', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00896', methods=['GET'])
 	def BenchmarkTest00896_get():
 		return BenchmarkTest00896_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00896', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00896', methods=['POST'])
 	def BenchmarkTest00896_post():
 		RESPONSE = ""
 
@@ -35,24 +35,13 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
+		num = 106
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
+		import flask
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
-		)
+		return flask.redirect(bar)
 
 		return RESPONSE
 

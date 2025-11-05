@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00373', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00373', methods=['GET'])
 	def BenchmarkTest00373_get():
 		return BenchmarkTest00373_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00373', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00373', methods=['POST'])
 	def BenchmarkTest00373_post():
 		RESPONSE = ""
 
@@ -34,36 +34,39 @@ def init(app):
 				param = name
 				break
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import codecs
+		import elementpath
+		import xml.etree.ElementTree as ET
 		import helpers.utils
 
+		if '\'' in bar:
+			RESPONSE += (
+				"Employee ID must not contain apostrophes"
+			)
+			return RESPONSE
+
 		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-
+		except:
 			RESPONSE += (
-				" And file already exists."
-			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

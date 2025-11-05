@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00886', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00886', methods=['GET'])
 	def BenchmarkTest00886_get():
 		return BenchmarkTest00886_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00886', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00886', methods=['POST'])
 	def BenchmarkTest00886_post():
 		RESPONSE = ""
 
@@ -44,25 +44,31 @@ def init(app):
 		conf89872.set('section89872', 'keyB-89872', param)
 		bar = conf89872.get('section89872', 'keyA-89872')
 
-		import helpers.utils
+		import hashlib, base64
+		import io, helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		if len(input) == 0:
 			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
+				'Cannot generate hash: Input was empty.'
 			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+			return RESPONSE
+
+		hash = hashlib.md5()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00569', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00569', methods=['GET'])
 	def BenchmarkTest00569_get():
 		return BenchmarkTest00569_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00569', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00569', methods=['POST'])
 	def BenchmarkTest00569_post():
 		RESPONSE = ""
 
@@ -34,22 +34,37 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		map28566 = {}
-		map28566['keyA-28566'] = 'a-Value'
-		map28566['keyB-28566'] = param
-		map28566['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map28566['keyB-28566']
-		bar = map28566['keyA-28566']
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import os
-		import helpers.utils
+		import random
+		from helpers.utils import mysession
 
-		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-		if os.path.exists(fileName):
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		num = 'BenchmarkTest00569'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
 		else:
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

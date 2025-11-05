@@ -28,21 +28,20 @@ def init(app):
 	def BenchmarkTest01226_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01226")
+		values = request.args.getlist("BenchmarkTest01226")
+		param = ""
+		if values:
+			param = values[0]
 
-		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
 
 		import hashlib, base64
 		import io, helpers.utils
 
 		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		if isinstance(param, str):
+			input = param.encode('utf-8')
+		elif isinstance(param, io.IOBase):
+			input = param.read(1000)
 
 		if len(input) == 0:
 			RESPONSE += (
@@ -50,7 +49,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha1')
+		hash = hashlib.sha384()
 		hash.update(input)
 
 		result = hash.digest()
@@ -62,4 +61,5 @@ def init(app):
 		f.close()
 
 		return RESPONSE
+
 

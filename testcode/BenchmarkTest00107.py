@@ -32,29 +32,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf94363 = configparser.ConfigParser()
-		conf94363.add_section('section94363')
-		conf94363.set('section94363', 'keyA-94363', 'a_Value')
-		conf94363.set('section94363', 'keyB-94363', param)
-		bar = conf94363.get('section94363', 'keyA-94363')
+		string94363 = 'help'
+		string94363 += param
+		string94363 += 'snapes on a plane'
+		bar = string94363[4:-17]
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
-		if '\'' in bar:
-			RESPONSE += (
-				"Employee ID must not contain apostrophes"
-			)
-			return RESPONSE
-
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			run_query = lxml.etree.XPath(query)
+			nodes = run_query(root)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

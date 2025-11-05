@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00484', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00484', methods=['GET'])
 	def BenchmarkTest00484_get():
 		return BenchmarkTest00484_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00484', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00484', methods=['POST'])
 	def BenchmarkTest00484_post():
 		RESPONSE = ""
 
@@ -32,35 +32,32 @@ def init(app):
 		if not param:
 		    param = ""
 
-		string28714 = 'help'
-		string28714 += param
-		string28714 += 'snapes on a plane'
-		bar = string28714[4:-17]
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		import random
+		from helpers.utils import mysession
 
-		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
+		num = 'BenchmarkTest00484'[13:]
+		user = f'SafeIsaac{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().randint(0, 2**32))
 
-			doc = xml.dom.minidom.parseString(bar, parser)
-
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
-
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

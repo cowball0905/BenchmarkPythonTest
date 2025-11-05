@@ -20,54 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01012', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01012', methods=['GET'])
 	def BenchmarkTest01012_get():
 		return BenchmarkTest01012_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01012', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01012', methods=['POST'])
 	def BenchmarkTest01012_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01012" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01012"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01012") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		map72463 = {}
-		map72463['keyA-72463'] = 'a-Value'
-		map72463['keyB-72463'] = param
-		map72463['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map72463['keyB-72463']
-		bar = map72463['keyA-72463']
+		bar = "This should never happen"
+		if 'should' not in bar:
+		        bar = "Ifnot case passed"
 
-		import lxml.etree
+		import codecs
 		import helpers.utils
 
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
-			run_query = lxml.etree.XPath(query)
-			nodes = run_query(root)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
-		except:
+
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
 			)
 
 		return RESPONSE

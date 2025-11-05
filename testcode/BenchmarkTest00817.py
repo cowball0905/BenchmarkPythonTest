@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00817', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00817', methods=['GET'])
 	def BenchmarkTest00817_get():
 		return BenchmarkTest00817_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00817', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00817', methods=['POST'])
 	def BenchmarkTest00817_post():
 		RESPONSE = ""
 
@@ -33,14 +33,34 @@ def init(app):
 		if values:
 			param = values[0]
 
-		superstring = f'14142{param}abcd'
-		bar = superstring[len('14142'):len(superstring)-5]
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
+		import hashlib, base64
+		import io, helpers.utils
 
-		otherarg = "static text"
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		if len(input) == 0:
+			RESPONSE += (
+				'Cannot generate hash: Input was empty.'
+			)
+			return RESPONSE
+
+		hash = hashlib.sha512()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
 		)
+		f.close()
 
 		return RESPONSE
 

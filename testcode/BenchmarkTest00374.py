@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00374', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00374', methods=['GET'])
 	def BenchmarkTest00374_get():
 		return BenchmarkTest00374_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00374', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00374', methods=['POST'])
 	def BenchmarkTest00374_post():
 		RESPONSE = ""
 
@@ -34,38 +34,39 @@ def init(app):
 				param = name
 				break
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		import helpers.utils
-
-		fileName = None
-		fd = None
+		import xml.dom.minidom
+		import xml.sax.handler
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
-		except IOError as e:
+		except:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

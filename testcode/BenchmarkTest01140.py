@@ -20,49 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01140', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01140', methods=['GET'])
 	def BenchmarkTest01140_get():
 		return BenchmarkTest01140_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01140', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01140', methods=['POST'])
 	def BenchmarkTest01140_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01140")
 
-		string84778 = 'help'
-		string84778 += param
-		string84778 += 'snapes on a plane'
-		bar = string84778[4:-17]
+		map84778 = {}
+		map84778['keyA-84778'] = 'a-Value'
+		map84778['keyB-84778'] = param
+		map84778['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map84778['keyB-84778']
+		bar = map84778['keyA-84778']
 
-		import hashlib, base64
-		import io, helpers.utils
+		import random
+		from helpers.utils import mysession
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		num = 'BenchmarkTest01140'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
 
-		if len(input) == 0:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		hash = hashlib.md5()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

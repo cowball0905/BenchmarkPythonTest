@@ -20,29 +20,43 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00578', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00578', methods=['GET'])
 	def BenchmarkTest00578_get():
 		return BenchmarkTest00578_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00578', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00578', methods=['POST'])
 	def BenchmarkTest00578_post():
 		RESPONSE = ""
 
 		param = ""
-		headers = request.headers.getlist("Referer")
+		headers = request.headers.getlist("BenchmarkTest00578")
 		
 		if headers:
 			param = headers[0]
 
-		import html
+		import helpers.ThingFactory
 		
-		bar = html.escape(param)
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
+		import random
+		from helpers.utils import mysession
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
-		)
+		num = 'BenchmarkTest00578'[13:]
+		user = f'SafeRandy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().getrandbits(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

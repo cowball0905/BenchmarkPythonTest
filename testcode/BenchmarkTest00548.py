@@ -20,47 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00548', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00548', methods=['GET'])
 	def BenchmarkTest00548_get():
 		return BenchmarkTest00548_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00548', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00548', methods=['POST'])
 	def BenchmarkTest00548_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00548")
-		if not param:
-		    param = ""
-
-		num = 106
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00548")
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		if headers:
+			param = headers[0]
 
-		import helpers.ldap
-		import ldap3
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
+		import xml.dom.minidom
+		import xml.sax.handler
+
 		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
+			RESPONSE += (
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
+			)
 		except:
 			RESPONSE += (
-				"Error processing LDAP query."
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
 			)
 
 		return RESPONSE

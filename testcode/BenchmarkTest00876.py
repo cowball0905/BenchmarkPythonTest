@@ -20,48 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00876', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00876', methods=['GET'])
 	def BenchmarkTest00876_get():
 		return BenchmarkTest00876_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00876', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00876', methods=['POST'])
 	def BenchmarkTest00876_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00876")
-		param = ""
-		if values:
-			param = values[0]
-
-		import configparser
+		import helpers.separate_request
 		
-		bar = 'safe!'
-		conf8113 = configparser.ConfigParser()
-		conf8113.add_section('section8113')
-		conf8113.set('section8113', 'keyA-8113', 'a_Value')
-		conf8113.set('section8113', 'keyB-8113', param)
-		bar = conf8113.get('section8113', 'keyA-8113')
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00876")
+		if not param:
+			param = ""
 
-		import platform
-		import subprocess
-		import helpers.utils
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
+		import random
+		import base64
+		from helpers.utils import mysession
 
-		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+		num = 'BenchmarkTest00876'[13:]
+		user = f'SafeBarbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
 
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				helpers.utils.commandOutput(proc)
+				f'Welcome back: {user}<br/>'
 			)
-		except IOError:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

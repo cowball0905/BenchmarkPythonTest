@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00086', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00086', methods=['GET'])
 	def BenchmarkTest00086_get():
 		return BenchmarkTest00086_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00086', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00086', methods=['POST'])
 	def BenchmarkTest00086_post():
 		RESPONSE = ""
 
@@ -32,14 +32,38 @@ def init(app):
 		if not param:
 			param = ""
 
-		import html
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = html.escape(param)
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
+		import helpers.utils
 
-		RESPONSE += (
-			f'Parameter value: {bar}'
-		)
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
+			RESPONSE += (
+				f'Now ready to write to file: {escape_for_html(fileName)}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

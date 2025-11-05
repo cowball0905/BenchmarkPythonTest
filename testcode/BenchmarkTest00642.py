@@ -20,40 +20,56 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00642', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00642', methods=['GET'])
 	def BenchmarkTest00642_get():
 		return BenchmarkTest00642_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00642', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00642', methods=['POST'])
 	def BenchmarkTest00642_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00642")
 		
-		if headers:
-			param = headers[0]
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
+		
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+		import random
+		import base64
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00642'[13:]
+		user = f'SafeBarbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				"Exec argument must be a plain string literal."
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		try:
-			exec(bar)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

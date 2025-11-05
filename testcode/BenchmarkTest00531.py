@@ -20,39 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00531', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00531', methods=['GET'])
 	def BenchmarkTest00531_get():
 		return BenchmarkTest00531_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00531', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00531', methods=['POST'])
 	def BenchmarkTest00531_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00531")
-		if not param:
-		    param = ""
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00531")
+		
+		if headers:
+			param = headers[0]
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		import configparser
+		
+		bar = 'safe!'
+		conf18258 = configparser.ConfigParser()
+		conf18258.add_section('section18258')
+		conf18258.set('section18258', 'keyA-18258', 'a_Value')
+		conf18258.set('section18258', 'keyB-18258', param)
+		bar = conf18258.get('section18258', 'keyA-18258')
 
-		import re
+		import pathlib
+		import helpers.utils
 
-		regex = r'(a+)+$'
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = (testfiles / bar).resolve()
 
-		if re.match(regex, bar) is not None:
+		if not str(p).startswith(str(testfiles)):
 			RESPONSE += (
-				'String matches!'
+				"Invalid Path."
 			)
+			return RESPONSE
+		
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

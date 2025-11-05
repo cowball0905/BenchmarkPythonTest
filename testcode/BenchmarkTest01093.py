@@ -20,47 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01093', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01093', methods=['GET'])
 	def BenchmarkTest01093_get():
 		return BenchmarkTest01093_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01093', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01093', methods=['POST'])
 	def BenchmarkTest01093_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01093" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01093"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01093") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		string70197 = ''
-		data12 = ''
-		copy = string70197
-		string70197 = ''
-		string70197 += param
-		copy += 'SomeOKString'
-		bar = copy
+		bar = param
 
-		import yaml
+		import hashlib, base64
+		import io, helpers.utils
 
-		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
+		if len(input) == 0:
 			RESPONSE += (
-				yobj['text']
+				'Cannot generate hash: Input was empty.'
 			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+			return RESPONSE
+
+		hash = hashlib.sha512()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

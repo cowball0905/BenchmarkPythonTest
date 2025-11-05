@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00155', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00155', methods=['GET'])
 	def BenchmarkTest00155_get():
 		return BenchmarkTest00155_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00155', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00155', methods=['POST'])
 	def BenchmarkTest00155_post():
 		RESPONSE = ""
 
@@ -41,18 +41,14 @@ def init(app):
 			lst.pop(0)
 			bar = lst[0]
 
-		import re
+		import flask
 
-		regex = re.compile(r'a*bcde[e-z]+')
+		flask.session['userid'] = bar
 
-		if regex.match(bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+		RESPONSE += (
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
+		)
 
 		return RESPONSE
 

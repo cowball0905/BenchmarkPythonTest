@@ -20,47 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00839', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00839', methods=['GET'])
 	def BenchmarkTest00839_get():
 		return BenchmarkTest00839_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00839', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00839', methods=['POST'])
 	def BenchmarkTest00839_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00839")
-		param = ""
-		if values:
-			param = values[0]
-
-		import configparser
+		import helpers.separate_request
 		
-		bar = 'safe!'
-		conf3721 = configparser.ConfigParser()
-		conf3721.add_section('section3721')
-		conf3721.set('section3721', 'keyA-3721', 'a_Value')
-		conf3721.set('section3721', 'keyB-3721', param)
-		bar = conf3721.get('section3721', 'keyA-3721')
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00839")
+		if not param:
+			param = ""
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		num = 'BenchmarkTest00839'[13:]
-		user = f'SafeToby{num}'
-		cookie = f'rememberMe{num}'
-		value = base64.b64encode(secrets.token_bytes(32))
+		import helpers.utils
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-		else:
-			mysession[cookie] = value
+		except IOError as e:
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

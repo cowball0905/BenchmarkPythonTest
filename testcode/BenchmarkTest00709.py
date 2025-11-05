@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00709', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00709', methods=['GET'])
 	def BenchmarkTest00709_get():
 		return BenchmarkTest00709_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00709', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00709', methods=['POST'])
 	def BenchmarkTest00709_post():
 		RESPONSE = ""
 
@@ -38,25 +38,24 @@ def init(app):
 		map71878['keyC'] = 'another-Value'
 		bar = map71878['keyB-71878']
 
-		import helpers.utils
+		import random
+		from helpers.utils import mysession
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
+		num = 'BenchmarkTest00709'[13:]
+		user = f'SafeNancy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().normalvariate())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
+				f'Welcome back: {user}<br/>'
 			)
-		except IOError as e:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

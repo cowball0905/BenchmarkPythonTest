@@ -20,52 +20,48 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00927', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00927', methods=['GET'])
 	def BenchmarkTest00927_get():
 		return BenchmarkTest00927_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00927', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00927', methods=['POST'])
 	def BenchmarkTest00927_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00927")
-		if not param:
-			param = ""
-
-		possible = "ABC"
-		guess = possible[0]
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00927" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00927"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00927") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		param = urllib.parse.unquote_plus(param)
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		num = 'BenchmarkTest00927'[13:]
-		user = f'SafeTheo{num}'
-		cookie = f'rememberMe{num}'
-		value = secrets.token_hex(32)
+		import helpers.utils
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

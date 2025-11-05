@@ -20,50 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00843', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00843', methods=['GET'])
 	def BenchmarkTest00843_get():
 		return BenchmarkTest00843_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00843', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00843', methods=['POST'])
 	def BenchmarkTest00843_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00843")
-		param = ""
-		if values:
-			param = values[0]
-
-		possible = "ABC"
-		guess = possible[0]
+		import helpers.separate_request
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00843")
+		if not param:
+			param = ""
 
-		import random
-		import base64
-		from helpers.utils import mysession
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		num = 'BenchmarkTest00843'[13:]
-		user = f'SafeBarbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
+		import helpers.utils
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

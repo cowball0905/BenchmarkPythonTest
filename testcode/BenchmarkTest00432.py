@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00432', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00432', methods=['GET'])
 	def BenchmarkTest00432_get():
 		return BenchmarkTest00432_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00432', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00432', methods=['POST'])
 	def BenchmarkTest00432_post():
 		RESPONSE = ""
 
@@ -34,40 +34,36 @@ def init(app):
 				param = name
 				break
 
-		import configparser
-		
-		bar = 'safe!'
-		conf76211 = configparser.ConfigParser()
-		conf76211.add_section('section76211')
-		conf76211.set('section76211', 'keyA-76211', 'a-Value')
-		conf76211.set('section76211', 'keyB-76211', param)
-		bar = conf76211.get('section76211', 'keyB-76211')
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import hashlib, base64
-		import io, helpers.utils
+		import helpers.ldap
+		import ldap3
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
+		try:
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
 
-		if len(input) == 0:
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				"Error processing LDAP query."
 			)
-			return RESPONSE
-
-		hash = hashlib.new('sha384')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
 
 		return RESPONSE
 

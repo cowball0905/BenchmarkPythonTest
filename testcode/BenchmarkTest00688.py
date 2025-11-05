@@ -20,40 +20,50 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00688', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00688', methods=['GET'])
 	def BenchmarkTest00688_get():
 		return BenchmarkTest00688_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00688', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00688', methods=['POST'])
 	def BenchmarkTest00688_post():
 		RESPONSE = ""
 
+		param = request.args.get("BenchmarkTest00688")
+		if not param:
+			param = ""
+
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
+
+		import lxml.etree
 		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
 
-		import re
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		regex = re.compile(r'a*bcde[e-z]+')
-
-		if regex.match(bar) is not None:
 			RESPONSE += (
-				'String matches!'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-		else:
+		except:
 			RESPONSE += (
-				'String does not match.'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

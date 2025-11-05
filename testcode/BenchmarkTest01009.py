@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest01009', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01009', methods=['GET'])
 	def BenchmarkTest01009_get():
 		return BenchmarkTest01009_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest01009', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01009', methods=['POST'])
 	def BenchmarkTest01009_post():
 		RESPONSE = ""
 
@@ -41,35 +41,25 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		string37461 = 'help'
+		string37461 = ''
+		data12 = ''
+		copy = string37461
+		string37461 = ''
 		string37461 += param
-		string37461 += 'snapes on a plane'
-		bar = string37461[4:-17]
+		copy += 'SomeOKString'
+		bar = copy
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		import yaml
 
 		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
-
-			doc = xml.dom.minidom.parseString(bar, parser)
-
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
+			yobj = yaml.load(bar, Loader=yaml.Loader)
 
 			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
+				yobj['text']
 			)
 		except:
 			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

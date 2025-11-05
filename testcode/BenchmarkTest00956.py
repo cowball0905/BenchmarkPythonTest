@@ -20,41 +20,57 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00956', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00956', methods=['GET'])
 	def BenchmarkTest00956_get():
 		return BenchmarkTest00956_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00956', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00956', methods=['POST'])
 	def BenchmarkTest00956_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00956")
-		if not param:
-			param = ""
-
-		import configparser
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00956" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00956"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00956") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = 'safe!'
-		conf98918 = configparser.ConfigParser()
-		conf98918.add_section('section98918')
-		conf98918.set('section98918', 'keyA-98918', 'a_Value')
-		conf98918.set('section98918', 'keyB-98918', param)
-		bar = conf98918.get('section98918', 'keyA-98918')
+		param = urllib.parse.unquote_plus(param)
 
-		import re
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		regex = re.compile(r'a*bcde[e-z]+')
+		import random
+		from helpers.utils import mysession
 
-		if regex.match(bar) is not None:
+		num = 'BenchmarkTest00956'[13:]
+		user = f'Randy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.getrandbits(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'String matches!'
+				f'Welcome back: {user}<br/>'
 			)
 		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				'String does not match.'
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

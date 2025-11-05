@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00270', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00270', methods=['GET'])
 	def BenchmarkTest00270_get():
 		return BenchmarkTest00270_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00270', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00270', methods=['POST'])
 	def BenchmarkTest00270_post():
 		RESPONSE = ""
 
@@ -33,18 +33,36 @@ def init(app):
 		if values:
 			param = values[0]
 
-		string53101 = 'help'
-		string53101 += param
-		string53101 += 'snapes on a plane'
-		bar = string53101[4:-17]
-
-
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00270': bar}))
+		possible = "ABC"
+		guess = possible[0]
 		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
+
+		import os
+		import subprocess
+		import helpers.utils
+
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
+		else:
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {bar}")
+
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
+		RESPONSE += (
+			helpers.utils.commandOutput(proc)
+		)
 
 		return RESPONSE
 

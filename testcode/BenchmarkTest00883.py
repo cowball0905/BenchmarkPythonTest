@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00883', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00883', methods=['GET'])
 	def BenchmarkTest00883_get():
 		return BenchmarkTest00883_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00883', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00883', methods=['POST'])
 	def BenchmarkTest00883_post():
 		RESPONSE = ""
 
@@ -35,38 +35,36 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
+		import helpers.ThingFactory
 		
-		bar = 'safe!'
-		conf40506 = configparser.ConfigParser()
-		conf40506.add_section('section40506')
-		conf40506.set('section40506', 'keyA-40506', 'a-Value')
-		conf40506.set('section40506', 'keyB-40506', param)
-		bar = conf40506.get('section40506', 'keyB-40506')
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import helpers.utils
+		import hashlib, base64
+		import io, helpers.utils
 
-		fileName = None
-		fd = None
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
+		if len(input) == 0:
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				'Cannot generate hash: Input was empty.'
 			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+			return RESPONSE
+
+		hash = hashlib.new('sha384')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

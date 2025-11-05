@@ -20,39 +20,32 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00537', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00537', methods=['GET'])
 	def BenchmarkTest00537_get():
 		return BenchmarkTest00537_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00537', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00537', methods=['POST'])
 	def BenchmarkTest00537_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00537")
-		if not param:
-		    param = ""
-
-		import markupsafe
+		param = ""
+		headers = request.headers.getlist("Referer")
 		
-		bar = markupsafe.escape(param)
+		if headers:
+			param = headers[0]
 
-		import flask
-		import urllib.parse
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
-			RESPONSE += (
-				'Error parsing URL.'
-			)
-			return RESPONSE
 
-		return flask.redirect(bar)
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
+		RESPONSE += (
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+		)
 
 		return RESPONSE
 

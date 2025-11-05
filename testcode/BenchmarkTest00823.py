@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00823', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00823', methods=['GET'])
 	def BenchmarkTest00823_get():
 		return BenchmarkTest00823_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00823', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00823', methods=['POST'])
 	def BenchmarkTest00823_post():
 		RESPONSE = ""
 
@@ -33,34 +33,36 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = 'safe!'
-		conf33668 = configparser.ConfigParser()
-		conf33668.add_section('section33668')
-		conf33668.set('section33668', 'keyA-33668', 'a-Value')
-		conf33668.set('section33668', 'keyB-33668', param)
-		bar = conf33668.get('section33668', 'keyB-33668')
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
+		import flask
+		import urllib.parse
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				'Error parsing URL.'
 			)
+			return RESPONSE
 
+		return flask.redirect(bar)
 
 		return RESPONSE
 

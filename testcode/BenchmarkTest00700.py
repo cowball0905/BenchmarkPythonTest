@@ -20,49 +20,49 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00700', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00700', methods=['GET'])
 	def BenchmarkTest00700_get():
 		return BenchmarkTest00700_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00700', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00700', methods=['POST'])
 	def BenchmarkTest00700_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
+		param = request.args.get("BenchmarkTest00700")
+		if not param:
+			param = ""
+
+		possible = "ABC"
+		guess = possible[0]
 		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		import random
+		from helpers.utils import mysession
 
-		import pickle
-		import base64
-		import helpers.utils
+		num = 'BenchmarkTest00700'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
-
-		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'Unpickling failed!'
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

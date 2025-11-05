@@ -20,50 +20,30 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01198', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01198', methods=['GET'])
 	def BenchmarkTest01198_get():
 		return BenchmarkTest01198_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01198', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01198', methods=['POST'])
 	def BenchmarkTest01198_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01198")
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest01198" in request.form.getlist(name):
+				param = name
+				break
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
 
-		import lxml.etree
+		import os
 		import helpers.utils
 
-		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=$name]'
-			nodes = root.xpath(query, name=bar)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{param}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
+
 

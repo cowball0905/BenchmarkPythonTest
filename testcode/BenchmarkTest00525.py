@@ -20,46 +20,48 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00525', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00525', methods=['GET'])
 	def BenchmarkTest00525_get():
 		return BenchmarkTest00525_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00525', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00525', methods=['POST'])
 	def BenchmarkTest00525_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00525")
-		if not param:
-		    param = ""
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00525")
+		
+		if headers:
+			param = headers[0]
 
-		superstring = f'1026{param}abcd'
-		bar = superstring[len('1026'):len(superstring)-5]
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		import hashlib, base64
-		import io, helpers.utils
+		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-			return RESPONSE
-
-		hash = hashlib.sha512()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

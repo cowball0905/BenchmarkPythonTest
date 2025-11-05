@@ -20,42 +20,54 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00938', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00938', methods=['GET'])
 	def BenchmarkTest00938_get():
 		return BenchmarkTest00938_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00938', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00938', methods=['POST'])
 	def BenchmarkTest00938_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00938")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00938" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00938"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00938") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		import configparser
+		
+		bar = 'safe!'
+		conf39662 = configparser.ConfigParser()
+		conf39662.add_section('section39662')
+		conf39662.set('section39662', 'keyA-39662', 'a-Value')
+		conf39662.set('section39662', 'keyB-39662', param)
+		bar = conf39662.get('section39662', 'keyB-39662')
 
-		import random
-		from helpers.utils import mysession
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		num = 'BenchmarkTest00938'[13:]
-		user = f'SafeRandall{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().random())[2:]
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-		else:
-			mysession[cookie] = value
+		except:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

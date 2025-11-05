@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01175', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01175', methods=['GET'])
 	def BenchmarkTest01175_get():
 		return BenchmarkTest01175_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01175', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01175', methods=['POST'])
 	def BenchmarkTest01175_post():
 		RESPONSE = ""
 
@@ -32,38 +32,21 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01175")
 
-		possible = "ABC"
-		guess = possible[1]
+		import configparser
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
-
-		import helpers.utils
+		bar = 'safe!'
+		conf39213 = configparser.ConfigParser()
+		conf39213.add_section('section39213')
+		conf39213.set('section39213', 'keyA-39213', 'a-Value')
+		conf39213.set('section39213', 'keyB-39213', param)
+		bar = conf39213.get('section39213', 'keyB-39213')
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
+			exec(bar)
+		except:
 			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
+				f'Error executing statement \'{escape_for_html(bar)}\''
 			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

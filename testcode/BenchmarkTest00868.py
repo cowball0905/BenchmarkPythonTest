@@ -20,31 +20,43 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00868', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00868', methods=['GET'])
 	def BenchmarkTest00868_get():
 		return BenchmarkTest00868_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00868', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00868', methods=['POST'])
 	def BenchmarkTest00868_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00868")
-		param = ""
-		if values:
-			param = values[0]
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00868")
+		if not param:
+			param = ""
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		import markupsafe
+		
+		bar = markupsafe.escape(param)
 
-		import flask
+		import secrets
+		from helpers.utils import mysession
 
-		flask.session[bar] = '12345'
+		num = 'BenchmarkTest00868'[13:]
+		user = f'SafeRobbie{num}'
+		cookie = f'rememberMe{num}'
+		value = str(secrets.randbelow(2**32))
 
-		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
-		)
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

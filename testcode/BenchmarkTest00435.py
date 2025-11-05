@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00435', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00435', methods=['GET'])
 	def BenchmarkTest00435_get():
 		return BenchmarkTest00435_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00435', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00435', methods=['POST'])
 	def BenchmarkTest00435_post():
 		RESPONSE = ""
 
@@ -34,40 +34,27 @@ def init(app):
 				param = name
 				break
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import hashlib, base64
-		import io, helpers.utils
+		import os
+		import subprocess
+		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
+		else:
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {bar}")
 
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.md5()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			helpers.utils.commandOutput(proc)
 		)
-		f.close()
 
 		return RESPONSE
 

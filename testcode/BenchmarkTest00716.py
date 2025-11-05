@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00716', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00716', methods=['GET'])
 	def BenchmarkTest00716_get():
 		return BenchmarkTest00716_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00716', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00716', methods=['POST'])
 	def BenchmarkTest00716_post():
 		RESPONSE = ""
 
@@ -36,27 +36,33 @@ def init(app):
 		map31356['keyA-31356'] = 'a-Value'
 		map31356['keyB-31356'] = param
 		map31356['keyC'] = 'another-Value'
-		bar = "safe!"
 		bar = map31356['keyB-31356']
-		bar = map31356['keyA-31356']
 
-		import helpers.utils
+		import hashlib, base64
+		import io, helpers.utils
 
-		fileName = None
-		fd = None
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'rb') as fd:
-				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-				)
-		except IOError as e:
+		if len(input) == 0:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				'Cannot generate hash: Input was empty.'
 			)
+			return RESPONSE
+
+		hash = hashlib.new('sha1')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

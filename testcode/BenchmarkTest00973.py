@@ -20,38 +20,59 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00973', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00973', methods=['GET'])
 	def BenchmarkTest00973_get():
 		return BenchmarkTest00973_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00973', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00973', methods=['POST'])
 	def BenchmarkTest00973_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00973")
-		if not param:
-			param = ""
-
-		import configparser
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00973" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00973"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00973") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = 'safe!'
-		conf73289 = configparser.ConfigParser()
-		conf73289.add_section('section73289')
-		conf73289.set('section73289', 'keyA-73289', 'a-Value')
-		conf73289.set('section73289', 'keyB-73289', param)
-		bar = conf73289.get('section73289', 'keyB-73289')
+		param = urllib.parse.unquote_plus(param)
 
-		import flask
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		flask.session['userid'] = bar
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
-		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
-		)
+		num = 'BenchmarkTest00973'[13:]
+		user = f'SafeTheo{num}'
+		cookie = f'rememberMe{num}'
+		value = secrets.token_hex(32)
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01102', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01102', methods=['GET'])
 	def BenchmarkTest01102_get():
 		return BenchmarkTest01102_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01102', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01102', methods=['POST'])
 	def BenchmarkTest01102_post():
 		RESPONSE = ""
 
@@ -33,22 +33,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = param
-
-		import pathlib
-		import helpers.utils
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
 		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = testfiles / bar
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
+				eval(bar)
 			)
-		except OSError:
+		except:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

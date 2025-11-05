@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00349', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00349', methods=['GET'])
 	def BenchmarkTest00349_get():
 		return BenchmarkTest00349_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00349', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00349', methods=['POST'])
 	def BenchmarkTest00349_post():
 		RESPONSE = ""
 
@@ -35,40 +35,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf69172 = configparser.ConfigParser()
-		conf69172.add_section('section69172')
-		conf69172.set('section69172', 'keyA-69172', 'a_Value')
-		conf69172.set('section69172', 'keyB-69172', param)
-		bar = conf69172.get('section69172', 'keyA-69172')
+		bar = param
 
-		import hashlib, base64
-		import io, helpers.utils
-
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				"Exec argument must be a plain string literal."
 			)
 			return RESPONSE
 
-		hash = hashlib.sha1()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

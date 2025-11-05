@@ -20,42 +20,48 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01127', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest01127', methods=['GET'])
 	def BenchmarkTest01127_get():
 		return BenchmarkTest01127_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01127', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest01127', methods=['POST'])
 	def BenchmarkTest01127_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01127")
 
 		import helpers.ThingFactory
 		
 		thing = helpers.ThingFactory.createThing()
 		bar = thing.doSomething(param)
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		num = 'BenchmarkTest01127'[13:]
-		user = f'SafeTruman{num}'
-		cookie = f'rememberMe{num}'
-		value = secrets.token_urlsafe(32)
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
-		else:
-			mysession[cookie] = value
+		except:
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
 			)
 
 		return RESPONSE

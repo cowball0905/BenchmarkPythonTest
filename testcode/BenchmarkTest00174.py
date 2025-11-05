@@ -20,38 +20,41 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00174', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00174', methods=['GET'])
 	def BenchmarkTest00174_get():
 		return BenchmarkTest00174_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00174', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00174', methods=['POST'])
 	def BenchmarkTest00174_post():
 		RESPONSE = ""
 
-		param = request.form.get("BenchmarkTest00174")
-		if not param:
-			param = ""
+		values = request.form.getlist("BenchmarkTest00174")
+		param = ""
+		if values:
+			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf56895 = configparser.ConfigParser()
-		conf56895.add_section('section56895')
-		conf56895.set('section56895', 'keyA-56895', 'a_Value')
-		conf56895.set('section56895', 'keyB-56895', param)
-		bar = conf56895.get('section56895', 'keyA-56895')
+		string56895 = 'help'
+		string56895 += param
+		string56895 += 'snapes on a plane'
+		bar = string56895[4:-17]
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Exec argument must be a plain string literal."
-			)
-			return RESPONSE
+		import codecs
+		import helpers.utils
 
 		try:
-			exec(bar)
-		except:
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+			)
+
+			RESPONSE += (
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
 			)
 
 		return RESPONSE

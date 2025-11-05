@@ -28,30 +28,21 @@ def init(app):
 	def BenchmarkTest01200_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01200")
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest01200" in request.form.getlist(name):
+				param = name
+				break
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
 
 		import random
+		import base64
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest01200'[13:]
-		user = f'Randy{num}'
+		user = f'SafeBarbara{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.getrandbits(32))
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -65,4 +56,5 @@ def init(app):
 			)
 
 		return RESPONSE
+
 

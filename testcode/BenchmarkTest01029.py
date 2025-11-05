@@ -20,50 +20,27 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01029', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01029', methods=['GET'])
 	def BenchmarkTest01029_get():
 		return BenchmarkTest01029_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01029', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01029', methods=['POST'])
 	def BenchmarkTest01029_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01029" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01029"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01029") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		superstring = f'55141{param}abcd'
+		bar = superstring[len('55141'):len(superstring)-5]
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest01029'[13:]
-		user = f'SafeTheo{num}'
-		cookie = f'rememberMe{num}'
-		value = secrets.token_hex(32)
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+		)
 
 		return RESPONSE
 

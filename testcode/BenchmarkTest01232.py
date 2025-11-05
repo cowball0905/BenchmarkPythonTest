@@ -20,38 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01232', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest01232', methods=['GET'])
 	def BenchmarkTest01232_get():
 		return BenchmarkTest01232_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01232', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest01232', methods=['POST'])
 	def BenchmarkTest01232_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01232")
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		map58046 = {}
-		map58046['keyA-58046'] = 'a-Value'
-		map58046['keyB-58046'] = param
-		map58046['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map58046['keyB-58046']
-		bar = map58046['keyA-58046']
 
-		import re
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		regex = re.compile(r'a*bcde[e-z]+')
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
 
-		if regex.match(bar) is not None:
+			doc = xml.dom.minidom.parseString(param, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
 			RESPONSE += (
-				'String matches!'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
-		else:
+		except:
 			RESPONSE += (
-				'String does not match.'
+				f'There was an error reading your XML doc:<br>{escape_for_html(param)}'
 			)
 
 		return RESPONSE
+
 

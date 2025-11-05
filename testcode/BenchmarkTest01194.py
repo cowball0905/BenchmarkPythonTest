@@ -20,50 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest01194', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01194', methods=['GET'])
 	def BenchmarkTest01194_get():
 		return BenchmarkTest01194_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest01194', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01194', methods=['POST'])
 	def BenchmarkTest01194_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01194")
+		values = request.form.getlist("BenchmarkTest01194")
+		param = ""
+		if values:
+			param = values[0]
 
-		map61106 = {}
-		map61106['keyA-61106'] = 'a-Value'
-		map61106['keyB-61106'] = param
-		map61106['keyC'] = 'another-Value'
-		bar = map61106['keyB-61106']
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		import lxml.etree
+		import helpers.utils
 
 		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
-			parser.setFeature(xml.sax.handler.feature_external_ges, True)
-
-			doc = xml.dom.minidom.parseString(bar, parser)
-
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{param.replace('\'', '&apos;')}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
 			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
 		except:
 			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE
+
 

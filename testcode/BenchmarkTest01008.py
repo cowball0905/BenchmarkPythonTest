@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01008', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest01008', methods=['GET'])
 	def BenchmarkTest01008_get():
 		return BenchmarkTest01008_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01008', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest01008', methods=['POST'])
 	def BenchmarkTest01008_post():
 		RESPONSE = ""
 
@@ -41,34 +41,30 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		import configparser
+		num = 86
 		
-		bar = 'safe!'
-		conf92283 = configparser.ConfigParser()
-		conf92283.add_section('section92283')
-		conf92283.set('section92283', 'keyA-92283', 'a-Value')
-		conf92283.set('section92283', 'keyB-92283', param)
-		bar = conf92283.get('section92283', 'keyB-92283')
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import os
+		import subprocess
 		import helpers.utils
 
-		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
+		else:
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {bar}")
 
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
-
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
+		RESPONSE += (
+			helpers.utils.commandOutput(proc)
+		)
 
 		return RESPONSE
 

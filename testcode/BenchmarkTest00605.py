@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00605', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00605', methods=['GET'])
 	def BenchmarkTest00605_get():
 		return BenchmarkTest00605_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00605', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00605', methods=['POST'])
 	def BenchmarkTest00605_post():
 		RESPONSE = ""
 
@@ -34,30 +34,22 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import secrets
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00605'[13:]
-		user = f'SafeRicky{num}'
-		cookie = f'rememberMe{num}'
-		value = str(secrets.randbits(32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				eval(bar)
 			)
-		else:
-			mysession[cookie] = value
+		except:
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

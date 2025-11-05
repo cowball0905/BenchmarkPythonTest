@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00071', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00071', methods=['GET'])
 	def BenchmarkTest00071_get():
-		response = make_response(render_template('web/securecookie-00/BenchmarkTest00071.html'))
-		response.set_cookie('BenchmarkTest00071', 'whatever',
+		response = make_response(render_template('web/trustbound-00/BenchmarkTest00071.html'))
+		response.set_cookie('BenchmarkTest00071', 'my_user_id',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,7 +31,7 @@ def init(app):
 		return response
 		return BenchmarkTest00071_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00071', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00071', methods=['POST'])
 	def BenchmarkTest00071_post():
 		RESPONSE = ""
 
@@ -41,28 +41,14 @@ def init(app):
 		import helpers.utils
 		bar = helpers.utils.escape_for_html(param)
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		import flask
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
+		flask.session['userid'] = bar
 
 		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
 		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=False,
-			httponly=True)
 
 		return RESPONSE
 

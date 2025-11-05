@@ -20,39 +20,58 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00648', methods=['GET'])
+	@app.route('/benchmark/hash-00/BenchmarkTest00648', methods=['GET'])
 	def BenchmarkTest00648_get():
 		return BenchmarkTest00648_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00648', methods=['POST'])
+	@app.route('/benchmark/hash-00/BenchmarkTest00648', methods=['POST'])
 	def BenchmarkTest00648_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00648")
 		
-		if headers:
-			param = headers[0]
-
-		num = 86
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		import yaml
+		map77996 = {}
+		map77996['keyA-77996'] = 'a-Value'
+		map77996['keyB-77996'] = param
+		map77996['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map77996['keyB-77996']
+		bar = map77996['keyA-77996']
 
-		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
+		import hashlib, base64
+		import io, helpers.utils
 
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		if len(input) == 0:
 			RESPONSE += (
-				yobj['text']
+				'Cannot generate hash: Input was empty.'
 			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+			return RESPONSE
+
+		hash = hashlib.new('sha384')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

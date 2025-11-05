@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00608', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00608', methods=['GET'])
 	def BenchmarkTest00608_get():
 		return BenchmarkTest00608_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00608', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00608', methods=['POST'])
 	def BenchmarkTest00608_post():
 		RESPONSE = ""
 
@@ -34,32 +34,40 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		map11370 = {}
-		map11370['keyA-11370'] = 'a-Value'
-		map11370['keyB-11370'] = param
-		map11370['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map11370['keyB-11370']
-		bar = map11370['keyA-11370']
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
+		import helpers.ldap
+		import ldap3
 
-		num = 'BenchmarkTest00608'[13:]
-		user = f'SafeTruman{num}'
-		cookie = f'rememberMe{num}'
-		value = secrets.token_urlsafe(32)
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
+		try:
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				"Error processing LDAP query."
 			)
 
 		return RESPONSE

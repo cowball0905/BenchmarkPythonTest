@@ -20,40 +20,34 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00752', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00752', methods=['GET'])
 	def BenchmarkTest00752_get():
 		return BenchmarkTest00752_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00752', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00752', methods=['POST'])
 	def BenchmarkTest00752_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00752")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00752")
+		param = ""
+		if values:
+			param = values[0]
 
-		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
-
-		import random
-		import base64
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00752'[13:]
-		user = f'SafeBarbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
 		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			bar = param
+
+		import os
+		import helpers.utils
+
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
 

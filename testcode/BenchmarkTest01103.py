@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01103', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01103', methods=['GET'])
 	def BenchmarkTest01103_get():
 		return BenchmarkTest01103_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01103', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01103', methods=['POST'])
 	def BenchmarkTest01103_post():
 		RESPONSE = ""
 
@@ -33,29 +33,24 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = param
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import pathlib
-		import helpers.utils
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Eval argument must be a plain string literal."
+			)
+			return RESPONSE		
 
 		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / bar).resolve()
-
-			if not str(p).startswith(str(testfiles)):
-				RESPONSE += (
-					"Invalid Path."
-				)
-				return RESPONSE
-
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
+				eval(bar)
 			)
-		except OSError:
+		except:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

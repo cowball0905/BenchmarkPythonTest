@@ -20,50 +20,56 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00943', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00943', methods=['GET'])
 	def BenchmarkTest00943_get():
 		return BenchmarkTest00943_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00943', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00943', methods=['POST'])
 	def BenchmarkTest00943_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00943")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00943" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00943"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00943") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import hashlib, base64
-		import io, helpers.utils
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
+		if '\'' in bar:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				"Employee ID must not contain apostrophes"
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha1')
-		hash.update(input)
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

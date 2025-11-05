@@ -20,45 +20,33 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00759', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00759', methods=['GET'])
 	def BenchmarkTest00759_get():
 		return BenchmarkTest00759_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00759', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00759', methods=['POST'])
 	def BenchmarkTest00759_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00759")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00759")
+		param = ""
+		if values:
+			param = values[0]
 
-		bar = param
+		import configparser
+		
+		bar = 'safe!'
+		conf89087 = configparser.ConfigParser()
+		conf89087.add_section('section89087')
+		conf89087.set('section89087', 'keyA-89087', 'a_Value')
+		conf89087.set('section89087', 'keyB-89087', param)
+		bar = conf89087.get('section89087', 'keyA-89087')
 
-		import hashlib, base64
-		import io, helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.sha1()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
+		otherarg = "static text"
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
 		)
-		f.close()
 
 		return RESPONSE
 

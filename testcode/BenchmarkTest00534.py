@@ -20,25 +20,36 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00534', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00534', methods=['GET'])
 	def BenchmarkTest00534_get():
 		return BenchmarkTest00534_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00534', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00534', methods=['POST'])
 	def BenchmarkTest00534_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00534")
-		if not param:
-		    param = ""
-
-		num = 106
+		param = ""
+		headers = request.headers.getlist("Referer")
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		if headers:
+			param = headers[0]
 
-		import flask
+		import configparser
+		
+		bar = 'safe!'
+		conf58886 = configparser.ConfigParser()
+		conf58886.add_section('section58886')
+		conf58886.set('section58886', 'keyA-58886', 'a-Value')
+		conf58886.set('section58886', 'keyB-58886', param)
+		bar = conf58886.get('section58886', 'keyB-58886')
 
-		return flask.redirect(bar)
+
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
+		RESPONSE += (
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+		)
 
 		return RESPONSE
 

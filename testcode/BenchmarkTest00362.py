@@ -20,23 +20,22 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00362', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00362', methods=['GET'])
 	def BenchmarkTest00362_get():
 		return BenchmarkTest00362_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00362', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00362', methods=['POST'])
 	def BenchmarkTest00362_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00362")
-		if not param:
-			param = ""
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00362" in request.form.getlist(name):
+				param = name
+				break
 
 		possible = "ABC"
-		guess = possible[1]
+		guess = possible[0]
 		
 		match guess:
 			case 'A':
@@ -48,19 +47,27 @@ def init(app):
 			case _:
 				bar = 'bob\'s your uncle'
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
+		import pathlib
+		import helpers.utils
 
 		try:
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = (testfiles / bar).resolve()
+
+			if not str(p).startswith(str(testfiles)):
+				RESPONSE += (
+					"Invalid Path."
+				)
+				return RESPONSE
+
 			RESPONSE += (
-				eval(bar)
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-		except:
+		except OSError:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

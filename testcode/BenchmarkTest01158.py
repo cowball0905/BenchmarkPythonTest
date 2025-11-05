@@ -20,32 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01158', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01158', methods=['GET'])
 	def BenchmarkTest01158_get():
 		return BenchmarkTest01158_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01158', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01158', methods=['POST'])
 	def BenchmarkTest01158_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01158")
 
-		string86576 = 'help'
-		string86576 += param
-		string86576 += 'snapes on a plane'
-		bar = string86576[4:-17]
+		import configparser
+		
+		bar = 'safe!'
+		conf86576 = configparser.ConfigParser()
+		conf86576.add_section('section86576')
+		conf86576.set('section86576', 'keyA-86576', 'a-Value')
+		conf86576.set('section86576', 'keyB-86576', param)
+		bar = conf86576.get('section86576', 'keyB-86576')
 
-		try:
+		import hashlib, base64
+		import io, helpers.utils
+
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		if len(input) == 0:
 			RESPONSE += (
-				eval(bar)
+				'Cannot generate hash: Input was empty.'
 			)
-		except:
-			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
-			)
+			return RESPONSE
+
+		hash = hashlib.md5()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

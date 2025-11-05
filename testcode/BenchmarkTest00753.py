@@ -20,45 +20,41 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00753', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00753', methods=['GET'])
 	def BenchmarkTest00753_get():
 		return BenchmarkTest00753_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00753', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00753', methods=['POST'])
 	def BenchmarkTest00753_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00753")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00753")
+		param = ""
+		if values:
+			param = values[0]
 
-		import configparser
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = 'safe!'
-		conf72616 = configparser.ConfigParser()
-		conf72616.add_section('section72616')
-		conf72616.set('section72616', 'keyA-72616', 'a-Value')
-		conf72616.set('section72616', 'keyB-72616', param)
-		bar = conf72616.get('section72616', 'keyB-72616')
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import random
-		from helpers.utils import mysession
+		import pathlib
+		import helpers.utils
 
-		num = 'BenchmarkTest00753'[13:]
-		user = f'SafeIsaac{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().randint(0, 2**32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

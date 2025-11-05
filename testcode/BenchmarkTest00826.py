@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00826', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00826', methods=['GET'])
 	def BenchmarkTest00826_get():
 		return BenchmarkTest00826_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00826', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00826', methods=['POST'])
 	def BenchmarkTest00826_post():
 		RESPONSE = ""
 
@@ -33,33 +33,18 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = param
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		import flask
 
-		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
+		flask.session['userid'] = bar
 
-			doc = xml.dom.minidom.parseString(bar, parser)
-
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
-
-			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
-			)
-		except:
-			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
-			)
+		RESPONSE += (
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
+		)
 
 		return RESPONSE
 

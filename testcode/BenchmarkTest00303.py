@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00303', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00303', methods=['GET'])
 	def BenchmarkTest00303_get():
 		return BenchmarkTest00303_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00303', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00303', methods=['POST'])
 	def BenchmarkTest00303_post():
 		RESPONSE = ""
 
@@ -35,23 +35,33 @@ def init(app):
 		if not param:
 			param = ""
 
-		string85622 = 'help'
-		string85622 += param
-		string85622 += 'snapes on a plane'
-		bar = string85622[4:-17]
+		import configparser
+		
+		bar = 'safe!'
+		conf85622 = configparser.ConfigParser()
+		conf85622.add_section('section85622')
+		conf85622.set('section85622', 'keyA-85622', 'a-Value')
+		conf85622.set('section85622', 'keyB-85622', param)
+		bar = conf85622.get('section85622', 'keyB-85622')
 
+		import lxml.etree
 		import helpers.utils
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'wb') as fd:
-				RESPONSE += (
-					f'Now ready to write to file: {escape_for_html(fileName)}'
-				)
-		except IOError as e:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

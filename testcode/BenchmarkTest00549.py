@@ -20,50 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00549', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00549', methods=['GET'])
 	def BenchmarkTest00549_get():
 		return BenchmarkTest00549_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00549', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00549', methods=['POST'])
 	def BenchmarkTest00549_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00549")
-		if not param:
-		    param = ""
-
-		num = 86
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00549")
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		if headers:
+			param = headers[0]
 
-		import helpers.ldap
-		import ldap3
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
+		import lxml.etree
+		import helpers.utils
+
 		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
 			RESPONSE += (
-				"Error processing LDAP query."
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

@@ -32,22 +32,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		map49459 = {}
-		map49459['keyA-49459'] = 'a-Value'
-		map49459['keyB-49459'] = param
-		map49459['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map49459['keyB-49459']
-		bar = map49459['keyA-49459']
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

@@ -20,39 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00526', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00526', methods=['GET'])
 	def BenchmarkTest00526_get():
 		return BenchmarkTest00526_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00526', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00526', methods=['POST'])
 	def BenchmarkTest00526_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00526")
-		if not param:
-		    param = ""
-
-		import configparser
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00526")
 		
-		bar = 'safe!'
-		conf95384 = configparser.ConfigParser()
-		conf95384.add_section('section95384')
-		conf95384.set('section95384', 'keyA-95384', 'a-Value')
-		conf95384.set('section95384', 'keyB-95384', param)
-		bar = conf95384.get('section95384', 'keyB-95384')
+		if headers:
+			param = headers[0]
 
-		import re
+		string95384 = 'help'
+		string95384 += param
+		string95384 += 'snapes on a plane'
+		bar = string95384[4:-17]
 
-		regex = re.compile(r'^(([a-z])+.)+')
+		import helpers.utils
 
-		if regex.match(bar) is not None:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				'String matches!'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-		else:
+		except IOError as e:
 			RESPONSE += (
-				'String does not match.'
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

@@ -20,40 +20,53 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00751', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00751', methods=['GET'])
 	def BenchmarkTest00751_get():
 		return BenchmarkTest00751_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00751', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00751', methods=['POST'])
 	def BenchmarkTest00751_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00751")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00751")
+		param = ""
+		if values:
+			param = values[0]
 
-		import html
+		import configparser
 		
-		bar = html.escape(param)
+		bar = 'safe!'
+		conf49714 = configparser.ConfigParser()
+		conf49714.add_section('section49714')
+		conf49714.set('section49714', 'keyA-49714', 'a-Value')
+		conf49714.set('section49714', 'keyB-49714', param)
+		bar = conf49714.get('section49714', 'keyB-49714')
 
-		import random
-		from helpers.utils import mysession
+		import helpers.utils
 
-		num = 'BenchmarkTest00751'[13:]
-		user = f'SafeNancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		if '../' in bar:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				'File name must not contain \'../\''
 			)
-		else:
-			mysession[cookie] = value
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01106', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01106', methods=['GET'])
 	def BenchmarkTest01106_get():
 		return BenchmarkTest01106_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01106', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01106', methods=['POST'])
 	def BenchmarkTest01106_post():
 		RESPONSE = ""
 
@@ -33,14 +33,31 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
+		import configparser
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = 'safe!'
+		conf86865 = configparser.ConfigParser()
+		conf86865.add_section('section86865')
+		conf86865.set('section86865', 'keyA-86865', 'a-Value')
+		conf86865.set('section86865', 'keyB-86865', param)
+		bar = conf86865.get('section86865', 'keyB-86865')
 
+		import pickle
+		import base64
+		import helpers.utils
 
-		otherarg = "static text"
+		helpers.utils.sharedstr = "no pickles to be seen here"
+
+		try:
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
+		except:
+			RESPONSE += (
+				'Unpickling failed!'
+			)
+			return RESPONSE
+
 		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+			f'shared string is {helpers.utils.sharedstr}'
 		)
 
 		return RESPONSE

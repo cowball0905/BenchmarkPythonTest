@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00388', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00388', methods=['GET'])
 	def BenchmarkTest00388_get():
 		return BenchmarkTest00388_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00388', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00388', methods=['POST'])
 	def BenchmarkTest00388_post():
 		RESPONSE = ""
 
@@ -34,22 +34,33 @@ def init(app):
 				param = name
 				break
 
-		import configparser
-		
-		bar = 'safe!'
-		conf67409 = configparser.ConfigParser()
-		conf67409.add_section('section67409')
-		conf67409.set('section67409', 'keyA-67409', 'a-Value')
-		conf67409.set('section67409', 'keyB-67409', param)
-		bar = conf67409.get('section67409', 'keyB-67409')
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
+		import random
+		from helpers.utils import mysession
 
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
-		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
-		)
+		num = 'BenchmarkTest00388'[13:]
+		user = f'Isaac{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.randint(0, 2**32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

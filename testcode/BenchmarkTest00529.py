@@ -20,39 +20,36 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00529', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00529', methods=['GET'])
 	def BenchmarkTest00529_get():
 		return BenchmarkTest00529_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00529', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00529', methods=['POST'])
 	def BenchmarkTest00529_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00529")
-		if not param:
-		    param = ""
-
-		import configparser
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00529")
 		
-		bar = 'safe!'
-		conf5707 = configparser.ConfigParser()
-		conf5707.add_section('section5707')
-		conf5707.set('section5707', 'keyA-5707', 'a_Value')
-		conf5707.set('section5707', 'keyB-5707', param)
-		bar = conf5707.get('section5707', 'keyA-5707')
+		if headers:
+			param = headers[0]
 
-		import re
+		map5707 = {}
+		map5707['keyA-5707'] = 'a-Value'
+		map5707['keyB-5707'] = param
+		map5707['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map5707['keyB-5707']
+		bar = map5707['keyA-5707']
 
-		regex = re.compile(r'a*bcde[e-z]+')
+		import os
+		import helpers.utils
 
-		if regex.match(bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
 		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
 

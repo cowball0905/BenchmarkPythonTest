@@ -20,43 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01213', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01213', methods=['GET'])
 	def BenchmarkTest01213_get():
 		return BenchmarkTest01213_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01213', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01213', methods=['POST'])
 	def BenchmarkTest01213_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01213")
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest01213")
+		
+		if headers:
+			param = headers[0]
 
-		map68177 = {}
-		map68177['keyA-68177'] = 'a-Value'
-		map68177['keyB-68177'] = param
-		map68177['keyC'] = 'another-Value'
-		bar = map68177['keyB-68177']
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
+		import hashlib, base64
+		import io, helpers.utils
 
-		num = 'BenchmarkTest01213'[13:]
-		user = f'SafeTheo{num}'
-		cookie = f'rememberMe{num}'
-		value = secrets.token_hex(32)
+		input = ''
+		if isinstance(param, str):
+			input = param.encode('utf-8')
+		elif isinstance(param, io.IOBase):
+			input = param.read(1000)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		if len(input) == 0:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				'Cannot generate hash: Input was empty.'
 			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			return RESPONSE
+
+		hash = hashlib.sha1()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
+
 

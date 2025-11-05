@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest01112', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01112', methods=['GET'])
 	def BenchmarkTest01112_get():
 		return BenchmarkTest01112_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest01112', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01112', methods=['POST'])
 	def BenchmarkTest01112_post():
 		RESPONSE = ""
 
@@ -33,20 +33,23 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		string1434 = 'help'
+		string1434 += param
+		string1434 += 'snapes on a plane'
+		bar = string1434[4:-17]
 
-		import helpers.db_sqlite
+		import yaml
 
-		sql = f'SELECT username from USERS where password = ?'
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql, (bar,))
-		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
-		)
-		con.close()
+		try:
+			yobj = yaml.safe_load(bar)
+
+			RESPONSE += (
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
+			)
 
 		return RESPONSE
 

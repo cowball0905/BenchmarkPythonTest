@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00584', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00584', methods=['GET'])
 	def BenchmarkTest00584_get():
 		return BenchmarkTest00584_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00584', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00584', methods=['POST'])
 	def BenchmarkTest00584_post():
 		RESPONSE = ""
 
@@ -34,21 +34,29 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		string83588 = 'help'
-		string83588 += param
-		string83588 += 'snapes on a plane'
-		bar = string83588[4:-17]
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import helpers.db_sqlite
+		import random
+		from helpers.utils import mysession
 
-		sql = f'SELECT username from USERS where password = ?'
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql, (bar,))
-		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
-		)
-		con.close()
+		num = 'BenchmarkTest00584'[13:]
+		user = f'SafeRandall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

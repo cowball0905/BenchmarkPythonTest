@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00162', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00162', methods=['GET'])
 	def BenchmarkTest00162_get():
 		return BenchmarkTest00162_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00162', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00162', methods=['POST'])
 	def BenchmarkTest00162_post():
 		RESPONSE = ""
 
@@ -32,22 +32,16 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00162': bar}))
-		
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

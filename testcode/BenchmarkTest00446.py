@@ -20,39 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00446', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00446', methods=['GET'])
 	def BenchmarkTest00446_get():
 		return BenchmarkTest00446_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00446', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00446', methods=['POST'])
 	def BenchmarkTest00446_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00446" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("BenchmarkTest00446")
+		if not param:
+		    param = ""
 
-		num = 86
+		num = 106
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import re
+		import helpers.utils
 
-		regex = r'(abc)*(bcd)+'
+		fileName = None
+		fd = None
 
-		if re.match(regex, bar) is not None:
+		if '../' in bar:
 			RESPONSE += (
-				'String matches!'
+				'File name must not include \'../\''
 			)
-		else:
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				'String does not match.'
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

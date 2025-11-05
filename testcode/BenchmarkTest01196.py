@@ -20,46 +20,35 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01196', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01196', methods=['GET'])
 	def BenchmarkTest01196_get():
 		return BenchmarkTest01196_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01196', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01196', methods=['POST'])
 	def BenchmarkTest01196_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01196")
+		values = request.form.getlist("BenchmarkTest01196")
+		param = ""
+		if values:
+			param = values[0]
 
-		map5595 = {}
-		map5595['keyA-5595'] = 'a-Value'
-		map5595['keyB-5595'] = param
-		map5595['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map5595['keyB-5595']
-		bar = map5595['keyA-5595']
 
-		import lxml.etree
-		import helpers.utils
+		if not param.startswith('\'') or not param.endswith('\'') or '\'' in param[1:-1]:
+			RESPONSE += (
+				"Eval argument must be a plain string literal."
+			)
+			return RESPONSE		
 
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
-
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				eval(param)
 			)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'Error evaluating expression \'{escape_for_html(param)}\''
 			)
 
 		return RESPONSE
+
 

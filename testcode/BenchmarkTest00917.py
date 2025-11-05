@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00917', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00917', methods=['GET'])
 	def BenchmarkTest00917_get():
 		return BenchmarkTest00917_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00917', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00917', methods=['POST'])
 	def BenchmarkTest00917_post():
 		RESPONSE = ""
 
@@ -35,32 +35,26 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 86
+		import configparser
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = 'safe!'
+		conf10263 = configparser.ConfigParser()
+		conf10263.add_section('section10263')
+		conf10263.set('section10263', 'keyA-10263', 'a_Value')
+		conf10263.set('section10263', 'keyB-10263', param)
+		bar = conf10263.get('section10263', 'keyA-10263')
 
-		import lxml.etree
-		import helpers.utils
+		import yaml
 
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
-
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			yobj = yaml.load(bar, Loader=yaml.Loader)
 
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				yobj['text']
 			)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

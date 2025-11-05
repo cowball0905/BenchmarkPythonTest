@@ -20,44 +20,48 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00770', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00770', methods=['GET'])
 	def BenchmarkTest00770_get():
 		return BenchmarkTest00770_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00770', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00770', methods=['POST'])
 	def BenchmarkTest00770_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00770")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00770")
+		param = ""
+		if values:
+			param = values[0]
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		from flask import make_response
-		import io
+		import lxml.etree
 		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=False,
-			httponly=True)
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

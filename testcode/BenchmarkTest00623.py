@@ -20,47 +20,54 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00623', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00623', methods=['GET'])
 	def BenchmarkTest00623_get():
 		return BenchmarkTest00623_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00623', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00623', methods=['POST'])
 	def BenchmarkTest00623_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00623")
 		
-		if headers:
-			param = headers[0]
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
+		
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		bar = param + '_SafeStuff'
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import hashlib, base64
-		import io, helpers.utils
+		import pathlib
+		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = (testfiles / bar).resolve()
 
-		if len(input) == 0:
+		if not str(p).startswith(str(testfiles)):
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				"Invalid Path."
 			)
 			return RESPONSE
-
-		hash = hashlib.sha1()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

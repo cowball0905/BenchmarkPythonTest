@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00311', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00311', methods=['GET'])
 	def BenchmarkTest00311_get():
 		return BenchmarkTest00311_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00311', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00311', methods=['POST'])
 	def BenchmarkTest00311_post():
 		RESPONSE = ""
 
@@ -35,40 +35,28 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf45571 = configparser.ConfigParser()
-		conf45571.add_section('section45571')
-		conf45571.set('section45571', 'keyA-45571', 'a-Value')
-		conf45571.set('section45571', 'keyB-45571', param)
-		bar = conf45571.get('section45571', 'keyB-45571')
+		string45571 = 'help'
+		string45571 += param
+		string45571 += 'snapes on a plane'
+		bar = string45571[4:-17]
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		import secrets
+		from helpers.utils import mysession
 
-		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
-			parser.setFeature(xml.sax.handler.feature_external_ges, True)
+		num = 'BenchmarkTest00311'[13:]
+		user = f'SafeRobbie{num}'
+		cookie = f'rememberMe{num}'
+		value = str(secrets.randbelow(2**32))
 
-			doc = xml.dom.minidom.parseString(bar, parser)
-
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
-
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

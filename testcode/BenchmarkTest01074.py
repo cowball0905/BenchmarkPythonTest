@@ -20,39 +20,50 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest01074', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01074', methods=['GET'])
 	def BenchmarkTest01074_get():
 		return BenchmarkTest01074_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest01074', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01074', methods=['POST'])
 	def BenchmarkTest01074_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01074" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01074"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01074") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		import configparser
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = 'safe!'
-		conf97834 = configparser.ConfigParser()
-		conf97834.add_section('section97834')
-		conf97834.set('section97834', 'keyA-97834', 'a-Value')
-		conf97834.set('section97834', 'keyB-97834', param)
-		bar = conf97834.get('section97834', 'keyB-97834')
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import flask
+		import random
+		from helpers.utils import mysession
 
-		return flask.redirect(bar)
+		num = 'BenchmarkTest01074'[13:]
+		user = f'SafeRandy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().getrandbits(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

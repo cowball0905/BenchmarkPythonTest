@@ -28,22 +28,16 @@ def init(app):
 	def BenchmarkTest01201_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01201")
+		param = request.stream
 
-		import html
-		
-		bar = html.escape(param)
 
 		import random
-		import base64
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest01201'[13:]
-		user = f'Barbara{num}'
+		user = f'SafeNancy{num}'
 		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.randbytes(32)))
+		value = str(random.SystemRandom().normalvariate())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -57,4 +51,5 @@ def init(app):
 			)
 
 		return RESPONSE
+
 

@@ -20,37 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00961', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00961', methods=['GET'])
 	def BenchmarkTest00961_get():
 		return BenchmarkTest00961_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00961', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00961', methods=['POST'])
 	def BenchmarkTest00961_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00961")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00961" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00961"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00961") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		string51700 = 'help'
-		string51700 += param
-		string51700 += 'snapes on a plane'
-		bar = string51700[4:-17]
+		map51700 = {}
+		map51700['keyA-51700'] = 'a-Value'
+		map51700['keyB-51700'] = param
+		map51700['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map51700['keyB-51700']
+		bar = map51700['keyA-51700']
 
-		import re
+		import random
+		from helpers.utils import mysession
 
-		regex = r'(abc)*(bcd)+'
+		num = 'BenchmarkTest00961'[13:]
+		user = f'Isaac{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.randint(0, 2**32))
 
-		if re.match(regex, bar) is not None:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'String matches!'
+				f'Welcome back: {user}<br/>'
 			)
 		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				'String does not match.'
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

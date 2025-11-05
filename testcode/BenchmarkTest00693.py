@@ -20,50 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00693', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00693', methods=['GET'])
 	def BenchmarkTest00693_get():
 		return BenchmarkTest00693_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00693', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00693', methods=['POST'])
 	def BenchmarkTest00693_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		param = request.args.get("BenchmarkTest00693")
+		if not param:
+			param = ""
 
-		map86946 = {}
-		map86946['keyA-86946'] = 'a-Value'
-		map86946['keyB-86946'] = param
-		map86946['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map86946['keyB-86946']
-		bar = map86946['keyA-86946']
+		bar = "This should never happen"
+		if 'should' not in bar:
+		        bar = "Ifnot case passed"
 
-		import flask
-		import urllib.parse
+		import random
+		from helpers.utils import mysession
 
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
+		num = 'BenchmarkTest00693'[13:]
+		user = f'Nancy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.normalvariate())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'Error parsing URL.'
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		return flask.redirect(bar)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

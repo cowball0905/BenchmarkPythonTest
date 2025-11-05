@@ -20,28 +20,41 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest01152', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01152', methods=['GET'])
 	def BenchmarkTest01152_get():
 		return BenchmarkTest01152_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest01152', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01152', methods=['POST'])
 	def BenchmarkTest01152_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01152")
 
-		map40584 = {}
-		map40584['keyA-40584'] = 'a-Value'
-		map40584['keyB-40584'] = param
-		map40584['keyC'] = 'another-Value'
-		bar = map40584['keyB-40584']
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import flask
+		import random
+		from helpers.utils import mysession
 
-		return flask.redirect(bar)
+		num = 'BenchmarkTest01152'[13:]
+		user = f'SafeRandall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

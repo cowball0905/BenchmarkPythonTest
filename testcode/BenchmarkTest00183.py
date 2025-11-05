@@ -20,37 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00183', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00183', methods=['GET'])
 	def BenchmarkTest00183_get():
 		return BenchmarkTest00183_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00183', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00183', methods=['POST'])
 	def BenchmarkTest00183_post():
 		RESPONSE = ""
 
-		param = request.form.get("BenchmarkTest00183")
-		if not param:
-			param = ""
+		values = request.form.getlist("BenchmarkTest00183")
+		param = ""
+		if values:
+			param = values[0]
 
-		string40535 = ''
-		data12 = ''
-		copy = string40535
-		string40535 = ''
-		string40535 += param
-		copy += 'SomeOKString'
-		bar = copy
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import yaml
+		import pathlib
+		import helpers.utils
 
 		try:
-			yobj = yaml.safe_load(bar)
-
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = testfiles / bar
 			RESPONSE += (
-				yobj['text']
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-		except:
+		except OSError:
 			RESPONSE += (
-				"There was an error loading the configuration"
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

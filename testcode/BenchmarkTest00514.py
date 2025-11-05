@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00514', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00514', methods=['GET'])
 	def BenchmarkTest00514_get():
 		return BenchmarkTest00514_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00514', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00514', methods=['POST'])
 	def BenchmarkTest00514_post():
 		RESPONSE = ""
 
@@ -32,40 +32,26 @@ def init(app):
 		if not param:
 		    param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf4618 = configparser.ConfigParser()
-		conf4618.add_section('section4618')
-		conf4618.set('section4618', 'keyA-4618', 'a_Value')
-		conf4618.set('section4618', 'keyB-4618', param)
-		bar = conf4618.get('section4618', 'keyA-4618')
+		superstring = f'4618{param}abcd'
+		bar = superstring[len('4618'):len(superstring)-5]
 
-		import hashlib, base64
-		import io, helpers.utils
+		import pickle
+		import base64
+		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		helpers.utils.sharedstr = "no pickles to be seen here"
 
-		if len(input) == 0:
+		try:
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
+		except:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				'Unpickling failed!'
 			)
 			return RESPONSE
 
-		hash = hashlib.new('md5')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			f'shared string is {helpers.utils.sharedstr}'
 		)
-		f.close()
 
 		return RESPONSE
 

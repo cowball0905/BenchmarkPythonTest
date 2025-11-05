@@ -20,43 +20,62 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00921', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00921', methods=['GET'])
 	def BenchmarkTest00921_get():
 		return BenchmarkTest00921_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00921', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00921', methods=['POST'])
 	def BenchmarkTest00921_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00921")
-		if not param:
-			param = ""
-
-		num = 106
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00921" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00921"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00921") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		param = urllib.parse.unquote_plus(param)
 
-		import random
-		from helpers.utils import mysession
+		string33980 = 'help'
+		string33980 += param
+		string33980 += 'snapes on a plane'
+		bar = string33980[4:-17]
 
-		num = 'BenchmarkTest00921'[13:]
-		user = f'Randy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.getrandbits(32))
+		import platform
+		import codecs
+		import helpers.utils
+		from urllib.parse import urlparse
+		from urllib.request import url2pathname
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		startURIslashes = ""
+
+		if platform.system() == "Windows":
+			startURIslashes = "/"
 		else:
-			mysession[cookie] = value
+			startURIslashes = "//"
+
+		try:
+			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
+
+			RESPONSE += (
+				" And file already exists."
+			)
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
+			)
+		except IOError:
+			pass
 
 		return RESPONSE
 

@@ -20,38 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00689', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00689', methods=['GET'])
 	def BenchmarkTest00689_get():
 		return BenchmarkTest00689_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00689', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00689', methods=['POST'])
 	def BenchmarkTest00689_post():
 		RESPONSE = ""
 
+		param = request.args.get("BenchmarkTest00689")
+		if not param:
+			param = ""
+
+		import configparser
+		
+		bar = 'safe!'
+		conf23354 = configparser.ConfigParser()
+		conf23354.add_section('section23354')
+		conf23354.set('section23354', 'keyA-23354', 'a-Value')
+		conf23354.set('section23354', 'keyB-23354', param)
+		bar = conf23354.get('section23354', 'keyB-23354')
+
+		import lxml.etree
 		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
 
-		bar = param + '_SafeStuff'
+		try:
+			if '\'' in bar:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
 
-		import re
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		regex = r'(abc)*(bcd)+'
-
-		if re.match(regex, bar) is not None:
 			RESPONSE += (
-				'String matches!'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-		else:
+		except:
 			RESPONSE += (
-				'String does not match.'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

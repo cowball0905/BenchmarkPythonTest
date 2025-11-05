@@ -20,41 +20,38 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01202', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01202', methods=['GET'])
 	def BenchmarkTest01202_get():
 		return BenchmarkTest01202_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01202', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01202', methods=['POST'])
 	def BenchmarkTest01202_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01202")
+		param = request.headers.get("BenchmarkTest01202")
+		if not param:
+		    param = ""
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import random
-		import base64
-		from helpers.utils import mysession
+		import codecs
+		import helpers.utils
 
-		num = 'BenchmarkTest01202'[13:]
-		user = f'Barbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.randbytes(32)))
+		try:
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{param}','r','utf-8')
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
-		else:
-			mysession[cookie] = value
+
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
 			)
 
 		return RESPONSE
+
 

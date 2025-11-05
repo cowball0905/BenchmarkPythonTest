@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00739', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00739', methods=['GET'])
 	def BenchmarkTest00739_get():
 		return BenchmarkTest00739_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00739', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00739', methods=['POST'])
 	def BenchmarkTest00739_post():
 		RESPONSE = ""
 
@@ -32,28 +32,36 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import random
-		from helpers.utils import mysession
+		import os
+		import subprocess
+		import helpers.utils
 
-		num = 'BenchmarkTest00739'[13:]
-		user = f'Isaac{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.randint(0, 2**32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
 		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {bar}")
+
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
+		RESPONSE += (
+			helpers.utils.commandOutput(proc)
+		)
 
 		return RESPONSE
 

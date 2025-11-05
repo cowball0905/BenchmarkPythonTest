@@ -20,33 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00631', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00631', methods=['GET'])
 	def BenchmarkTest00631_get():
 		return BenchmarkTest00631_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00631', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00631', methods=['POST'])
 	def BenchmarkTest00631_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00631")
 		
-		if headers:
-			param = headers[0]
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
+		
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		bar = param + '_SafeStuff'
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import re
+		import random
+		import base64
+		from helpers.utils import mysession
 
-		regex = r'(abc)*(bcd)+'
+		num = 'BenchmarkTest00631'[13:]
+		user = f'Barbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.randbytes(32)))
 
-		if re.match(regex, bar) is not None:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'String matches!'
+				f'Welcome back: {user}<br/>'
 			)
 		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				'String does not match.'
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

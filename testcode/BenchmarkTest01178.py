@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01178', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01178', methods=['GET'])
 	def BenchmarkTest01178_get():
 		return BenchmarkTest01178_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01178', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01178', methods=['POST'])
 	def BenchmarkTest01178_post():
 		RESPONSE = ""
 
@@ -32,18 +32,23 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01178")
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		string45958 = 'help'
+		string45958 += param
+		string45958 += 'snapes on a plane'
+		bar = string45958[4:-17]
 
-		import os
-		import helpers.utils
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
 
-		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-		if os.path.exists(fileName):
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

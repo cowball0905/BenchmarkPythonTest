@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00658', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00658', methods=['GET'])
 	def BenchmarkTest00658_get():
 		return BenchmarkTest00658_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00658', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00658', methods=['POST'])
 	def BenchmarkTest00658_post():
 		RESPONSE = ""
 
@@ -39,30 +39,13 @@ def init(app):
 				param = name
 				break
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		import markupsafe
+		
+		bar = markupsafe.escape(param)
 
-		import pathlib
-		import helpers.utils
+		import flask
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = testfiles / bar
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		return flask.redirect(bar)
 
 		return RESPONSE
 

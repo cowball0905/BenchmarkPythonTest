@@ -35,14 +35,21 @@ def init(app):
 		if not param:
 			param = ""
 
-		string31208 = 'help'
-		string31208 += param
-		string31208 += 'snapes on a plane'
-		bar = string31208[4:-17]
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
 
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
 		RESPONSE += (
-			f'Parameter value: {bar}'
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
 		)
 
 		return RESPONSE

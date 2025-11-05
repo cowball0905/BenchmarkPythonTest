@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00428', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00428', methods=['GET'])
 	def BenchmarkTest00428_get():
 		return BenchmarkTest00428_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00428', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00428', methods=['POST'])
 	def BenchmarkTest00428_post():
 		RESPONSE = ""
 
@@ -34,31 +34,28 @@ def init(app):
 				param = name
 				break
 
-		string3150 = ''
-		data12 = ''
-		copy = string3150
-		string3150 = ''
-		string3150 += param
-		copy += 'SomeOKString'
-		bar = copy
+		import configparser
+		
+		bar = 'safe!'
+		conf3150 = configparser.ConfigParser()
+		conf3150.add_section('section3150')
+		conf3150.set('section3150', 'keyA-3150', 'a_Value')
+		conf3150.set('section3150', 'keyB-3150', param)
+		bar = conf3150.get('section3150', 'keyA-3150')
 
-		import random
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00428'[13:]
-		user = f'SafeRandall{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().random())[2:]
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				"Eval argument must be a plain string literal."
 			)
-		else:
-			mysession[cookie] = value
+			return RESPONSE		
+
+		try:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

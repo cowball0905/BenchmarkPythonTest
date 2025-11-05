@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01238', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01238', methods=['GET'])
 	def BenchmarkTest01238_get():
 		return BenchmarkTest01238_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01238', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01238', methods=['POST'])
 	def BenchmarkTest01238_post():
 		RESPONSE = ""
 
@@ -32,22 +32,12 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01238")
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
 
-		import re
 
-		regex = r'(abc)*(bcd)+'
-
-		if re.match(regex, bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+		RESPONSE += (
+			f'Parameter value: {param}'
+		)
 
 		return RESPONSE
+
 

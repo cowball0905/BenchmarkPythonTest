@@ -20,53 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01090', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01090', methods=['GET'])
 	def BenchmarkTest01090_get():
 		return BenchmarkTest01090_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01090', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01090', methods=['POST'])
 	def BenchmarkTest01090_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01090" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01090"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01090") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf43161 = configparser.ConfigParser()
-		conf43161.add_section('section43161')
-		conf43161.set('section43161', 'keyA-43161', 'a-Value')
-		conf43161.set('section43161', 'keyB-43161', param)
-		bar = conf43161.get('section43161', 'keyB-43161')
+		string43161 = ''
+		data12 = ''
+		copy = string43161
+		string43161 = ''
+		string43161 += param
+		copy += 'SomeOKString'
+		bar = copy
 
-		import pickle
-		import base64
-		import helpers.utils
+		import hashlib, base64
+		import io, helpers.utils
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
+		if len(input) == 0:
 			RESPONSE += (
-				'Unpickling failed!'
+				'Cannot generate hash: Input was empty.'
 			)
 			return RESPONSE
 
+		hash = hashlib.new('sha512')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
 		)
+		f.close()
 
 		return RESPONSE
 

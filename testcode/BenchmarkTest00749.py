@@ -20,39 +20,61 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00749', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00749', methods=['GET'])
 	def BenchmarkTest00749_get():
 		return BenchmarkTest00749_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00749', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00749', methods=['POST'])
 	def BenchmarkTest00749_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00749")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00749")
+		param = ""
+		if values:
+			param = values[0]
+
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
 
-		import random
-		from helpers.utils import mysession
+		fileName = None
+		fd = None
 
-		num = 'BenchmarkTest00749'[13:]
-		user = f'SafeRandy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().getrandbits(32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		if '../' in bar:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				'File name must not include \'../\''
 			)
-		else:
-			mysession[cookie] = value
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

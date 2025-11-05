@@ -20,42 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00793', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00793', methods=['GET'])
 	def BenchmarkTest00793_get():
 		return BenchmarkTest00793_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00793', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00793', methods=['POST'])
 	def BenchmarkTest00793_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00793")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00793")
+		param = ""
+		if values:
+			param = values[0]
 
-		num = 106
+		import configparser
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = 'safe!'
+		conf63761 = configparser.ConfigParser()
+		conf63761.add_section('section63761')
+		conf63761.set('section63761', 'keyA-63761', 'a_Value')
+		conf63761.set('section63761', 'keyB-63761', param)
+		bar = conf63761.get('section63761', 'keyA-63761')
 
-		import platform
-		import subprocess
-		import helpers.utils
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
+		num = 'BenchmarkTest00793'[13:]
+		user = f'SafeTruman{num}'
+		cookie = f'rememberMe{num}'
+		value = secrets.token_urlsafe(32)
 
-		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
-
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				helpers.utils.commandOutput(proc)
+				f'Welcome back: {user}<br/>'
 			)
-		except IOError:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

@@ -20,42 +20,36 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00929', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00929', methods=['GET'])
 	def BenchmarkTest00929_get():
 		return BenchmarkTest00929_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00929', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00929', methods=['POST'])
 	def BenchmarkTest00929_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00929")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00929" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00929"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00929") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		bar = param + '_SafeStuff'
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest00929'[13:]
-		user = f'SafeTruman{num}'
-		cookie = f'rememberMe{num}'
-		value = secrets.token_urlsafe(32)
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

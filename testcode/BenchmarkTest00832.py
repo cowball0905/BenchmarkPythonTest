@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00832', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00832', methods=['GET'])
 	def BenchmarkTest00832_get():
 		return BenchmarkTest00832_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00832', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00832', methods=['POST'])
 	def BenchmarkTest00832_post():
 		RESPONSE = ""
 
@@ -33,29 +33,26 @@ def init(app):
 		if values:
 			param = values[0]
 
-		map26388 = {}
-		map26388['keyA-26388'] = 'a-Value'
-		map26388['keyB-26388'] = param
-		map26388['keyC'] = 'another-Value'
-		bar = map26388['keyB-26388']
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import random
-		from helpers.utils import mysession
+		import yaml
 
-		num = 'BenchmarkTest00832'[13:]
-		user = f'Nancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.normalvariate())[2:]
+		try:
+			yobj = yaml.load(bar, Loader=yaml.Loader)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				yobj['text']
 			)
-		else:
-			mysession[cookie] = value
+		except:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

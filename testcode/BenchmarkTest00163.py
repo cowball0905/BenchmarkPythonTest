@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00163', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00163', methods=['GET'])
 	def BenchmarkTest00163_get():
 		return BenchmarkTest00163_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00163', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00163', methods=['POST'])
 	def BenchmarkTest00163_post():
 		RESPONSE = ""
 
@@ -32,22 +32,21 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
-
-
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00163': bar}))
+		import configparser
 		
+		bar = 'safe!'
+		conf57505 = configparser.ConfigParser()
+		conf57505.add_section('section57505')
+		conf57505.set('section57505', 'keyA-57505', 'a-Value')
+		conf57505.set('section57505', 'keyB-57505', param)
+		bar = conf57505.get('section57505', 'keyB-57505')
+
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

@@ -20,31 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00783', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00783', methods=['GET'])
 	def BenchmarkTest00783_get():
 		return BenchmarkTest00783_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00783', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00783', methods=['POST'])
 	def BenchmarkTest00783_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00783")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00783")
+		param = ""
+		if values:
+			param = values[0]
 
-		map46760 = {}
-		map46760['keyA-46760'] = 'a-Value'
-		map46760['keyB-46760'] = param
-		map46760['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map46760['keyB-46760']
-		bar = map46760['keyA-46760']
+		import configparser
+		
+		bar = 'safe!'
+		conf46760 = configparser.ConfigParser()
+		conf46760.add_section('section46760')
+		conf46760.set('section46760', 'keyA-46760', 'a_Value')
+		conf46760.set('section46760', 'keyB-46760', param)
+		bar = conf46760.get('section46760', 'keyA-46760')
 
-		try:
-			exec(bar)
-		except:
+		import random
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00783'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

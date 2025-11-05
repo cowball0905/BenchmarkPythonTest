@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01176', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01176', methods=['GET'])
 	def BenchmarkTest01176_get():
 		return BenchmarkTest01176_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01176', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01176', methods=['POST'])
 	def BenchmarkTest01176_post():
 		RESPONSE = ""
 
@@ -32,33 +32,16 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01176")
 
-		bar = param
-
-		import helpers.utils
-
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not contain \'../\''
-			)
-			return RESPONSE
+		bar = "This should never happen"
+		if 'should' not in bar:
+		        bar = "Ifnot case passed"
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
+			exec(bar)
+		except:
 			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
+				f'Error executing statement \'{escape_for_html(bar)}\''
 			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01182', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest01182', methods=['GET'])
 	def BenchmarkTest01182_get():
 		return BenchmarkTest01182_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01182', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest01182', methods=['POST'])
 	def BenchmarkTest01182_post():
 		RESPONSE = ""
 
@@ -36,28 +36,23 @@ def init(app):
 		if 'should' in bar:
 			bar = param
 
-		import pathlib
+		import os
+		import subprocess
 		import helpers.utils
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / bar).resolve()
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
+		else:
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {bar}")
 
-			if not str(p).startswith(str(testfiles)):
-				RESPONSE += (
-					"Invalid Path."
-				)
-				return RESPONSE
-
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
+		RESPONSE += (
+			helpers.utils.commandOutput(proc)
+		)
 
 		return RESPONSE
 

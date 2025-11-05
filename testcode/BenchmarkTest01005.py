@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest01005', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01005', methods=['GET'])
 	def BenchmarkTest01005_get():
 		return BenchmarkTest01005_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest01005', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01005', methods=['POST'])
 	def BenchmarkTest01005_post():
 		RESPONSE = ""
 
@@ -41,22 +41,34 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		map96560 = {}
-		map96560['keyA-96560'] = 'a-Value'
-		map96560['keyB-96560'] = param
-		map96560['keyC'] = 'another-Value'
-		bar = map96560['keyB-96560']
+		bar = param
 
-		import helpers.db_sqlite
+		import helpers.ldap
+		import ldap3
 
-		sql = f'SELECT username from USERS where password = \'{bar}\''
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql)
-		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
-		)
-		con.close()
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(uid={bar}))'
+		try:
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
+
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except IOError:
+			RESPONSE += (
+				"Error processing LDAP query."
+			)
 
 		return RESPONSE
 

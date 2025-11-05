@@ -20,43 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00936', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00936', methods=['GET'])
 	def BenchmarkTest00936_get():
 		return BenchmarkTest00936_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00936', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00936', methods=['POST'])
 	def BenchmarkTest00936_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00936")
-		if not param:
-			param = ""
-
-		num = 106
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00936" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00936"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00936") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		param = urllib.parse.unquote_plus(param)
 
-		import random
-		from helpers.utils import mysession
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		num = 'BenchmarkTest00936'[13:]
-		user = f'SafeIsaac{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().randint(0, 2**32))
+		import helpers.db_sqlite
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (bar,))
+		RESPONSE += (
+			helpers.db_sqlite.results(cur, sql)
+		)
+		con.close()
 
 		return RESPONSE
 

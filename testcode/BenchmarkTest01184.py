@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01184', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01184', methods=['GET'])
 	def BenchmarkTest01184_get():
 		return BenchmarkTest01184_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01184', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01184', methods=['POST'])
 	def BenchmarkTest01184_post():
 		RESPONSE = ""
 
@@ -32,15 +32,22 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01184")
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
+		import yaml
 
-		otherarg = "static text"
-		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
-		)
+		try:
+			yobj = yaml.safe_load(bar)
+
+			RESPONSE += (
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
+			)
 
 		return RESPONSE
 

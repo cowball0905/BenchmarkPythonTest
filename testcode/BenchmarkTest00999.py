@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest00999', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00999', methods=['GET'])
 	def BenchmarkTest00999_get():
 		return BenchmarkTest00999_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest00999', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00999', methods=['POST'])
 	def BenchmarkTest00999_post():
 		RESPONSE = ""
 
@@ -46,17 +46,16 @@ def init(app):
 		bar = 'safe!'
 		conf83950 = configparser.ConfigParser()
 		conf83950.add_section('section83950')
-		conf83950.set('section83950', 'keyA-83950', 'a_Value')
+		conf83950.set('section83950', 'keyA-83950', 'a-Value')
 		conf83950.set('section83950', 'keyB-83950', param)
-		bar = conf83950.get('section83950', 'keyA-83950')
+		bar = conf83950.get('section83950', 'keyB-83950')
 
-
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
-		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
-		)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

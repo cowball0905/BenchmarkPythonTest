@@ -20,37 +20,57 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00638', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00638', methods=['GET'])
 	def BenchmarkTest00638_get():
 		return BenchmarkTest00638_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00638', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00638', methods=['POST'])
 	def BenchmarkTest00638_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00638")
 		
-		if headers:
-			param = headers[0]
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
+		
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import flask
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
-		flask.session[bar] = '12345'
+		num = 'BenchmarkTest00638'[13:]
+		user = f'SafeTruman{num}'
+		cookie = f'rememberMe{num}'
+		value = secrets.token_urlsafe(32)
 
-		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
-		)
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

@@ -20,45 +20,43 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00750', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00750', methods=['GET'])
 	def BenchmarkTest00750_get():
 		return BenchmarkTest00750_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00750', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00750', methods=['POST'])
 	def BenchmarkTest00750_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00750")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00750")
+		param = ""
+		if values:
+			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf8238 = configparser.ConfigParser()
-		conf8238.add_section('section8238')
-		conf8238.set('section8238', 'keyA-8238', 'a-Value')
-		conf8238.set('section8238', 'keyB-8238', param)
-		bar = conf8238.get('section8238', 'keyB-8238')
+		string8238 = 'help'
+		string8238 += param
+		string8238 += 'snapes on a plane'
+		bar = string8238[4:-17]
 
-		import random
-		from helpers.utils import mysession
+		import helpers.utils
 
-		num = 'BenchmarkTest00750'[13:]
-		user = f'SafeNancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-		else:
-			mysession[cookie] = value
+		except IOError as e:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

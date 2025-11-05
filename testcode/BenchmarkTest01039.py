@@ -20,52 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01039', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest01039', methods=['GET'])
 	def BenchmarkTest01039_get():
 		return BenchmarkTest01039_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01039', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest01039', methods=['POST'])
 	def BenchmarkTest01039_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01039" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01039"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01039") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = param
 
-		import random
-		import base64
-		from helpers.utils import mysession
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		num = 'BenchmarkTest01039'[13:]
-		user = f'SafeBarbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
-		else:
-			mysession[cookie] = value
+		except:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
 			)
 
 		return RESPONSE

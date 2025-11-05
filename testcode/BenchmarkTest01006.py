@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest01006', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01006', methods=['GET'])
 	def BenchmarkTest01006_get():
 		return BenchmarkTest01006_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest01006', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01006', methods=['POST'])
 	def BenchmarkTest01006_post():
 		RESPONSE = ""
 
@@ -41,25 +41,31 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		map56505 = {}
+		map56505['keyA-56505'] = 'a-Value'
+		map56505['keyB-56505'] = param
+		map56505['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map56505['keyB-56505']
+		bar = map56505['keyA-56505']
 
-		import helpers.db_sqlite
+		import pickle
+		import base64
+		import helpers.utils
 
-		sql = f'SELECT username from USERS where password = ?'
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql, (bar,))
+		helpers.utils.sharedstr = "no pickles to be seen here"
+
+		try:
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
+		except:
+			RESPONSE += (
+				'Unpickling failed!'
+			)
+			return RESPONSE
+
 		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
+			f'shared string is {helpers.utils.sharedstr}'
 		)
-		con.close()
 
 		return RESPONSE
 

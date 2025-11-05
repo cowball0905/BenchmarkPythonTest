@@ -20,34 +20,53 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00275', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00275', methods=['GET'])
 	def BenchmarkTest00275_get():
 		return BenchmarkTest00275_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00275', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00275', methods=['POST'])
 	def BenchmarkTest00275_post():
 		RESPONSE = ""
 
-		values = request.form.getlist("BenchmarkTest00275")
-		param = ""
-		if values:
-			param = values[0]
-
-		import configparser
+		import helpers.separate_request
 		
-		bar = 'safe!'
-		conf4093 = configparser.ConfigParser()
-		conf4093.add_section('section4093')
-		conf4093.set('section4093', 'keyA-4093', 'a_Value')
-		conf4093.set('section4093', 'keyB-4093', param)
-		bar = conf4093.get('section4093', 'keyA-4093')
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_form_parameter("BenchmarkTest00275")
+		if not param:
+			param = ""
+
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
+
+		import helpers.utils
+
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not contain \'../\''
+			)
+			return RESPONSE
 
 		try:
-			exec(bar)
-		except:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

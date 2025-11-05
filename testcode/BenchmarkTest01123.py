@@ -20,46 +20,33 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01123', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01123', methods=['GET'])
 	def BenchmarkTest01123_get():
 		return BenchmarkTest01123_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01123', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01123', methods=['POST'])
 	def BenchmarkTest01123_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01123")
 
-		import configparser
-		
-		bar = 'safe!'
-		conf63527 = configparser.ConfigParser()
-		conf63527.add_section('section63527')
-		conf63527.set('section63527', 'keyA-63527', 'a-Value')
-		conf63527.set('section63527', 'keyB-63527', param)
-		bar = conf63527.get('section63527', 'keyB-63527')
+		map63527 = {}
+		map63527['keyA-63527'] = 'a-Value'
+		map63527['keyB-63527'] = param
+		map63527['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map63527['keyB-63527']
+		bar = map63527['keyA-63527']
 
-		import random
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest01123'[13:]
-		user = f'Isaac{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.randint(0, 2**32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
+		RESPONSE += (
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+		)
 
 		return RESPONSE
 

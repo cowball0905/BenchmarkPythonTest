@@ -20,50 +20,50 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00644', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00644', methods=['GET'])
 	def BenchmarkTest00644_get():
 		return BenchmarkTest00644_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00644', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00644', methods=['POST'])
 	def BenchmarkTest00644_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00644")
 		
-		if headers:
-			param = headers[0]
-
-		import helpers.ThingFactory
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		import helpers.ldap
-		import ldap3
+		map39357 = {}
+		map39357['keyA-39357'] = 'a-Value'
+		map39357['keyB-39357'] = param
+		map39357['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map39357['keyB-39357']
+		bar = map39357['keyA-39357']
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
-		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+		import random
+		from helpers.utils import mysession
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
+		num = 'BenchmarkTest00644'[13:]
+		user = f'SafeRandall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				"Error processing LDAP query."
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

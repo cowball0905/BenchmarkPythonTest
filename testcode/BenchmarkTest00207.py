@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00207', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00207', methods=['GET'])
 	def BenchmarkTest00207_get():
 		return BenchmarkTest00207_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00207', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00207', methods=['POST'])
 	def BenchmarkTest00207_post():
 		RESPONSE = ""
 
@@ -33,14 +33,34 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
+		bar = param
 
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		otherarg = "static text"
-		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
-		)
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
+			RESPONSE += (
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
+			)
+		except:
+			RESPONSE += (
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+			)
 
 		return RESPONSE
 

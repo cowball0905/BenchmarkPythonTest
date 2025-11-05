@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00296', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00296', methods=['GET'])
 	def BenchmarkTest00296_get():
 		return BenchmarkTest00296_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00296', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00296', methods=['POST'])
 	def BenchmarkTest00296_post():
 		RESPONSE = ""
 
@@ -35,26 +35,34 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
+		import configparser
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = 'safe!'
+		conf74499 = configparser.ConfigParser()
+		conf74499.add_section('section74499')
+		conf74499.set('section74499', 'keyA-74499', 'a_Value')
+		conf74499.set('section74499', 'keyB-74499', param)
+		bar = conf74499.get('section74499', 'keyA-74499')
 
-		import pathlib
+		import lxml.etree
 		import helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		if not str(p).startswith(str(testfiles)):
 			RESPONSE += (
-				"Invalid Path."
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-			return RESPONSE
-		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

@@ -20,33 +20,48 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00764', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00764', methods=['GET'])
 	def BenchmarkTest00764_get():
 		return BenchmarkTest00764_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00764', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00764', methods=['POST'])
 	def BenchmarkTest00764_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00764")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00764")
+		param = ""
+		if values:
+			param = values[0]
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import re
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		regex = r'(a+)+$'
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
 
-		if re.match(regex, bar) is not None:
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
 			RESPONSE += (
-				'String matches!'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
-		else:
+		except:
 			RESPONSE += (
-				'String does not match.'
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
 			)
 
 		return RESPONSE

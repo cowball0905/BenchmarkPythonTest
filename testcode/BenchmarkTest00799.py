@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00799', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00799', methods=['GET'])
 	def BenchmarkTest00799_get():
 		return BenchmarkTest00799_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00799', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00799', methods=['POST'])
 	def BenchmarkTest00799_post():
 		RESPONSE = ""
 
@@ -33,18 +33,27 @@ def init(app):
 		if values:
 			param = values[0]
 
-		string43417 = ''
-		data12 = ''
-		copy = string43417
-		string43417 = ''
-		string43417 += param
-		copy += 'SomeOKString'
-		bar = copy
+		bar = param
 
+		import random
+		import base64
+		from helpers.utils import mysession
 
-		RESPONSE += (
-			f'Parameter value: {bar}'
-		)
+		num = 'BenchmarkTest00799'[13:]
+		user = f'SafeBarbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

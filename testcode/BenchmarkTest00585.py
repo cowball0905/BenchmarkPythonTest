@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00585', methods=['GET'])
+	@app.route('/benchmark/hash-00/BenchmarkTest00585', methods=['GET'])
 	def BenchmarkTest00585_get():
 		return BenchmarkTest00585_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00585', methods=['POST'])
+	@app.route('/benchmark/hash-00/BenchmarkTest00585', methods=['POST'])
 	def BenchmarkTest00585_post():
 		RESPONSE = ""
 
@@ -34,35 +34,39 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		string45337 = ''
+		data12 = ''
+		copy = string45337
+		string45337 = ''
+		string45337 += param
+		copy += 'SomeOKString'
+		bar = copy
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
+		import hashlib, base64
+		import io, helpers.utils
 
-		if '\'' in bar:
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		if len(input) == 0:
 			RESPONSE += (
-				"Employee ID must not contain apostrophes"
+				'Cannot generate hash: Input was empty.'
 			)
 			return RESPONSE
 
-		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+		hash = hashlib.new('sha1')
+		hash.update(input)
 
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

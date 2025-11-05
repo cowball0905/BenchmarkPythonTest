@@ -20,58 +20,31 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00598', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00598', methods=['GET'])
 	def BenchmarkTest00598_get():
 		return BenchmarkTest00598_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00598', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00598', methods=['POST'])
 	def BenchmarkTest00598_post():
 		RESPONSE = ""
 
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00598")
+		headers = request.headers.getlist("Referer")
 		
 		if headers:
 			param = headers[0]
 
-		possible = "ABC"
-		guess = possible[0]
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
+
+
+		RESPONSE += (
+			'The value of the bar parameter is now in a custom header.'
+		)
+
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00598': bar}))
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
-
-		import lxml.etree
-		import helpers.utils
-		import io
-
-		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			strIO = io.StringIO()
-			strIO.write('/Employees/Employee[@emplid=\'')
-			strIO.write(bar)
-			strIO.write('\']')
-			query = strIO.getvalue()
-
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
 
 		return RESPONSE
 

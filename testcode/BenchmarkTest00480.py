@@ -20,29 +20,41 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00480', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00480', methods=['GET'])
 	def BenchmarkTest00480_get():
 		return BenchmarkTest00480_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00480', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00480', methods=['POST'])
 	def BenchmarkTest00480_post():
 		RESPONSE = ""
 
-		param = request.headers.get("Referer")
+		param = request.headers.get("BenchmarkTest00480")
 		if not param:
 		    param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
-		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
-		)
+		num = 'BenchmarkTest00480'[13:]
+		user = f'SafeToby{num}'
+		cookie = f'rememberMe{num}'
+		value = base64.b64encode(secrets.token_bytes(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

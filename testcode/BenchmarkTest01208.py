@@ -20,44 +20,27 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01208', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01208', methods=['GET'])
 	def BenchmarkTest01208_get():
 		return BenchmarkTest01208_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01208', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01208', methods=['POST'])
 	def BenchmarkTest01208_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01208")
+		param = request.headers.get("Referer")
+		if not param:
+		    param = ""
 
-		map214 = {}
-		map214['keyA-214'] = 'a-Value'
-		map214['keyB-214'] = param
-		map214['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map214['keyB-214']
-		bar = map214['keyA-214']
 
-		import secrets
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest01208'[13:]
-		user = f'SafeRobbie{num}'
-		cookie = f'rememberMe{num}'
-		value = str(secrets.randbelow(2**32))
+		RESPONSE += (
+			'The value of the param parameter is now in a custom header.'
+		)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest01208': param}))
+		
 
 		return RESPONSE
+
 

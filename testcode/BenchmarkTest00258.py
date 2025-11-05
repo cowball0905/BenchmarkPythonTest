@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00258', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00258', methods=['GET'])
 	def BenchmarkTest00258_get():
 		return BenchmarkTest00258_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00258', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00258', methods=['POST'])
 	def BenchmarkTest00258_post():
 		RESPONSE = ""
 
@@ -41,8 +41,9 @@ def init(app):
 		copy += 'SomeOKString'
 		bar = copy
 
-		import hashlib, base64
-		import io, helpers.utils
+		from flask import make_response
+		import io
+		import helpers.utils
 
 		input = ''
 		if isinstance(bar, str):
@@ -50,22 +51,18 @@ def init(app):
 		elif isinstance(bar, io.IOBase):
 			input = bar.read(1000)
 
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
 
-		hash = hashlib.new('sha1')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
 		)
-		f.close()
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=False,
+			httponly=True)
 
 		return RESPONSE
 

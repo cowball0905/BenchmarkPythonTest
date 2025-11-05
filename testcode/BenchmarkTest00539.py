@@ -20,35 +20,34 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00539', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00539', methods=['GET'])
 	def BenchmarkTest00539_get():
 		return BenchmarkTest00539_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00539', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00539', methods=['POST'])
 	def BenchmarkTest00539_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00539")
-		if not param:
-		    param = ""
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00539")
+		
+		if headers:
+			param = headers[0]
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import flask
+		import helpers.db_sqlite
 
-		flask.session[bar] = '12345'
-
+		sql = f'SELECT username from USERS where password = \'{bar}\''
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql)
 		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
+			helpers.db_sqlite.results(cur, sql)
 		)
+		con.close()
 
 		return RESPONSE
 

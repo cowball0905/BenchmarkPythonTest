@@ -20,37 +20,49 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00691', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00691', methods=['GET'])
 	def BenchmarkTest00691_get():
 		return BenchmarkTest00691_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00691', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00691', methods=['POST'])
 	def BenchmarkTest00691_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
+		param = request.args.get("BenchmarkTest00691")
+		if not param:
+			param = ""
+
+		possible = "ABC"
+		guess = possible[1]
 		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		import random
+		from helpers.utils import mysession
 
-		import flask
+		num = 'BenchmarkTest00691'[13:]
+		user = f'Randy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.getrandbits(32))
 
-		return flask.redirect(bar)
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

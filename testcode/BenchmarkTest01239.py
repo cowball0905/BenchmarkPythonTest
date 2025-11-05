@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01239', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01239', methods=['GET'])
 	def BenchmarkTest01239_get():
 		return BenchmarkTest01239_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01239', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01239', methods=['POST'])
 	def BenchmarkTest01239_post():
 		RESPONSE = ""
 
@@ -32,26 +32,25 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01239")
 
-		string42950 = ''
-		data12 = ''
-		copy = string42950
-		string42950 = ''
-		string42950 += param
-		copy += 'SomeOKString'
-		bar = copy
 
-		import re
+		import helpers.utils
 
-		regex = r'(abc)*(bcd)+'
+		fileName = None
+		fd = None
 
-		if re.match(regex, bar) is not None:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{param}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE
+
 

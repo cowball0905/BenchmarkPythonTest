@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00833', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00833', methods=['GET'])
 	def BenchmarkTest00833_get():
 		return BenchmarkTest00833_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00833', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00833', methods=['POST'])
 	def BenchmarkTest00833_post():
 		RESPONSE = ""
 
@@ -33,27 +33,20 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
-		import random
-		from helpers.utils import mysession
+		import yaml
 
-		num = 'BenchmarkTest00833'[13:]
-		user = f'Nancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.normalvariate())[2:]
+		try:
+			yobj = yaml.safe_load(bar)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				yobj['text']
 			)
-		else:
-			mysession[cookie] = value
+		except:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

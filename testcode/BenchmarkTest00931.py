@@ -20,45 +20,38 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00931', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00931', methods=['GET'])
 	def BenchmarkTest00931_get():
 		return BenchmarkTest00931_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00931', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00931', methods=['POST'])
 	def BenchmarkTest00931_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00931")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00931" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00931"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00931") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		map38351 = {}
-		map38351['keyA-38351'] = 'a-Value'
-		map38351['keyB-38351'] = param
-		map38351['keyC'] = 'another-Value'
-		bar = map38351['keyB-38351']
+		import html
+		
+		bar = html.escape(param)
 
-		import random
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest00931'[13:]
-		user = f'SafeNancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
+		RESPONSE += (
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+		)
 
 		return RESPONSE
 

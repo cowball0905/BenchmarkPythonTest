@@ -20,33 +20,41 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00785', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00785', methods=['GET'])
 	def BenchmarkTest00785_get():
 		return BenchmarkTest00785_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00785', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00785', methods=['POST'])
 	def BenchmarkTest00785_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00785")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00785")
+		param = ""
+		if values:
+			param = values[0]
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+		import random
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00785'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				"Exec argument must be a plain string literal."
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		try:
-			exec(bar)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

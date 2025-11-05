@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00900', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00900', methods=['GET'])
 	def BenchmarkTest00900_get():
 		return BenchmarkTest00900_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00900', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00900', methods=['POST'])
 	def BenchmarkTest00900_post():
 		RESPONSE = ""
 
@@ -35,20 +35,19 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import helpers.db_sqlite
+		import flask
 
-		sql = f'SELECT username from USERS where password = \'{bar}\''
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql)
+		flask.session[bar] = '12345'
+
 		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
+			f'Item: \'{escape_for_html(bar)}'
+			'\' with value: 12345 saved in session.'
 		)
-		con.close()
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01243', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01243', methods=['GET'])
 	def BenchmarkTest01243_get():
 		return BenchmarkTest01243_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01243', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01243', methods=['POST'])
 	def BenchmarkTest01243_post():
 		RESPONSE = ""
 
@@ -32,36 +32,25 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01243")
 
-		map22205 = {}
-		map22205['keyA-22205'] = 'a-Value'
-		map22205['keyB-22205'] = param
-		map22205['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map22205['keyB-22205']
-		bar = map22205['keyA-22205']
 
-		from flask import make_response
-		import io
+		import pickle
+		import base64
 		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		helpers.utils.sharedstr = "no pickles to be seen here"
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
+		try:
+			unpickled = pickle.loads(base64.urlsafe_b64decode(param))
+		except:
+			RESPONSE += (
+				'Unpickling failed!'
+			)
+			return RESPONSE
 
 		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+			f'shared string is {helpers.utils.sharedstr}'
 		)
 
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=True,
-			httponly=True)
-
 		return RESPONSE
+
 

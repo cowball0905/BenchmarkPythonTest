@@ -20,30 +20,32 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00454', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00454', methods=['GET'])
 	def BenchmarkTest00454_get():
 		return BenchmarkTest00454_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00454', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00454', methods=['POST'])
 	def BenchmarkTest00454_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00454" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("Referer")
+		if not param:
+		    param = ""
 
-		bar = param
+		import configparser
+		
+		bar = 'safe!'
+		conf5528 = configparser.ConfigParser()
+		conf5528.add_section('section5528')
+		conf5528.set('section5528', 'keyA-5528', 'a_Value')
+		conf5528.set('section5528', 'keyB-5528', param)
+		bar = conf5528.get('section5528', 'keyA-5528')
 
-		try:
-			RESPONSE += (
-				eval(bar)
-			)
-		except:
-			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
-			)
+
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+		)
 
 		return RESPONSE
 

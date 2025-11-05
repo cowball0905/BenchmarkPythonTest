@@ -20,39 +20,35 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01197', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01197', methods=['GET'])
 	def BenchmarkTest01197_get():
 		return BenchmarkTest01197_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01197', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01197', methods=['POST'])
 	def BenchmarkTest01197_post():
 		RESPONSE = ""
 
 		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01197")
-
-		possible = "ABC"
-		guess = possible[0]
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_form_parameter("BenchmarkTest01197")
+		if not param:
+			param = ""
+
 
 		import lxml.etree
 		import helpers.utils
 
 		try:
+			if '\'' in param:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
+
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
-
+			query = f'/Employees/Employee[@emplid=\'{param}\']'
 			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
@@ -67,4 +63,5 @@ def init(app):
 			)
 
 		return RESPONSE
+
 

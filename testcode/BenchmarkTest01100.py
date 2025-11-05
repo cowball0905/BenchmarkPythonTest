@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01100', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01100', methods=['GET'])
 	def BenchmarkTest01100_get():
 		return BenchmarkTest01100_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01100', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01100', methods=['POST'])
 	def BenchmarkTest01100_post():
 		RESPONSE = ""
 
@@ -33,31 +33,22 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		map30057 = {}
+		map30057['keyA-30057'] = 'a-Value'
+		map30057['keyB-30057'] = param
+		map30057['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map30057['keyB-30057']
+		bar = map30057['keyA-30057']
 
-		import pathlib
-		import helpers.utils
-
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
-
-		if not str(p).startswith(str(testfiles)):
+		try:
 			RESPONSE += (
-				"Invalid Path."
+				eval(bar)
 			)
-			return RESPONSE
-		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

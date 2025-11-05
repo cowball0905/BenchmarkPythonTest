@@ -20,31 +20,48 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00871', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00871', methods=['GET'])
 	def BenchmarkTest00871_get():
 		return BenchmarkTest00871_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00871', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00871', methods=['POST'])
 	def BenchmarkTest00871_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00871")
-		param = ""
-		if values:
-			param = values[0]
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00871")
+		if not param:
+			param = ""
 
-		string86170 = 'help'
-		string86170 += param
-		string86170 += 'snapes on a plane'
-		bar = string86170[4:-17]
+		import configparser
+		
+		bar = 'safe!'
+		conf86170 = configparser.ConfigParser()
+		conf86170.add_section('section86170')
+		conf86170.set('section86170', 'keyA-86170', 'a-Value')
+		conf86170.set('section86170', 'keyB-86170', param)
+		bar = conf86170.get('section86170', 'keyB-86170')
 
-		try:
+		import base64
+		import secrets
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00871'[13:]
+		user = f'SafeToby{num}'
+		cookie = f'rememberMe{num}'
+		value = base64.b64encode(secrets.token_bytes(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				eval(bar)
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

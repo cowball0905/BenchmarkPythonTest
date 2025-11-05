@@ -20,33 +20,39 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00281', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00281', methods=['GET'])
 	def BenchmarkTest00281_get():
 		return BenchmarkTest00281_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00281', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00281', methods=['POST'])
 	def BenchmarkTest00281_post():
 		RESPONSE = ""
 
-		values = request.form.getlist("BenchmarkTest00281")
-		param = ""
-		if values:
-			param = values[0]
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_form_parameter("BenchmarkTest00281")
+		if not param:
+			param = ""
 
-		bar = param + '_SafeStuff'
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import yaml
 
-		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
-
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

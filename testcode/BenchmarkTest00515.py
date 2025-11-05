@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00515', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00515', methods=['GET'])
 	def BenchmarkTest00515_get():
 		return BenchmarkTest00515_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00515', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00515', methods=['POST'])
 	def BenchmarkTest00515_post():
 		RESPONSE = ""
 
@@ -37,35 +37,31 @@ def init(app):
 		bar = 'safe!'
 		conf95991 = configparser.ConfigParser()
 		conf95991.add_section('section95991')
-		conf95991.set('section95991', 'keyA-95991', 'a-Value')
+		conf95991.set('section95991', 'keyA-95991', 'a_Value')
 		conf95991.set('section95991', 'keyB-95991', param)
-		bar = conf95991.get('section95991', 'keyB-95991')
+		bar = conf95991.get('section95991', 'keyA-95991')
 
-		import hashlib, base64
-		import io, helpers.utils
+		import platform
+		import subprocess
+		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
+		else:
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
 
-		if len(input) == 0:
+		try:
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				helpers.utils.commandOutput(proc)
 			)
-			return RESPONSE
-
-		hash = hashlib.new('sha1')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		except IOError:
+			RESPONSE += (
+				"Problem executing cmdi - subprocess.run(list) Test Case"
+			)
 
 		return RESPONSE
 

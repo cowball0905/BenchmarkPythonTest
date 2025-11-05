@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00509', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00509', methods=['GET'])
 	def BenchmarkTest00509_get():
 		return BenchmarkTest00509_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00509', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00509', methods=['POST'])
 	def BenchmarkTest00509_post():
 		RESPONSE = ""
 
@@ -32,36 +32,17 @@ def init(app):
 		if not param:
 		    param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		map33385 = {}
+		map33385['keyA-33385'] = 'a-Value'
+		map33385['keyB-33385'] = param
+		map33385['keyC'] = 'another-Value'
+		bar = map33385['keyB-33385']
 
-		import random
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00509'[13:]
-		user = f'SafeNancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			exec(bar)
+		except:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Error executing statement \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

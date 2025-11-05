@@ -20,48 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00671', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00671', methods=['GET'])
 	def BenchmarkTest00671_get():
 		return BenchmarkTest00671_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00671', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00671', methods=['POST'])
 	def BenchmarkTest00671_post():
 		RESPONSE = ""
 
+		param = request.args.get("BenchmarkTest00671")
+		if not param:
+			param = ""
+
+		string39424 = 'help'
+		string39424 += param
+		string39424 += 'snapes on a plane'
+		bar = string39424[4:-17]
+
+		import pathlib
 		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		try:
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = (testfiles / bar).resolve()
 
-		import random
-		import base64
-		from helpers.utils import mysession
+			if not str(p).startswith(str(testfiles)):
+				RESPONSE += (
+					"Invalid Path."
+				)
+				return RESPONSE
 
-		num = 'BenchmarkTest00671'[13:]
-		user = f'SafeBarbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-		else:
-			mysession[cookie] = value
+		except OSError:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

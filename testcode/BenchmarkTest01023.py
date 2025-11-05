@@ -20,53 +20,35 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01023', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01023', methods=['GET'])
 	def BenchmarkTest01023_get():
 		return BenchmarkTest01023_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01023', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01023', methods=['POST'])
 	def BenchmarkTest01023_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01023" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01023"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01023") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		bar = "This should never happen"
+		if 'should' not in bar:
+		        bar = "Ifnot case passed"
 
-		import random
-		from helpers.utils import mysession
+		import helpers.utils
 
-		num = 'BenchmarkTest01023'[13:]
-		user = f'Randall{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.random())[2:]
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

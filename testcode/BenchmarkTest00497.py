@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00497', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00497', methods=['GET'])
 	def BenchmarkTest00497_get():
 		return BenchmarkTest00497_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00497', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00497', methods=['POST'])
 	def BenchmarkTest00497_post():
 		RESPONSE = ""
 
@@ -37,24 +37,28 @@ def init(app):
 		thing = helpers.ThingFactory.createThing()
 		bar = thing.doSomething(param)
 
-		import random
-		from helpers.utils import mysession
+		from flask import make_response
+		import io
+		import helpers.utils
 
-		num = 'BenchmarkTest00497'[13:]
-		user = f'Randall{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.random())[2:]
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
+
+		RESPONSE += (
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+		)
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=False,
+			httponly=True)
 
 		return RESPONSE
 

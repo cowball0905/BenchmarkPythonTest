@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00310', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00310', methods=['GET'])
 	def BenchmarkTest00310_get():
 		return BenchmarkTest00310_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00310', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00310', methods=['POST'])
 	def BenchmarkTest00310_post():
 		RESPONSE = ""
 
@@ -35,34 +35,32 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
+		import random
+		from helpers.utils import mysession
 
-		if '\'' in bar:
+		num = 'BenchmarkTest00310'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				"Employee ID must not contain apostrophes"
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

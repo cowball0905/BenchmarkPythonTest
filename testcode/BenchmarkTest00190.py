@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00190', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00190', methods=['GET'])
 	def BenchmarkTest00190_get():
 		return BenchmarkTest00190_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00190', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00190', methods=['POST'])
 	def BenchmarkTest00190_post():
 		RESPONSE = ""
 
@@ -33,38 +33,22 @@ def init(app):
 		if values:
 			param = values[0]
 
-		possible = "ABC"
-		guess = possible[1]
+		import configparser
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = 'safe!'
+		conf48255 = configparser.ConfigParser()
+		conf48255.add_section('section48255')
+		conf48255.set('section48255', 'keyA-48255', 'a_Value')
+		conf48255.set('section48255', 'keyB-48255', param)
+		bar = conf48255.get('section48255', 'keyA-48255')
 
-		import helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
+		RESPONSE += (
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+		)
 
 		return RESPONSE
 

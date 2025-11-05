@@ -20,38 +20,41 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest01075', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01075', methods=['GET'])
 	def BenchmarkTest01075_get():
 		return BenchmarkTest01075_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest01075', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01075', methods=['POST'])
 	def BenchmarkTest01075_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01075" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01075"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01075") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		string52153 = ''
-		data12 = ''
-		copy = string52153
-		string52153 = ''
-		string52153 += param
-		copy += 'SomeOKString'
-		bar = copy
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import flask
+		import random
+		from helpers.utils import mysession
 
-		return flask.redirect(bar)
+		num = 'BenchmarkTest01075'[13:]
+		user = f'SafeNancy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().normalvariate())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

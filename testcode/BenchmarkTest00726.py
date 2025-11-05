@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00726', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00726', methods=['GET'])
 	def BenchmarkTest00726_get():
 		return BenchmarkTest00726_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00726', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00726', methods=['POST'])
 	def BenchmarkTest00726_post():
 		RESPONSE = ""
 
@@ -32,33 +32,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		map20491 = {}
-		map20491['keyA-20491'] = 'a-Value'
-		map20491['keyB-20491'] = param
-		map20491['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map20491['keyB-20491']
-		bar = map20491['keyA-20491']
+		string20491 = 'help'
+		string20491 += param
+		string20491 += 'snapes on a plane'
+		bar = string20491[4:-17]
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
 
-		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+		RESPONSE += (
+			'The value of the bar parameter is now in a custom header.'
+		)
 
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
-
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00726': bar}))
+		
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00506', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00506', methods=['GET'])
 	def BenchmarkTest00506_get():
 		return BenchmarkTest00506_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00506', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00506', methods=['POST'])
 	def BenchmarkTest00506_post():
 		RESPONSE = ""
 
@@ -41,23 +41,13 @@ def init(app):
 		conf42361.set('section42361', 'keyB-42361', param)
 		bar = conf42361.get('section42361', 'keyA-42361')
 
-		import random
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00506'[13:]
-		user = f'SafeRandy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().getrandbits(32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				eval(bar)
 			)
-		else:
-			mysession[cookie] = value
+		except:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01097', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest01097', methods=['GET'])
 	def BenchmarkTest01097_get():
 		return BenchmarkTest01097_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01097', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest01097', methods=['POST'])
 	def BenchmarkTest01097_post():
 		RESPONSE = ""
 
@@ -33,18 +33,19 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		string48882 = 'help'
+		string48882 += param
+		string48882 += 'snapes on a plane'
+		bar = string48882[4:-17]
 
-		import os
-		import helpers.utils
+		import flask
 
-		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-		if os.path.exists(fileName):
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
+		flask.session['userid'] = bar
+
+		RESPONSE += (
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
+		)
 
 		return RESPONSE
 

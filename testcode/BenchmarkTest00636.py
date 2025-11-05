@@ -20,46 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00636', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00636', methods=['GET'])
 	def BenchmarkTest00636_get():
 		return BenchmarkTest00636_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00636', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00636', methods=['POST'])
 	def BenchmarkTest00636_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00636")
 		
-		if headers:
-			param = headers[0]
-
-		import configparser
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
 		
-		bar = 'safe!'
-		conf52975 = configparser.ConfigParser()
-		conf52975.add_section('section52975')
-		conf52975.set('section52975', 'keyA-52975', 'a_Value')
-		conf52975.set('section52975', 'keyB-52975', param)
-		bar = conf52975.get('section52975', 'keyA-52975')
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		import flask
-		import urllib.parse
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
+		import base64
+		import secrets
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00636'[13:]
+		user = f'SafeToby{num}'
+		cookie = f'rememberMe{num}'
+		value = base64.b64encode(secrets.token_bytes(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'Error parsing URL.'
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		return flask.redirect(bar)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

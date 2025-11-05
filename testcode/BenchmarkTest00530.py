@@ -20,36 +20,34 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00530', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00530', methods=['GET'])
 	def BenchmarkTest00530_get():
 		return BenchmarkTest00530_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00530', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00530', methods=['POST'])
 	def BenchmarkTest00530_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00530")
-		if not param:
-		    param = ""
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00530")
+		
+		if headers:
+			param = headers[0]
 
-		map80744 = {}
-		map80744['keyA-80744'] = 'a-Value'
-		map80744['keyB-80744'] = param
-		map80744['keyC'] = 'another-Value'
-		bar = map80744['keyB-80744']
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import re
+		import pathlib
+		import helpers.utils
 
-		regex = r'(a+)+$'
-
-		if re.match(regex, bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

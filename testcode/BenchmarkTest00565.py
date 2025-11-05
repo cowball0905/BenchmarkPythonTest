@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00565', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00565', methods=['GET'])
 	def BenchmarkTest00565_get():
 		return BenchmarkTest00565_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00565', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00565', methods=['POST'])
 	def BenchmarkTest00565_post():
 		RESPONSE = ""
 
@@ -34,40 +34,33 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import platform
-		import codecs
-		import helpers.utils
-		from urllib.parse import urlparse
-		from urllib.request import url2pathname
+		import random
+		from helpers.utils import mysession
 
-		startURIslashes = ""
+		num = 'BenchmarkTest00565'[13:]
+		user = f'Nancy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.normalvariate())[2:]
 
-		if platform.system() == "Windows":
-			startURIslashes = "/"
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
 		else:
-			startURIslashes = "//"
-
-		try:
-			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+			mysession[cookie] = value
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
-
-			RESPONSE += (
-				" And file already exists."
-			)
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
-		except IOError:
-			pass
 
 		return RESPONSE
 

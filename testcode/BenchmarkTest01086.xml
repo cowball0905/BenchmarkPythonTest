@@ -1,7 +1,7 @@
 <test-metadata>
   <benchmark-version>0.1</benchmark-version>
-  <category>ldapi</category>
+  <category>hash</category>
   <test-number>01086</test-number>
-  <vulnerability>true</vulnerability>
-  <cwe>90</cwe>
+  <vulnerability>false</vulnerability>
+  <cwe>328</cwe>
 </test-metadata>

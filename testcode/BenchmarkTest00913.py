@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00913', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00913', methods=['GET'])
 	def BenchmarkTest00913_get():
 		return BenchmarkTest00913_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00913', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00913', methods=['POST'])
 	def BenchmarkTest00913_post():
 		RESPONSE = ""
 
@@ -35,30 +35,36 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import lxml.etree
+		import os
+		import subprocess
 		import helpers.utils
 
-		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
+		else:
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {bar}")
 
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
+		RESPONSE += (
+			helpers.utils.commandOutput(proc)
+		)
 
 		return RESPONSE
 

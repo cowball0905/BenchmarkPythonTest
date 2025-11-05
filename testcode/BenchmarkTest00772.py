@@ -20,45 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00772', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00772', methods=['GET'])
 	def BenchmarkTest00772_get():
 		return BenchmarkTest00772_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00772', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00772', methods=['POST'])
 	def BenchmarkTest00772_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00772")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00772")
+		param = ""
+		if values:
+			param = values[0]
 
-		string57450 = 'help'
-		string57450 += param
-		string57450 += 'snapes on a plane'
-		bar = string57450[4:-17]
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		from flask import make_response
-		import io
+		import lxml.etree
 		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
-
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=False,
-			httponly=True)
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

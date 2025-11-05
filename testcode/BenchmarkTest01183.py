@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01183', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01183', methods=['GET'])
 	def BenchmarkTest01183_get():
 		return BenchmarkTest01183_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01183', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01183', methods=['POST'])
 	def BenchmarkTest01183_post():
 		RESPONSE = ""
 
@@ -32,22 +32,20 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01183")
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
-
 		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
+
+		import yaml
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'wb') as fd:
-				RESPONSE += (
-					f'Now ready to write to file: {escape_for_html(fileName)}'
-				)
-		except IOError as e:
+			yobj = yaml.load(bar, Loader=yaml.Loader)
+
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00705', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00705', methods=['GET'])
 	def BenchmarkTest00705_get():
 		return BenchmarkTest00705_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00705', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00705', methods=['POST'])
 	def BenchmarkTest00705_post():
 		RESPONSE = ""
 
@@ -32,33 +32,38 @@ def init(app):
 		if not param:
 			param = ""
 
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
+
 		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		import secrets
+		from helpers.utils import mysession
 
-		import helpers.utils
+		num = 'BenchmarkTest00705'[13:]
+		user = f'SafeTruman{num}'
+		cookie = f'rememberMe{num}'
+		value = secrets.token_urlsafe(32)
 
-		fileName = None
-		fd = None
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				f'Welcome back: {user}<br/>'
 			)
-		except IOError as e:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

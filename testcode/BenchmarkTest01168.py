@@ -20,48 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest01168', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest01168', methods=['GET'])
 	def BenchmarkTest01168_get():
 		return BenchmarkTest01168_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest01168', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest01168', methods=['POST'])
 	def BenchmarkTest01168_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01168")
 
-		map27566 = {}
-		map27566['keyA-27566'] = 'a-Value'
-		map27566['keyB-27566'] = param
-		map27566['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map27566['keyB-27566']
-		bar = map27566['keyA-27566']
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import platform
-		import subprocess
+		from flask import make_response
+		import io
 		import helpers.utils
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
 
-			RESPONSE += (
-				helpers.utils.commandOutput(proc)
-			)
-		except IOError:
-			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
-			)
+		RESPONSE += (
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+		)
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=False,
+			httponly=True)
 
 		return RESPONSE
 

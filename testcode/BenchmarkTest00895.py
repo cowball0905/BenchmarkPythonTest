@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00895', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00895', methods=['GET'])
 	def BenchmarkTest00895_get():
 		return BenchmarkTest00895_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00895', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00895', methods=['POST'])
 	def BenchmarkTest00895_post():
 		RESPONSE = ""
 
@@ -35,20 +35,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf68591 = configparser.ConfigParser()
-		conf68591.add_section('section68591')
-		conf68591.set('section68591', 'keyA-68591', 'a-Value')
-		conf68591.set('section68591', 'keyB-68591', param)
-		bar = conf68591.get('section68591', 'keyB-68591')
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
+		import flask
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
-		)
+		return flask.redirect(bar)
 
 		return RESPONSE
 

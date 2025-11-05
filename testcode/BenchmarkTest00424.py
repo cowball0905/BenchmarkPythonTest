@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00424', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00424', methods=['GET'])
 	def BenchmarkTest00424_get():
 		return BenchmarkTest00424_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00424', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00424', methods=['POST'])
 	def BenchmarkTest00424_post():
 		RESPONSE = ""
 
@@ -38,25 +38,14 @@ def init(app):
 		
 		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import random
-		import base64
-		from helpers.utils import mysession
+		import flask
 
-		num = 'BenchmarkTest00424'[13:]
-		user = f'SafeBarbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
+		flask.session['userid'] = bar
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		RESPONSE += (
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
+		)
 
 		return RESPONSE
 

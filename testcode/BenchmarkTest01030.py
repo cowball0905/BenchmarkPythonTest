@@ -20,49 +20,33 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01030', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest01030', methods=['GET'])
 	def BenchmarkTest01030_get():
 		return BenchmarkTest01030_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01030', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest01030', methods=['POST'])
 	def BenchmarkTest01030_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01030" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01030"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01030") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		superstring = f'41782{param}abcd'
-		bar = superstring[len('41782'):len(superstring)-5]
+		bar = "This should never happen"
+		if 'should' not in bar:
+		        bar = "Ifnot case passed"
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
+		import helpers.db_sqlite
 
-		num = 'BenchmarkTest01030'[13:]
-		user = f'SafeTruman{num}'
-		cookie = f'rememberMe{num}'
-		value = secrets.token_urlsafe(32)
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (bar,))
+		RESPONSE += (
+			helpers.db_sqlite.results(cur, sql)
+		)
+		con.close()
 
 		return RESPONSE
 

@@ -20,40 +20,43 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01068', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01068', methods=['GET'])
 	def BenchmarkTest01068_get():
 		return BenchmarkTest01068_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01068', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01068', methods=['POST'])
 	def BenchmarkTest01068_post():
 		RESPONSE = ""
 
-		import urllib.parse
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
+
+		import helpers.ThingFactory
 		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01068" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01068"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01068") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		map99915 = {}
-		map99915['keyA-99915'] = 'a-Value'
-		map99915['keyB-99915'] = param
-		map99915['keyC'] = 'another-Value'
-		bar = map99915['keyB-99915']
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
+		num = 'BenchmarkTest01068'[13:]
+		user = f'SafeToby{num}'
+		cookie = f'rememberMe{num}'
+		value = base64.b64encode(secrets.token_bytes(32))
 
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest01068': bar}))
-		
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

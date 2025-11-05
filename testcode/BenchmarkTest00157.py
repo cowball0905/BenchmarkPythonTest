@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00157', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00157', methods=['GET'])
 	def BenchmarkTest00157_get():
 		return BenchmarkTest00157_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00157', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00157', methods=['POST'])
 	def BenchmarkTest00157_post():
 		RESPONSE = ""
 
@@ -36,18 +36,14 @@ def init(app):
 		if 'should' in bar:
 			bar = param
 
-		import re
+		import flask
 
-		regex = r'(a+)+$'
+		flask.session[bar] = '12345'
 
-		if re.match(regex, bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+		RESPONSE += (
+			f'Item: \'{escape_for_html(bar)}'
+			'\' with value: 12345 saved in session.'
+		)
 
 		return RESPONSE
 

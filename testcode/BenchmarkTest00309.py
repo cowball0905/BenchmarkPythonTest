@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00309', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00309', methods=['GET'])
 	def BenchmarkTest00309_get():
 		return BenchmarkTest00309_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00309', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00309', methods=['POST'])
 	def BenchmarkTest00309_post():
 		RESPONSE = ""
 
@@ -39,16 +39,25 @@ def init(app):
 		if 'should' not in bar:
 		        bar = "Ifnot case passed"
 
-		import helpers.db_sqlite
+		import random
+		import base64
+		from helpers.utils import mysession
 
-		sql = f'SELECT username from USERS where password = ?'
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql, (bar,))
-		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
-		)
-		con.close()
+		num = 'BenchmarkTest00309'[13:]
+		user = f'Barbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.randbytes(32)))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00167', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00167', methods=['GET'])
 	def BenchmarkTest00167_get():
 		return BenchmarkTest00167_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00167', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00167', methods=['POST'])
 	def BenchmarkTest00167_post():
 		RESPONSE = ""
 
@@ -32,32 +32,31 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf27284 = configparser.ConfigParser()
-		conf27284.add_section('section27284')
-		conf27284.set('section27284', 'keyA-27284', 'a-Value')
-		conf27284.set('section27284', 'keyB-27284', param)
-		bar = conf27284.get('section27284', 'keyB-27284')
+		string27284 = ''
+		data12 = ''
+		copy = string27284
+		string27284 = ''
+		string27284 += param
+		copy += 'SomeOKString'
+		bar = copy
 
-		import flask
-		import urllib.parse
+		import pickle
+		import base64
+		import helpers.utils
+
+		helpers.utils.sharedstr = "no pickles to be seen here"
 
 		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
 		except:
 			RESPONSE += (
-				'Error parsing URL.'
+				'Unpickling failed!'
 			)
 			return RESPONSE
 
-		return flask.redirect(bar)
+		RESPONSE += (
+			f'shared string is {helpers.utils.sharedstr}'
+		)
 
 		return RESPONSE
 

@@ -20,31 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00452', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00452', methods=['GET'])
 	def BenchmarkTest00452_get():
 		return BenchmarkTest00452_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00452', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00452', methods=['POST'])
 	def BenchmarkTest00452_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00452" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("BenchmarkTest00452")
+		if not param:
+		    param = ""
+
+		import configparser
+		
+		bar = 'safe!'
+		conf75795 = configparser.ConfigParser()
+		conf75795.add_section('section75795')
+		conf75795.set('section75795', 'keyA-75795', 'a-Value')
+		conf75795.set('section75795', 'keyB-75795', param)
+		bar = conf75795.get('section75795', 'keyB-75795')
 
 		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
 
-		import flask
-
-		flask.session['userid'] = bar
-
-		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
-		)
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

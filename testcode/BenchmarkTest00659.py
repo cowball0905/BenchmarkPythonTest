@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00659', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00659', methods=['GET'])
 	def BenchmarkTest00659_get():
 		return BenchmarkTest00659_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00659', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00659', methods=['POST'])
 	def BenchmarkTest00659_post():
 		RESPONSE = ""
 
@@ -39,27 +39,36 @@ def init(app):
 				param = name
 				break
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import helpers.utils
-
-		fileName = None
-		fd = None
+		import flask
+		import urllib.parse
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'rb') as fd:
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
 				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+					'Invalid URL.'
 				)
-		except IOError as e:
+				return RESPONSE
+		except:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				'Error parsing URL.'
 			)
+			return RESPONSE
+
+		return flask.redirect(bar)
 
 		return RESPONSE
 

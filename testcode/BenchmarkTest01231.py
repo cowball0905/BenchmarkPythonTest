@@ -20,43 +20,30 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01231', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01231', methods=['GET'])
 	def BenchmarkTest01231_get():
 		return BenchmarkTest01231_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01231', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01231', methods=['POST'])
 	def BenchmarkTest01231_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01231")
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
 
-		import re
+		import pathlib
+		import helpers.utils
 
-		regex = re.compile(r'^(([a-z])+.)+')
-
-		if regex.match(bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / param
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
+
 

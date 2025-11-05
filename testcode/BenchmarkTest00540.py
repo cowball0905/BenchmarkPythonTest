@@ -20,35 +20,35 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00540', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00540', methods=['GET'])
 	def BenchmarkTest00540_get():
 		return BenchmarkTest00540_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00540', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00540', methods=['POST'])
 	def BenchmarkTest00540_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00540")
-		if not param:
-		    param = ""
-
-		import configparser
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00540")
 		
-		bar = 'safe!'
-		conf36502 = configparser.ConfigParser()
-		conf36502.add_section('section36502')
-		conf36502.set('section36502', 'keyA-36502', 'a_Value')
-		conf36502.set('section36502', 'keyB-36502', param)
-		bar = conf36502.get('section36502', 'keyA-36502')
+		if headers:
+			param = headers[0]
 
-		try:
-			RESPONSE += (
-				eval(bar)
-			)
-		except:
-			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
-			)
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
+
+		import helpers.db_sqlite
+
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (bar,))
+		RESPONSE += (
+			helpers.db_sqlite.results(cur, sql)
+		)
+		con.close()
 
 		return RESPONSE
 

@@ -20,38 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01078', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01078', methods=['GET'])
 	def BenchmarkTest01078_get():
 		return BenchmarkTest01078_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01078', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01078', methods=['POST'])
 	def BenchmarkTest01078_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01078" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01078"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01078") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		import markupsafe
+		
+		bar = markupsafe.escape(param)
 
-		try:
+		import random
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest01078'[13:]
+		user = f'SafeRandall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				eval(bar)
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

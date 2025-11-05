@@ -20,42 +20,53 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00972', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00972', methods=['GET'])
 	def BenchmarkTest00972_get():
 		return BenchmarkTest00972_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00972', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00972', methods=['POST'])
 	def BenchmarkTest00972_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00972")
-		if not param:
-			param = ""
-
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
-
-		import flask
 		import urllib.parse
+		
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00972" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00972"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00972") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
+
+		import base64
+		import secrets
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00972'[13:]
+		user = f'SafeTheo{num}'
+		cookie = f'rememberMe{num}'
+		value = secrets.token_hex(32)
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'Error parsing URL.'
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		return flask.redirect(bar)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

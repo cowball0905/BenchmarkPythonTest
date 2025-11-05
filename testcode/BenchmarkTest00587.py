@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00587', methods=['GET'])
+	@app.route('/benchmark/hash-00/BenchmarkTest00587', methods=['GET'])
 	def BenchmarkTest00587_get():
 		return BenchmarkTest00587_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00587', methods=['POST'])
+	@app.route('/benchmark/hash-00/BenchmarkTest00587', methods=['POST'])
 	def BenchmarkTest00587_post():
 		RESPONSE = ""
 
@@ -34,35 +34,35 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		num = 106
+		import markupsafe
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = markupsafe.escape(param)
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		import hashlib, base64
+		import io, helpers.utils
 
-		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-			doc = xml.dom.minidom.parseString(bar, parser)
-
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
-
+		if len(input) == 0:
 			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
+				'Cannot generate hash: Input was empty.'
 			)
-		except:
-			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
-			)
+			return RESPONSE
+
+		hash = hashlib.new('sha384')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

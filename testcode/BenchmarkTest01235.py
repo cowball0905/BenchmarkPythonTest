@@ -20,32 +20,33 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01235', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01235', methods=['GET'])
 	def BenchmarkTest01235_get():
 		return BenchmarkTest01235_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01235', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01235', methods=['POST'])
 	def BenchmarkTest01235_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01235")
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		bar = param
 
-		import re
-
-		regex = r'(abc)*(bcd)+'
-
-		if re.match(regex, bar) is not None:
+		if not param.startswith('\'') or not param.endswith('\'') or '\'' in param[1:-1]:
 			RESPONSE += (
-				'String matches!'
+				"Exec argument must be a plain string literal."
 			)
-		else:
+			return RESPONSE
+
+		try:
+			exec(param)
+		except:
 			RESPONSE += (
-				'String does not match.'
+				f'Error executing statement \'{escape_for_html(param)}\''
 			)
 
 		return RESPONSE
+
 

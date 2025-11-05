@@ -20,28 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00478', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00478', methods=['GET'])
 	def BenchmarkTest00478_get():
 		return BenchmarkTest00478_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00478', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00478', methods=['POST'])
 	def BenchmarkTest00478_post():
 		RESPONSE = ""
 
-		param = request.headers.get("Referer")
+		param = request.headers.get("BenchmarkTest00478")
 		if not param:
 		    param = ""
 
-		string38915 = 'help'
-		string38915 += param
-		string38915 += 'snapes on a plane'
-		bar = string38915[4:-17]
+		import configparser
+		
+		bar = 'safe!'
+		conf38915 = configparser.ConfigParser()
+		conf38915.add_section('section38915')
+		conf38915.set('section38915', 'keyA-38915', 'a-Value')
+		conf38915.set('section38915', 'keyB-38915', param)
+		bar = conf38915.get('section38915', 'keyB-38915')
 
+		import secrets
+		from helpers.utils import mysession
 
-		otherarg = "static text"
-		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
-		)
+		num = 'BenchmarkTest00478'[13:]
+		user = f'SafeRicky{num}'
+		cookie = f'rememberMe{num}'
+		value = str(secrets.randbits(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

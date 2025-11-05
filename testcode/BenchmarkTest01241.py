@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01241', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest01241', methods=['GET'])
 	def BenchmarkTest01241_get():
 		return BenchmarkTest01241_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01241', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest01241', methods=['POST'])
 	def BenchmarkTest01241_post():
 		RESPONSE = ""
 
@@ -32,32 +32,16 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01241")
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		import flask
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
+		flask.session[param] = '12345'
 
 		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+			f'Item: \'{escape_for_html(param)}'
+			'\' with value: 12345 saved in session.'
 		)
 
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=False,
-			httponly=True)
-
 		return RESPONSE
+
 

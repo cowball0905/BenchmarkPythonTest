@@ -20,52 +20,27 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01227', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01227', methods=['GET'])
 	def BenchmarkTest01227_get():
 		return BenchmarkTest01227_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01227', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01227', methods=['POST'])
 	def BenchmarkTest01227_post():
 		RESPONSE = ""
 
 		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01227")
-
-		import configparser
 		
-		bar = 'safe!'
-		conf49777 = configparser.ConfigParser()
-		conf49777.add_section('section49777')
-		conf49777.set('section49777', 'keyA-49777', 'a-Value')
-		conf49777.set('section49777', 'keyB-49777', param)
-		bar = conf49777.get('section49777', 'keyB-49777')
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest01227")
+		if not param:
+			param = ""
 
-		import hashlib, base64
-		import io, helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
 
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.new('sha384')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			f'Parameter value: {param}'
 		)
-		f.close()
 
 		return RESPONSE
+
 

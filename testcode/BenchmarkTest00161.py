@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00161', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00161', methods=['GET'])
 	def BenchmarkTest00161_get():
 		return BenchmarkTest00161_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00161', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00161', methods=['POST'])
 	def BenchmarkTest00161_post():
 		RESPONSE = ""
 
@@ -32,20 +32,25 @@ def init(app):
 		if not param:
 			param = ""
 
-		superstring = f'67731{param}abcd'
-		bar = superstring[len('67731'):len(superstring)-5]
+		map67731 = {}
+		map67731['keyA-67731'] = 'a-Value'
+		map67731['keyB-67731'] = param
+		map67731['keyC'] = 'another-Value'
+		bar = map67731['keyB-67731']
 
-		import re
-
-		regex = r'(abc)*(bcd)+'
-
-		if re.match(regex, bar) is not None:
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
 			RESPONSE += (
-				'String matches!'
+				"Eval argument must be a plain string literal."
 			)
-		else:
+			return RESPONSE		
+
+		try:
 			RESPONSE += (
-				'String does not match.'
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

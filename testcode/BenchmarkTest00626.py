@@ -20,50 +20,50 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00626', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00626', methods=['GET'])
 	def BenchmarkTest00626_get():
 		return BenchmarkTest00626_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00626', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00626', methods=['POST'])
 	def BenchmarkTest00626_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00626")
 		
-		if headers:
-			param = headers[0]
-
-		import helpers.ThingFactory
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		import hashlib, base64
-		import io, helpers.utils
+		map3953 = {}
+		map3953['keyA-3953'] = 'a-Value'
+		map3953['keyB-3953'] = param
+		map3953['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map3953['keyB-3953']
+		bar = map3953['keyA-3953']
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		import helpers.utils
 
-		if len(input) == 0:
+		fileName = None
+		fd = None
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
-			return RESPONSE
-
-		hash = hashlib.sha512()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00474', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00474', methods=['GET'])
 	def BenchmarkTest00474_get():
 		return BenchmarkTest00474_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00474', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00474', methods=['POST'])
 	def BenchmarkTest00474_post():
 		RESPONSE = ""
 
@@ -32,44 +32,34 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import configparser
+		
+		bar = 'safe!'
+		conf66828 = configparser.ConfigParser()
+		conf66828.add_section('section66828')
+		conf66828.set('section66828', 'keyA-66828', 'a_Value')
+		conf66828.set('section66828', 'keyB-66828', param)
+		bar = conf66828.get('section66828', 'keyA-66828')
 
+		import lxml.etree
 		import helpers.utils
 
-		fileName = None
-		fd = None
-
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not include \'../\''
-			)
-			return RESPONSE
-
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-		except IOError as e:
+		except:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

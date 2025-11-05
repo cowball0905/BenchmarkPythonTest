@@ -20,45 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00838', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00838', methods=['GET'])
 	def BenchmarkTest00838_get():
 		return BenchmarkTest00838_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00838', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00838', methods=['POST'])
 	def BenchmarkTest00838_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00838")
-		param = ""
-		if values:
-			param = values[0]
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00838")
+		if not param:
+			param = ""
 
-		string61765 = ''
-		data12 = ''
-		copy = string61765
-		string61765 = ''
-		string61765 += param
-		copy += 'SomeOKString'
-		bar = copy
-
-		import secrets
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00838'[13:]
-		user = f'SafeRicky{num}'
-		cookie = f'rememberMe{num}'
-		value = str(secrets.randbits(32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
 		else:
-			mysession[cookie] = value
+			bar = param
+
+		import helpers.utils
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

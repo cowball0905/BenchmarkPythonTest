@@ -20,43 +20,48 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00637', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00637', methods=['GET'])
 	def BenchmarkTest00637_get():
 		return BenchmarkTest00637_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00637', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00637', methods=['POST'])
 	def BenchmarkTest00637_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00637")
 		
-		if headers:
-			param = headers[0]
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
+		
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		map98281 = {}
-		map98281['keyA-98281'] = 'a-Value'
-		map98281['keyB-98281'] = param
-		map98281['keyC'] = 'another-Value'
-		bar = map98281['keyB-98281']
+		import html
+		
+		bar = html.escape(param)
 
-		import flask
-		import urllib.parse
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
+		num = 'BenchmarkTest00637'[13:]
+		user = f'SafeToby{num}'
+		cookie = f'rememberMe{num}'
+		value = base64.b64encode(secrets.token_bytes(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'Error parsing URL.'
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		return flask.redirect(bar)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00212', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00212', methods=['GET'])
 	def BenchmarkTest00212_get():
 		return BenchmarkTest00212_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00212', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00212', methods=['POST'])
 	def BenchmarkTest00212_post():
 		RESPONSE = ""
 
@@ -33,17 +33,32 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import markupsafe
-		
-		bar = markupsafe.escape(param)
+		map81856 = {}
+		map81856['keyA-81856'] = 'a-Value'
+		map81856['keyB-81856'] = param
+		map81856['keyC'] = 'another-Value'
+		bar = map81856['keyB-81856']
 
+		import lxml.etree
+		import helpers.utils
 
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
-		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
-		)
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			run_query = lxml.etree.XPath(query)
+			nodes = run_query(root)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

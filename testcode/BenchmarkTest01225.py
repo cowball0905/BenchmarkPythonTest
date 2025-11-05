@@ -20,47 +20,39 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01225', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01225', methods=['GET'])
 	def BenchmarkTest01225_get():
 		return BenchmarkTest01225_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01225', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01225', methods=['POST'])
 	def BenchmarkTest01225_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01225")
+		values = request.args.getlist("BenchmarkTest01225")
+		param = ""
+		if values:
+			param = values[0]
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import hashlib, base64
-		import io, helpers.utils
+		import random
+		from helpers.utils import mysession
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		num = 'BenchmarkTest01225'[13:]
+		user = f'SafeRandall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().random())[2:]
 
-		if len(input) == 0:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		hash = hashlib.new('md5')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
+
 

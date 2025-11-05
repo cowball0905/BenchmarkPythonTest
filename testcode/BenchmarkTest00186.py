@@ -33,28 +33,27 @@ def init(app):
 		if values:
 			param = values[0]
 
-		string64405 = 'help'
-		string64405 += param
-		string64405 += 'snapes on a plane'
-		bar = string64405[4:-17]
+		import configparser
+		
+		bar = 'safe!'
+		conf64405 = configparser.ConfigParser()
+		conf64405.add_section('section64405')
+		conf64405.set('section64405', 'keyA-64405', 'a-Value')
+		conf64405.set('section64405', 'keyB-64405', param)
+		bar = conf64405.get('section64405', 'keyB-64405')
 
-		import codecs
 		import helpers.utils
 
 		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
-			)
-
-			RESPONSE += (
-				" And file already exists."
-			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

@@ -20,53 +20,33 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00366', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00366', methods=['GET'])
 	def BenchmarkTest00366_get():
 		return BenchmarkTest00366_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00366', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00366', methods=['POST'])
 	def BenchmarkTest00366_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00366")
-		if not param:
-			param = ""
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00366" in request.form.getlist(name):
+				param = name
+				break
 
-		map99262 = {}
-		map99262['keyA-99262'] = 'a-Value'
-		map99262['keyB-99262'] = param
-		map99262['keyC'] = 'another-Value'
-		bar = map99262['keyB-99262']
+		string99262 = ''
+		data12 = ''
+		copy = string99262
+		string99262 = ''
+		string99262 += param
+		copy += 'SomeOKString'
+		bar = copy
 
-		import helpers.ldap
-		import ldap3
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
-		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
-
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
-			RESPONSE += (
-				"Error processing LDAP query."
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

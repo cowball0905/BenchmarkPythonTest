@@ -20,49 +20,48 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00875', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00875', methods=['GET'])
 	def BenchmarkTest00875_get():
 		return BenchmarkTest00875_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00875', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00875', methods=['POST'])
 	def BenchmarkTest00875_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00875")
-		param = ""
-		if values:
-			param = values[0]
-
-		possible = "ABC"
-		guess = possible[0]
+		import helpers.separate_request
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00875")
+		if not param:
+			param = ""
 
-		import os
-		import subprocess
-		import helpers.utils
+		map50727 = {}
+		map50727['keyA-50727'] = 'a-Value'
+		map50727['keyB-50727'] = param
+		map50727['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map50727['keyB-50727']
+		bar = map50727['keyA-50727']
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
+		import random
+		import base64
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00875'[13:]
+		user = f'SafeBarbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
 		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
-
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
-		RESPONSE += (
-			helpers.utils.commandOutput(proc)
-		)
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00081', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00081', methods=['GET'])
 	def BenchmarkTest00081_get():
-		response = make_response(render_template('web/ldapi-00/BenchmarkTest00081.html'))
-		response.set_cookie('BenchmarkTest00081', 'Ms+Bar',
+		response = make_response(render_template('web/deserialization-00/BenchmarkTest00081.html'))
+		response.set_cookie('BenchmarkTest00081', 'name%3A+safe+data%0Atext%3A+act+like+this+is+conf+data',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,47 +31,27 @@ def init(app):
 		return response
 		return BenchmarkTest00081_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00081', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00081', methods=['POST'])
 	def BenchmarkTest00081_post():
 		RESPONSE = ""
 
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00081", "noCookieValueSupplied"))
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
-		import helpers.ldap
-		import ldap3
+		import yaml
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
 		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+			yobj = yaml.safe_load(bar)
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
 			RESPONSE += (
-				"Error processing LDAP query."
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

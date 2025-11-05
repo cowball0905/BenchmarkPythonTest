@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00892', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00892', methods=['GET'])
 	def BenchmarkTest00892_get():
 		return BenchmarkTest00892_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00892', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00892', methods=['POST'])
 	def BenchmarkTest00892_post():
 		RESPONSE = ""
 
@@ -35,27 +35,41 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
+		from flask import make_response
+		import io
 		import helpers.utils
 
-		fileName = None
-		fd = None
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'rb') as fd:
-				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-				)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
+
+		RESPONSE += (
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+		)
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=False,
+			httponly=True)
 
 		return RESPONSE
 

@@ -20,31 +20,30 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00448', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00448', methods=['GET'])
 	def BenchmarkTest00448_get():
 		return BenchmarkTest00448_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00448', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00448', methods=['POST'])
 	def BenchmarkTest00448_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00448" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("BenchmarkTest00448")
+		if not param:
+		    param = ""
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
+		import os
+		import helpers.utils
 
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00448': bar}))
-		
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
 

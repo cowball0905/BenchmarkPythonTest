@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01173', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest01173', methods=['GET'])
 	def BenchmarkTest01173_get():
 		return BenchmarkTest01173_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01173', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest01173', methods=['POST'])
 	def BenchmarkTest01173_post():
 		RESPONSE = ""
 
@@ -32,15 +32,31 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01173")
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		string20496 = ''
+		data12 = ''
+		copy = string20496
+		string20496 = ''
+		string20496 += param
+		copy += 'SomeOKString'
+		bar = copy
 
+		import flask
+		import urllib.parse
 
-		RESPONSE += (
-			f'Parameter value: {bar}'
-		)
+		try:
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
+		except:
+			RESPONSE += (
+				'Error parsing URL.'
+			)
+			return RESPONSE
+
+		return flask.redirect(bar)
 
 		return RESPONSE
 

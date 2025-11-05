@@ -20,42 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00641', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00641', methods=['GET'])
 	def BenchmarkTest00641_get():
 		return BenchmarkTest00641_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00641', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00641', methods=['POST'])
 	def BenchmarkTest00641_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00641")
 		
-		if headers:
-			param = headers[0]
-
-		import configparser
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
 		
-		bar = 'safe!'
-		conf83525 = configparser.ConfigParser()
-		conf83525.add_section('section83525')
-		conf83525.set('section83525', 'keyA-83525', 'a-Value')
-		conf83525.set('section83525', 'keyB-83525', param)
-		bar = conf83525.get('section83525', 'keyB-83525')
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		try:
+		import random
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00641'[13:]
+		user = f'SafeRandy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().getrandbits(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				eval(bar)
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

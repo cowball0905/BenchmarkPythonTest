@@ -20,29 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00781', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00781', methods=['GET'])
 	def BenchmarkTest00781_get():
 		return BenchmarkTest00781_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00781', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00781', methods=['POST'])
 	def BenchmarkTest00781_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00781")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00781")
+		param = ""
+		if values:
+			param = values[0]
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		map85207 = {}
+		map85207['keyA-85207'] = 'a-Value'
+		map85207['keyB-85207'] = param
+		map85207['keyC'] = 'another-Value'
+		bar = map85207['keyB-85207']
 
-		try:
+		import random
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00781'[13:]
+		user = f'Isaac{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.randint(0, 2**32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				eval(bar)
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

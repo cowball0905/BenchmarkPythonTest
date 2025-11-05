@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01181', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01181', methods=['GET'])
 	def BenchmarkTest01181_get():
 		return BenchmarkTest01181_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01181', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01181', methods=['POST'])
 	def BenchmarkTest01181_post():
 		RESPONSE = ""
 
@@ -32,28 +32,41 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01181")
 
-		possible = "ABC"
-		guess = possible[1]
+		import configparser
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = 'safe!'
+		conf27043 = configparser.ConfigParser()
+		conf27043.add_section('section27043')
+		conf27043.set('section27043', 'keyA-27043', 'a-Value')
+		conf27043.set('section27043', 'keyB-27043', param)
+		bar = conf27043.get('section27043', 'keyB-27043')
 
-		import pathlib
-		import helpers.utils
+		import helpers.ldap
+		import ldap3
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = testfiles / bar
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(uid={bar}))'
+		try:
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
+
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except IOError:
+			RESPONSE += (
+				"Error processing LDAP query."
+			)
 
 		return RESPONSE
 

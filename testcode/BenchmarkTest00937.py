@@ -20,42 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00937', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00937', methods=['GET'])
 	def BenchmarkTest00937_get():
 		return BenchmarkTest00937_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00937', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00937', methods=['POST'])
 	def BenchmarkTest00937_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00937")
-		if not param:
-			param = ""
-
-		import html
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00937" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00937"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00937") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = html.escape(param)
+		param = urllib.parse.unquote_plus(param)
 
-		import random
-		from helpers.utils import mysession
+		bar = param
 
-		num = 'BenchmarkTest00937'[13:]
-		user = f'SafeRandall{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().random())[2:]
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-		else:
-			mysession[cookie] = value
+		except:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

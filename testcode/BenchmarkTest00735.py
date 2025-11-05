@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00735', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00735', methods=['GET'])
 	def BenchmarkTest00735_get():
 		return BenchmarkTest00735_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00735', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00735', methods=['POST'])
 	def BenchmarkTest00735_post():
 		RESPONSE = ""
 
@@ -32,34 +32,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		import markupsafe
+		
+		bar = markupsafe.escape(param)
 
-		import lxml.etree
-		import helpers.utils
+		import flask
 
-		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+		flask.session[bar] = '12345'
 
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
+		RESPONSE += (
+			f'Item: \'{escape_for_html(bar)}'
+			'\' with value: 12345 saved in session.'
+		)
 
 		return RESPONSE
 

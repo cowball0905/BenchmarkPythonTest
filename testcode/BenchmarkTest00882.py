@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00882', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00882', methods=['GET'])
 	def BenchmarkTest00882_get():
 		return BenchmarkTest00882_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00882', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00882', methods=['POST'])
 	def BenchmarkTest00882_post():
 		RESPONSE = ""
 
@@ -35,44 +35,40 @@ def init(app):
 		if not param:
 			param = ""
 
-		map72896 = {}
-		map72896['keyA-72896'] = 'a-Value'
-		map72896['keyB-72896'] = param
-		map72896['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map72896['keyB-72896']
-		bar = map72896['keyA-72896']
+		import configparser
+		
+		bar = 'safe!'
+		conf72896 = configparser.ConfigParser()
+		conf72896.add_section('section72896')
+		conf72896.set('section72896', 'keyA-72896', 'a-Value')
+		conf72896.set('section72896', 'keyB-72896', param)
+		bar = conf72896.get('section72896', 'keyB-72896')
 
-		import platform
-		import codecs
-		import helpers.utils
-		from urllib.parse import urlparse
-		from urllib.request import url2pathname
+		import hashlib, base64
+		import io, helpers.utils
 
-		startURIslashes = ""
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		if platform.system() == "Windows":
-			startURIslashes = "/"
-		else:
-			startURIslashes = "//"
-
-		try:
-			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+		if len(input) == 0:
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				'Cannot generate hash: Input was empty.'
 			)
+			return RESPONSE
 
-			RESPONSE += (
-				" And file already exists."
-			)
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
-		except IOError:
-			pass
+		hash = hashlib.new('sha384')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

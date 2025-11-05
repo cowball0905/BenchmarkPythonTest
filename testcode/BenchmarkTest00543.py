@@ -20,37 +20,43 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00543', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00543', methods=['GET'])
 	def BenchmarkTest00543_get():
 		return BenchmarkTest00543_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00543', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00543', methods=['POST'])
 	def BenchmarkTest00543_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00543")
-		if not param:
-		    param = ""
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00543")
+		
+		if headers:
+			param = headers[0]
 
-		string55620 = 'help'
-		string55620 += param
-		string55620 += 'snapes on a plane'
-		bar = string55620[4:-17]
+		bar = "This should never happen"
+		if 'should' not in bar:
+		        bar = "Ifnot case passed"
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
 		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				eval(bar)
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
+
 
 		return RESPONSE
 

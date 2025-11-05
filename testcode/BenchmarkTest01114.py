@@ -20,53 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest01114', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01114', methods=['GET'])
 	def BenchmarkTest01114_get():
 		return BenchmarkTest01114_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest01114', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01114', methods=['POST'])
 	def BenchmarkTest01114_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01114")
 
-		import configparser
+		num = 106
 		
-		bar = 'safe!'
-		conf52006 = configparser.ConfigParser()
-		conf52006.add_section('section52006')
-		conf52006.set('section52006', 'keyA-52006', 'a-Value')
-		conf52006.set('section52006', 'keyB-52006', param)
-		bar = conf52006.get('section52006', 'keyB-52006')
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		import platform
+		import codecs
+		import helpers.utils
+		from urllib.parse import urlparse
+		from urllib.request import url2pathname
+
+		startURIslashes = ""
+
+		if platform.system() == "Windows":
+			startURIslashes = "/"
+		else:
+			startURIslashes = "//"
 
 		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
-
-			doc = xml.dom.minidom.parseString(bar, parser)
-
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
+			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
 			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
-		except:
+
 			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+				" And file already exists."
 			)
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
+			)
+		except IOError:
+			pass
 
 		return RESPONSE
 

@@ -20,43 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00925', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00925', methods=['GET'])
 	def BenchmarkTest00925_get():
 		return BenchmarkTest00925_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00925', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00925', methods=['POST'])
 	def BenchmarkTest00925_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00925")
-		if not param:
-			param = ""
-
-		import markupsafe
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00925" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00925"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00925") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = markupsafe.escape(param)
+		param = urllib.parse.unquote_plus(param)
 
-		import secrets
-		from helpers.utils import mysession
+		map82988 = {}
+		map82988['keyA-82988'] = 'a-Value'
+		map82988['keyB-82988'] = param
+		map82988['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map82988['keyB-82988']
+		bar = map82988['keyA-82988']
 
-		num = 'BenchmarkTest00925'[13:]
-		user = f'SafeRobbie{num}'
-		cookie = f'rememberMe{num}'
-		value = str(secrets.randbelow(2**32))
+		import pathlib
+		import helpers.utils
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = (testfiles / bar).resolve()
+
+		if not str(p).startswith(str(testfiles)):
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				"Invalid Path."
 			)
+			return RESPONSE
+		
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

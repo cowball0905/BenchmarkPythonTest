@@ -20,34 +20,50 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00778', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00778', methods=['GET'])
 	def BenchmarkTest00778_get():
 		return BenchmarkTest00778_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00778', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00778', methods=['POST'])
 	def BenchmarkTest00778_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00778")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00778")
+		param = ""
+		if values:
+			param = values[0]
 
-		import configparser
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = 'safe!'
-		conf62476 = configparser.ConfigParser()
-		conf62476.add_section('section62476')
-		conf62476.set('section62476', 'keyA-62476', 'a-Value')
-		conf62476.set('section62476', 'keyB-62476', param)
-		bar = conf62476.get('section62476', 'keyB-62476')
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		try:
+		import random
+		import base64
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00778'[13:]
+		user = f'Barbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.randbytes(32)))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				eval(bar)
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

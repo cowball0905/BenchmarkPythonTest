@@ -20,41 +20,39 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00363', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00363', methods=['GET'])
 	def BenchmarkTest00363_get():
 		return BenchmarkTest00363_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00363', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00363', methods=['POST'])
 	def BenchmarkTest00363_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00363" in request.form.getlist(name):
+				param = name
+				break
+
+		num = 86
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00363")
-		if not param:
-			param = ""
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
-
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Exec argument must be a plain string literal."
-			)
-			return RESPONSE
+		import helpers.utils
 
 		try:
-			exec(bar)
-		except:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

@@ -20,35 +20,34 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00538', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00538', methods=['GET'])
 	def BenchmarkTest00538_get():
 		return BenchmarkTest00538_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00538', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00538', methods=['POST'])
 	def BenchmarkTest00538_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00538")
-		if not param:
-		    param = ""
-
-		import configparser
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00538")
 		
-		bar = 'safe!'
-		conf79019 = configparser.ConfigParser()
-		conf79019.add_section('section79019')
-		conf79019.set('section79019', 'keyA-79019', 'a_Value')
-		conf79019.set('section79019', 'keyB-79019', param)
-		bar = conf79019.get('section79019', 'keyA-79019')
+		if headers:
+			param = headers[0]
 
-		import flask
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		flask.session[bar] = '12345'
+		import helpers.db_sqlite
 
+		sql = f'SELECT username from USERS where password = \'{bar}\''
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql)
 		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
+			helpers.db_sqlite.results(cur, sql)
 		)
+		con.close()
 
 		return RESPONSE
 

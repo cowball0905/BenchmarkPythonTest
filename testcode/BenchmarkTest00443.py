@@ -20,19 +20,17 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00443', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00443', methods=['GET'])
 	def BenchmarkTest00443_get():
 		return BenchmarkTest00443_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00443', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00443', methods=['POST'])
 	def BenchmarkTest00443_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00443" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("BenchmarkTest00443")
+		if not param:
+		    param = ""
 
 		num = 86
 		
@@ -41,18 +39,29 @@ def init(app):
 		else:
 			bar = param
 
-		import re
+		import helpers.utils
 
-		regex = r'(a+)+$'
+		fileName = None
+		fd = None
 
-		if re.match(regex, bar) is not None:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				'String matches!'
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
-		else:
+		except IOError as e:
 			RESPONSE += (
-				'String does not match.'
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

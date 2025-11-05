@@ -20,38 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00794', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00794', methods=['GET'])
 	def BenchmarkTest00794_get():
 		return BenchmarkTest00794_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00794', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00794', methods=['POST'])
 	def BenchmarkTest00794_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00794")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00794")
+		param = ""
+		if values:
+			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf88104 = configparser.ConfigParser()
-		conf88104.add_section('section88104')
-		conf88104.set('section88104', 'keyA-88104', 'a-Value')
-		conf88104.set('section88104', 'keyB-88104', param)
-		bar = conf88104.get('section88104', 'keyB-88104')
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
-		import yaml
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
-		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
+		num = 'BenchmarkTest00794'[13:]
+		user = f'SafeTruman{num}'
+		cookie = f'rememberMe{num}'
+		value = secrets.token_urlsafe(32)
 
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				yobj['text']
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				"There was an error loading the configuration"
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

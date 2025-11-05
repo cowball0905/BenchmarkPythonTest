@@ -20,47 +20,50 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00792', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00792', methods=['GET'])
 	def BenchmarkTest00792_get():
 		return BenchmarkTest00792_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00792', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00792', methods=['POST'])
 	def BenchmarkTest00792_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00792")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00792")
+		param = ""
+		if values:
+			param = values[0]
 
-		import configparser
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = 'safe!'
-		conf8644 = configparser.ConfigParser()
-		conf8644.add_section('section8644')
-		conf8644.set('section8644', 'keyA-8644', 'a_Value')
-		conf8644.set('section8644', 'keyB-8644', param)
-		bar = conf8644.get('section8644', 'keyA-8644')
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import platform
-		import subprocess
-		import helpers.utils
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
+		num = 'BenchmarkTest00792'[13:]
+		user = f'SafeTheo{num}'
+		cookie = f'rememberMe{num}'
+		value = secrets.token_hex(32)
 
-		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
-
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				helpers.utils.commandOutput(proc)
+				f'Welcome back: {user}<br/>'
 			)
-		except IOError:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

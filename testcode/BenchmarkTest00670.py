@@ -20,46 +20,34 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00670', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00670', methods=['GET'])
 	def BenchmarkTest00670_get():
 		return BenchmarkTest00670_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00670', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00670', methods=['POST'])
 	def BenchmarkTest00670_post():
 		RESPONSE = ""
 
+		param = request.args.get("BenchmarkTest00670")
+		if not param:
+			param = ""
+
+		bar = param
+
+		import pathlib
 		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
-
-		import random
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00670'[13:]
-		user = f'SafeNancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = testfiles / bar
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-		else:
-			mysession[cookie] = value
+		except OSError:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

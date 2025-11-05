@@ -20,59 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00683', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00683', methods=['GET'])
 	def BenchmarkTest00683_get():
 		return BenchmarkTest00683_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00683', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00683', methods=['POST'])
 	def BenchmarkTest00683_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		param = request.args.get("BenchmarkTest00683")
+		if not param:
+			param = ""
 
-		bar = ""
+		bar = "alsosafe"
 		if param:
 			lst = []
 			lst.append('safe')
 			lst.append(param)
 			lst.append('moresafe')
 			lst.pop(0)
-			bar = lst[0]
+			bar = lst[1]
 
-		import hashlib, base64
-		import io, helpers.utils
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
+		if '\'' in bar:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				"Employee ID must not contain apostrophes"
 			)
 			return RESPONSE
 
-		hash = hashlib.sha384()
-		hash.update(input)
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

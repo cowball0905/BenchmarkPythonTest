@@ -20,34 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01234', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01234', methods=['GET'])
 	def BenchmarkTest01234_get():
 		return BenchmarkTest01234_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01234', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01234', methods=['POST'])
 	def BenchmarkTest01234_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01234")
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		import markupsafe
-		
-		bar = markupsafe.escape(param)
 
-		import re
+		import hashlib, base64
+		import io, helpers.utils
 
-		regex = r'(a+)+$'
+		input = ''
+		if isinstance(param, str):
+			input = param.encode('utf-8')
+		elif isinstance(param, io.IOBase):
+			input = param.read(1000)
 
-		if re.match(regex, bar) is not None:
+		if len(input) == 0:
 			RESPONSE += (
-				'String matches!'
+				'Cannot generate hash: Input was empty.'
 			)
-		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+			return RESPONSE
+
+		hash = hashlib.sha512()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
+
 

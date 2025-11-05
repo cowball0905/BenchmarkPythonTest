@@ -20,35 +20,58 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00528', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00528', methods=['GET'])
 	def BenchmarkTest00528_get():
 		return BenchmarkTest00528_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00528', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00528', methods=['POST'])
 	def BenchmarkTest00528_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00528")
-		if not param:
-		    param = ""
-
-		import helpers.ThingFactory
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00528")
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		if headers:
+			param = headers[0]
 
-		import re
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		regex = re.compile(r'^(([a-z])+.)+')
+		import helpers.utils
 
-		if regex.match(bar) is not None:
+		if '../' in bar:
 			RESPONSE += (
-				'String matches!'
+				'File name must not contain \'../\''
 			)
-		else:
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				'String does not match.'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

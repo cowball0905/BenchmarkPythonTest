@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01174', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01174', methods=['GET'])
 	def BenchmarkTest01174_get():
 		return BenchmarkTest01174_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01174', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01174', methods=['POST'])
 	def BenchmarkTest01174_post():
 		RESPONSE = ""
 
@@ -32,42 +32,23 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01174")
 
-		possible = "ABC"
-		guess = possible[1]
+		import configparser
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
-
-		import helpers.utils
-
-		fileName = None
-		fd = None
+		bar = 'safe!'
+		conf80725 = configparser.ConfigParser()
+		conf80725.add_section('section80725')
+		conf80725.set('section80725', 'keyA-80725', 'a-Value')
+		conf80725.set('section80725', 'keyB-80725', param)
+		bar = conf80725.get('section80725', 'keyB-80725')
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				eval(bar)
 			)
-		except IOError as e:
+		except:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

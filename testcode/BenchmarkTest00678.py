@@ -20,59 +20,29 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00678', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00678', methods=['GET'])
 	def BenchmarkTest00678_get():
 		return BenchmarkTest00678_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00678', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00678', methods=['POST'])
 	def BenchmarkTest00678_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
+		param = request.args.get("BenchmarkTest00678")
+		if not param:
+			param = ""
+
+		num = 106
 		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import configparser
-		
-		bar = 'safe!'
-		conf29173 = configparser.ConfigParser()
-		conf29173.add_section('section29173')
-		conf29173.set('section29173', 'keyA-29173', 'a_Value')
-		conf29173.set('section29173', 'keyB-29173', param)
-		bar = conf29173.get('section29173', 'keyA-29173')
 
-		import hashlib, base64
-		import io, helpers.utils
-
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.new('sha384')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
 		)
-		f.close()
 
 		return RESPONSE
 

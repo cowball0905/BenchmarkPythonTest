@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00397', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00397', methods=['GET'])
 	def BenchmarkTest00397_get():
 		return BenchmarkTest00397_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00397', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00397', methods=['POST'])
 	def BenchmarkTest00397_post():
 		RESPONSE = ""
 
@@ -34,39 +34,28 @@ def init(app):
 				param = name
 				break
 
-		import configparser
-		
-		bar = 'safe!'
-		conf97567 = configparser.ConfigParser()
-		conf97567.add_section('section97567')
-		conf97567.set('section97567', 'keyA-97567', 'a_Value')
-		conf97567.set('section97567', 'keyB-97567', param)
-		bar = conf97567.get('section97567', 'keyA-97567')
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
-		if '\'' in bar:
+		num = 'BenchmarkTest00397'[13:]
+		user = f'SafeTheo{num}'
+		cookie = f'rememberMe{num}'
+		value = secrets.token_hex(32)
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				"Employee ID must not contain apostrophes"
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

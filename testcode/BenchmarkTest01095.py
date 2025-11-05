@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01095', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest01095', methods=['GET'])
 	def BenchmarkTest01095_get():
 		return BenchmarkTest01095_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01095', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest01095', methods=['POST'])
 	def BenchmarkTest01095_post():
 		RESPONSE = ""
 
@@ -33,41 +33,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		map71288 = {}
-		map71288['keyA-71288'] = 'a-Value'
-		map71288['keyB-71288'] = param
-		map71288['keyC'] = 'another-Value'
-		bar = map71288['keyB-71288']
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		import helpers.utils
+		import flask
 
-		fileName = None
-		fd = None
-
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not include \'../\''
-			)
-			return RESPONSE
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		return flask.redirect(bar)
 
 		return RESPONSE
 

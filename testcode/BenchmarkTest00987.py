@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00987', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest00987', methods=['GET'])
 	def BenchmarkTest00987_get():
 		return BenchmarkTest00987_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00987', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest00987', methods=['POST'])
 	def BenchmarkTest00987_post():
 		RESPONSE = ""
 
@@ -41,40 +41,21 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		import configparser
+		string35919 = ''
+		data12 = ''
+		copy = string35919
+		string35919 = ''
+		string35919 += param
+		copy += 'SomeOKString'
+		bar = copy
+
+
+		RESPONSE += (
+			'The value of the bar parameter is now in a custom header.'
+		)
+
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00987': bar}))
 		
-		bar = 'safe!'
-		conf35919 = configparser.ConfigParser()
-		conf35919.add_section('section35919')
-		conf35919.set('section35919', 'keyA-35919', 'a_Value')
-		conf35919.set('section35919', 'keyB-35919', param)
-		bar = conf35919.get('section35919', 'keyA-35919')
-
-		import helpers.utils
-
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not contain \'../\''
-			)
-			return RESPONSE
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

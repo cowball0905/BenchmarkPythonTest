@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00660', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00660', methods=['GET'])
 	def BenchmarkTest00660_get():
 		return BenchmarkTest00660_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00660', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00660', methods=['POST'])
 	def BenchmarkTest00660_post():
 		RESPONSE = ""
 
@@ -39,27 +39,31 @@ def init(app):
 				param = name
 				break
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		string14455 = ''
+		data12 = ''
+		copy = string14455
+		string14455 = ''
+		string14455 += param
+		copy += 'SomeOKString'
+		bar = copy
 
-		import helpers.utils
-
-		fileName = None
-		fd = None
+		import flask
+		import urllib.parse
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'rb') as fd:
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
 				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+					'Invalid URL.'
 				)
-		except IOError as e:
+				return RESPONSE
+		except:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				'Error parsing URL.'
 			)
+			return RESPONSE
+
+		return flask.redirect(bar)
 
 		return RESPONSE
 

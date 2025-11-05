@@ -20,35 +20,30 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00282', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00282', methods=['GET'])
 	def BenchmarkTest00282_get():
 		return BenchmarkTest00282_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00282', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00282', methods=['POST'])
 	def BenchmarkTest00282_post():
 		RESPONSE = ""
 
-		values = request.form.getlist("BenchmarkTest00282")
-		param = ""
-		if values:
-			param = values[0]
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_form_parameter("BenchmarkTest00282")
+		if not param:
+			param = ""
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		import markupsafe
+		
+		bar = markupsafe.escape(param)
 
-		import yaml
 
-		try:
-			yobj = yaml.safe_load(bar)
-
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+		)
 
 		return RESPONSE
 

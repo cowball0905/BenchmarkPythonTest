@@ -10,17 +10,16 @@
 </head>
 <body>
 <form action="/benchmark/xss-00/BenchmarkTest00354" method="POST" id="FormBenchmarkTest00354" autocomplete="off">
-	<div><label>Please enter your details:</label></div>
+	<div><label>Please explain your answer:</label></div>
 	<br>
-	<div><label>Email:</label></div>
-	<div><input type="text" id="email" name="email" ></div>
-	<div><label>Password:</label></div>
-	<div><input type="text" id="password" name="password" value="" ></div>
-	<div>&nbsp;</div>
-	<div><label>Parameter: BenchmarkTest00354 <br>Value:</label>
-	<input type="text" id="BenchmarkTest00354" name="BenchmarkTest00354" value="SafeText" ></div>
+	<div><textarea rows="4" cols="50" id="BenchmarkTest00354Area" name="BenchmarkTest00354Area"></textarea></div>
+	<div><label>Any additional note for the reviewer:</label></div>
+	<div><input type="text" id="answer" name="answer" ></div>
 	<br>
-	<div><input type="submit" value="Login" ></div>
+	<div><label>An AJAX request will be sent with a parameter value 'BenchmarkTest00354' and name:</label>
+	<input type="text" id="BenchmarkTest00354" name="BenchmarkTest00354" value="SafeText" class="safe" ></div>
+	<div><input type="button" id="login-btn" value="Login" method="submitParameterNamesForm" testcase="BenchmarkTest00354" ></div>
 </form>
+<div id="ajax-form-msg1"><pre><code class="prettyprint" id="code"></code></pre></div>
 </body>
 </html>

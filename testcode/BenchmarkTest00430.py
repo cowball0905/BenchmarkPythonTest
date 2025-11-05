@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00430', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00430', methods=['GET'])
 	def BenchmarkTest00430_get():
 		return BenchmarkTest00430_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00430', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00430', methods=['POST'])
 	def BenchmarkTest00430_post():
 		RESPONSE = ""
 
@@ -34,39 +34,33 @@ def init(app):
 				param = name
 				break
 
-		map56477 = {}
-		map56477['keyA-56477'] = 'a-Value'
-		map56477['keyB-56477'] = param
-		map56477['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map56477['keyB-56477']
-		bar = map56477['keyA-56477']
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import hashlib, base64
-		import io, helpers.utils
-
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				"Eval argument must be a plain string literal."
 			)
-			return RESPONSE
+			return RESPONSE		
 
-		hash = hashlib.new('md5')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

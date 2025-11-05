@@ -20,33 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00576', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00576', methods=['GET'])
 	def BenchmarkTest00576_get():
 		return BenchmarkTest00576_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00576', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00576', methods=['POST'])
 	def BenchmarkTest00576_post():
 		RESPONSE = ""
 
 		param = ""
-		headers = request.headers.getlist("Referer")
+		headers = request.headers.getlist("BenchmarkTest00576")
 		
 		if headers:
 			param = headers[0]
 
-		string24315 = ''
-		data12 = ''
-		copy = string24315
-		string24315 = ''
-		string24315 += param
-		copy += 'SomeOKString'
-		bar = copy
+		map24315 = {}
+		map24315['keyA-24315'] = 'a-Value'
+		map24315['keyB-24315'] = param
+		map24315['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map24315['keyB-24315']
+		bar = map24315['keyA-24315']
 
+		import random
+		from helpers.utils import mysession
 
-		otherarg = "static text"
-		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
-		)
+		num = 'BenchmarkTest00576'[13:]
+		user = f'SafeRandy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().getrandbits(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00336', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00336', methods=['GET'])
 	def BenchmarkTest00336_get():
 		return BenchmarkTest00336_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00336', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00336', methods=['POST'])
 	def BenchmarkTest00336_post():
 		RESPONSE = ""
 
@@ -43,24 +43,13 @@ def init(app):
 		bar = map30382['keyB-30382']
 		bar = map30382['keyA-30382']
 
-		import random
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest00336'[13:]
-		user = f'SafeNancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
+		RESPONSE += (
+			'The value of the bar parameter is now in a custom header.'
+		)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00336': bar}))
+		
 
 		return RESPONSE
 

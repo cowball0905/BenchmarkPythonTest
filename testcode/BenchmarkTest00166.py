@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00166', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00166', methods=['GET'])
 	def BenchmarkTest00166_get():
 		return BenchmarkTest00166_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00166', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00166', methods=['POST'])
 	def BenchmarkTest00166_post():
 		RESPONSE = ""
 
@@ -32,13 +32,28 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		string29039 = 'help'
+		string29039 += param
+		string29039 += 'snapes on a plane'
+		bar = string29039[4:-17]
 
-		import flask
+		import pickle
+		import base64
+		import helpers.utils
 
-		return flask.redirect(bar)
+		helpers.utils.sharedstr = "no pickles to be seen here"
+
+		try:
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
+		except:
+			RESPONSE += (
+				'Unpickling failed!'
+			)
+			return RESPONSE
+
+		RESPONSE += (
+			f'shared string is {helpers.utils.sharedstr}'
+		)
 
 		return RESPONSE
 

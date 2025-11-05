@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00663', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00663', methods=['GET'])
 	def BenchmarkTest00663_get():
 		return BenchmarkTest00663_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00663', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00663', methods=['POST'])
 	def BenchmarkTest00663_post():
 		RESPONSE = ""
 
@@ -48,24 +48,17 @@ def init(app):
 			lst.pop(0)
 			bar = lst[0]
 
-		import random
-		import base64
-		from helpers.utils import mysession
+		import yaml
 
-		num = 'BenchmarkTest00663'[13:]
-		user = f'Barbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.randbytes(32)))
+		try:
+			yobj = yaml.load(bar, Loader=yaml.Loader)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				yobj['text']
 			)
-		else:
-			mysession[cookie] = value
+		except:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

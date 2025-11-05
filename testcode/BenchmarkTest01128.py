@@ -20,49 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01128', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest01128', methods=['GET'])
 	def BenchmarkTest01128_get():
 		return BenchmarkTest01128_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01128', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest01128', methods=['POST'])
 	def BenchmarkTest01128_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01128")
 
-		possible = "ABC"
-		guess = possible[1]
+		import configparser
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = 'safe!'
+		conf7098 = configparser.ConfigParser()
+		conf7098.add_section('section7098')
+		conf7098.set('section7098', 'keyA-7098', 'a-Value')
+		conf7098.set('section7098', 'keyB-7098', param)
+		bar = conf7098.get('section7098', 'keyB-7098')
 
-		import random
-		from helpers.utils import mysession
+		import lxml.etree
+		import helpers.utils
 
-		num = 'BenchmarkTest01128'[13:]
-		user = f'SafeRandy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().getrandbits(32))
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-		else:
-			mysession[cookie] = value
+		except:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

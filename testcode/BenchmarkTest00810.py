@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00810', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00810', methods=['GET'])
 	def BenchmarkTest00810_get():
 		return BenchmarkTest00810_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00810', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00810', methods=['POST'])
 	def BenchmarkTest00810_post():
 		RESPONSE = ""
 
@@ -33,29 +33,40 @@ def init(app):
 		if values:
 			param = values[0]
 
-		map10301 = {}
-		map10301['keyA-10301'] = 'a-Value'
-		map10301['keyB-10301'] = param
-		map10301['keyC'] = 'another-Value'
-		bar = map10301['keyB-10301']
+		import configparser
+		
+		bar = 'safe!'
+		conf10301 = configparser.ConfigParser()
+		conf10301.add_section('section10301')
+		conf10301.set('section10301', 'keyA-10301', 'a_Value')
+		conf10301.set('section10301', 'keyB-10301', param)
+		bar = conf10301.get('section10301', 'keyA-10301')
 
-		import helpers.utils
+		import hashlib, base64
+		import io, helpers.utils
 
-		fileName = None
-		fd = None
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'rb') as fd:
-				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-				)
-		except IOError as e:
+		if len(input) == 0:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				'Cannot generate hash: Input was empty.'
 			)
+			return RESPONSE
+
+		hash = hashlib.sha1()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

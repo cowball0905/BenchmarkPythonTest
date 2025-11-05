@@ -20,62 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01071', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01071', methods=['GET'])
 	def BenchmarkTest01071_get():
 		return BenchmarkTest01071_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01071', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01071', methods=['POST'])
 	def BenchmarkTest01071_post():
 		RESPONSE = ""
 
-		import urllib.parse
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
+
+		import configparser
 		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01071" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01071"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01071") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		bar = 'safe!'
+		conf45576 = configparser.ConfigParser()
+		conf45576.add_section('section45576')
+		conf45576.set('section45576', 'keyA-45576', 'a-Value')
+		conf45576.set('section45576', 'keyB-45576', param)
+		bar = conf45576.get('section45576', 'keyB-45576')
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		import random
+		from helpers.utils import mysession
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		num = 'BenchmarkTest01071'[13:]
+		user = f'SafeRandy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().getrandbits(32))
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
-
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=True,
-			httponly=True)
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

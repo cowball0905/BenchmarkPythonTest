@@ -20,36 +20,41 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01145', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01145', methods=['GET'])
 	def BenchmarkTest01145_get():
 		return BenchmarkTest01145_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01145', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01145', methods=['POST'])
 	def BenchmarkTest01145_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01145")
 
-		map6066 = {}
-		map6066['keyA-6066'] = 'a-Value'
-		map6066['keyB-6066'] = param
-		map6066['keyC'] = 'another-Value'
-		bar = map6066['keyB-6066']
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import re
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
-		regex = re.compile(r'^(([a-z])+.)+')
+		num = 'BenchmarkTest01145'[13:]
+		user = f'SafeToby{num}'
+		cookie = f'rememberMe{num}'
+		value = base64.b64encode(secrets.token_bytes(32))
 
-		if regex.match(bar) is not None:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'String matches!'
+				f'Welcome back: {user}<br/>'
 			)
 		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				'String does not match.'
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

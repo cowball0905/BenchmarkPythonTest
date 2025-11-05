@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00156', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00156', methods=['GET'])
 	def BenchmarkTest00156_get():
 		return BenchmarkTest00156_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00156', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00156', methods=['POST'])
 	def BenchmarkTest00156_post():
 		RESPONSE = ""
 
@@ -38,18 +38,14 @@ def init(app):
 		map27248['keyC'] = 'another-Value'
 		bar = map27248['keyB-27248']
 
-		import re
+		import flask
 
-		regex = r'(a+)+$'
+		flask.session[bar] = '12345'
 
-		if re.match(regex, bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+		RESPONSE += (
+			f'Item: \'{escape_for_html(bar)}'
+			'\' with value: 12345 saved in session.'
+		)
 
 		return RESPONSE
 

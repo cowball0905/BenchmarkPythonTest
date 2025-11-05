@@ -20,39 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00630', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00630', methods=['GET'])
 	def BenchmarkTest00630_get():
 		return BenchmarkTest00630_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00630', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00630', methods=['POST'])
 	def BenchmarkTest00630_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00630")
 		
-		if headers:
-			param = headers[0]
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
+		
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		map26888 = {}
-		map26888['keyA-26888'] = 'a-Value'
-		map26888['keyB-26888'] = param
-		map26888['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map26888['keyB-26888']
-		bar = map26888['keyA-26888']
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import re
+		import random
+		from helpers.utils import mysession
 
-		regex = r'(a+)+$'
+		num = 'BenchmarkTest00630'[13:]
+		user = f'Nancy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.normalvariate())[2:]
 
-		if re.match(regex, bar) is not None:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'String matches!'
+				f'Welcome back: {user}<br/>'
 			)
 		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				'String does not match.'
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

@@ -20,24 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00775', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00775', methods=['GET'])
 	def BenchmarkTest00775_get():
 		return BenchmarkTest00775_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00775', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00775', methods=['POST'])
 	def BenchmarkTest00775_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00775")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00775")
+		param = ""
+		if values:
+			param = values[0]
 
+		map86954 = {}
+		map86954['keyA-86954'] = 'a-Value'
+		map86954['keyB-86954'] = param
+		map86954['keyC'] = 'another-Value'
+		bar = map86954['keyB-86954']
+
+		import lxml.etree
 		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
 
-		import flask
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		return flask.redirect(bar)
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

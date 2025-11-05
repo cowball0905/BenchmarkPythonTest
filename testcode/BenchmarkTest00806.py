@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00806', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00806', methods=['GET'])
 	def BenchmarkTest00806_get():
 		return BenchmarkTest00806_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00806', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00806', methods=['POST'])
 	def BenchmarkTest00806_post():
 		RESPONSE = ""
 
@@ -33,30 +33,44 @@ def init(app):
 		if values:
 			param = values[0]
 
-		string94052 = 'help'
-		string94052 += param
-		string94052 += 'snapes on a plane'
-		bar = string94052[4:-17]
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import helpers.utils
+		import hashlib, base64
+		import io, helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		if len(input) == 0:
 			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
+				'Cannot generate hash: Input was empty.'
 			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+			return RESPONSE
+
+		hash = hashlib.new('md5')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

@@ -20,35 +20,30 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01172', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest01172', methods=['GET'])
 	def BenchmarkTest01172_get():
 		return BenchmarkTest01172_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01172', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest01172', methods=['POST'])
 	def BenchmarkTest01172_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01172")
 
-		num = 106
+		import configparser
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = 'safe!'
+		conf94095 = configparser.ConfigParser()
+		conf94095.add_section('section94095')
+		conf94095.set('section94095', 'keyA-94095', 'a_Value')
+		conf94095.set('section94095', 'keyB-94095', param)
+		bar = conf94095.get('section94095', 'keyA-94095')
 
-		import yaml
+		import flask
 
-		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
-
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		return flask.redirect(bar)
 
 		return RESPONSE
 

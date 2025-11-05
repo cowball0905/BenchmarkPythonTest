@@ -20,54 +20,41 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00620', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00620', methods=['GET'])
 	def BenchmarkTest00620_get():
 		return BenchmarkTest00620_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00620', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00620', methods=['POST'])
 	def BenchmarkTest00620_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00620")
 		
-		if headers:
-			param = headers[0]
-
-		import configparser
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
 		
-		bar = 'safe!'
-		conf68524 = configparser.ConfigParser()
-		conf68524.add_section('section68524')
-		conf68524.set('section68524', 'keyA-68524', 'a_Value')
-		conf68524.set('section68524', 'keyB-68524', param)
-		bar = conf68524.get('section68524', 'keyA-68524')
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		import hashlib, base64
-		import io, helpers.utils
+		map68524 = {}
+		map68524['keyA-68524'] = 'a-Value'
+		map68524['keyB-68524'] = param
+		map68524['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map68524['keyB-68524']
+		bar = map68524['keyA-68524']
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		import os
+		import helpers.utils
 
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.md5()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
 

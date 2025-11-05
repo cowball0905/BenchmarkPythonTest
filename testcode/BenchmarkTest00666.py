@@ -20,57 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00666', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00666', methods=['GET'])
 	def BenchmarkTest00666_get():
 		return BenchmarkTest00666_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00666', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00666', methods=['POST'])
 	def BenchmarkTest00666_post():
 		RESPONSE = ""
 
+		param = request.args.get("BenchmarkTest00666")
+		if not param:
+			param = ""
+
+		import configparser
+		
+		bar = 'safe!'
+		conf70921 = configparser.ConfigParser()
+		conf70921.add_section('section70921')
+		conf70921.set('section70921', 'keyA-70921', 'a-Value')
+		conf70921.set('section70921', 'keyB-70921', param)
+		bar = conf70921.get('section70921', 'keyB-70921')
+
 		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
-
-		import base64
-		import secrets
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00666'[13:]
-		user = f'SafeTheo{num}'
-		cookie = f'rememberMe{num}'
-		value = secrets.token_hex(32)
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		if '../' in bar:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				'File name must not contain \'../\''
 			)
-		else:
-			mysession[cookie] = value
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

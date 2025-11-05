@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01000', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01000', methods=['GET'])
 	def BenchmarkTest01000_get():
 		return BenchmarkTest01000_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01000', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01000', methods=['POST'])
 	def BenchmarkTest01000_post():
 		RESPONSE = ""
 
@@ -42,16 +42,15 @@ def init(app):
 		param = urllib.parse.unquote_plus(param)
 
 		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		if 'should' not in bar:
+		        bar = "Ifnot case passed"
 
-
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
-		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
-		)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

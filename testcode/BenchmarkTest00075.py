@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00075', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00075', methods=['GET'])
 	def BenchmarkTest00075_get():
-		response = make_response(render_template('web/trustbound-00/BenchmarkTest00075.html'))
-		response.set_cookie('BenchmarkTest00075', 'my_user_id',
+		response = make_response(render_template('web/codeinj-00/BenchmarkTest00075.html'))
+		response.set_cookie('BenchmarkTest00075', '%27RESPONSE+%2B%3D+%5C%27ECHOOO%5C%27%27',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,30 +31,23 @@ def init(app):
 		return response
 		return BenchmarkTest00075_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00075', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00075', methods=['POST'])
 	def BenchmarkTest00075_post():
 		RESPONSE = ""
 
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00075", "noCookieValueSupplied"))
 
-		import configparser
+		num = 106
 		
-		bar = 'safe!'
-		conf15867 = configparser.ConfigParser()
-		conf15867.add_section('section15867')
-		conf15867.set('section15867', 'keyA-15867', 'a-Value')
-		conf15867.set('section15867', 'keyB-15867', param)
-		bar = conf15867.get('section15867', 'keyB-15867')
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import flask
-
-		flask.session['userid'] = bar
-
-		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
-		)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

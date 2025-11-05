@@ -20,52 +20,43 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00873', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00873', methods=['GET'])
 	def BenchmarkTest00873_get():
 		return BenchmarkTest00873_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00873', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00873', methods=['POST'])
 	def BenchmarkTest00873_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00873")
-		param = ""
-		if values:
-			param = values[0]
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00873")
+		if not param:
+			param = ""
 
-		map91923 = {}
-		map91923['keyA-91923'] = 'a-Value'
-		map91923['keyB-91923'] = param
-		map91923['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map91923['keyB-91923']
-		bar = map91923['keyA-91923']
+		import markupsafe
+		
+		bar = markupsafe.escape(param)
 
-		import helpers.ldap
-		import ldap3
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
-		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+		num = 'BenchmarkTest00873'[13:]
+		user = f'SafeTruman{num}'
+		cookie = f'rememberMe{num}'
+		value = secrets.token_urlsafe(32)
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				"Error processing LDAP query."
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

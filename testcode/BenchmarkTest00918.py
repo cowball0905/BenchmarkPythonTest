@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00918', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00918', methods=['GET'])
 	def BenchmarkTest00918_get():
 		return BenchmarkTest00918_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00918', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00918', methods=['POST'])
 	def BenchmarkTest00918_post():
 		RESPONSE = ""
 
@@ -35,39 +35,30 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import lxml.etree
-		import helpers.utils
+		import yaml
 
 		try:
-			if '\'' in bar:
-				RESPONSE += (
-					"Employee ID must not contain apostrophes"
-				)
-				return RESPONSE
-
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			yobj = yaml.safe_load(bar)
 
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				yobj['text']
 			)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

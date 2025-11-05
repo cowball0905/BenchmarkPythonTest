@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00153', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00153', methods=['GET'])
 	def BenchmarkTest00153_get():
 		return BenchmarkTest00153_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00153', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00153', methods=['POST'])
 	def BenchmarkTest00153_post():
 		RESPONSE = ""
 
@@ -45,18 +45,23 @@ def init(app):
 			case _:
 				bar = 'bob\'s your uncle'
 
-		import re
+		import flask
+		import urllib.parse
 
-		regex = re.compile(r'^(([a-z])+.)+')
+		try:
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
+		except:
+			RESPONSE += (
+				'Error parsing URL.'
+			)
+			return RESPONSE
 
-		if regex.match(bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+		return flask.redirect(bar)
 
 		return RESPONSE
 

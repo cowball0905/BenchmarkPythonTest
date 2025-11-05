@@ -20,45 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00933', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest00933', methods=['GET'])
 	def BenchmarkTest00933_get():
 		return BenchmarkTest00933_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00933', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest00933', methods=['POST'])
 	def BenchmarkTest00933_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00933")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00933" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00933"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00933") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		string77085 = 'help'
+		string77085 = ''
+		data12 = ''
+		copy = string77085
+		string77085 = ''
 		string77085 += param
-		string77085 += 'snapes on a plane'
-		bar = string77085[4:-17]
+		copy += 'SomeOKString'
+		bar = copy
 
-		import random
-		import base64
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest00933'[13:]
-		user = f'SafeBarbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+		)
 
 		return RESPONSE
 

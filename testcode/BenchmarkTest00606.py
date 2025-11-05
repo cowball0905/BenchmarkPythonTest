@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00606', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00606', methods=['GET'])
 	def BenchmarkTest00606_get():
 		return BenchmarkTest00606_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00606', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00606', methods=['POST'])
 	def BenchmarkTest00606_post():
 		RESPONSE = ""
 
@@ -34,27 +34,24 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		superstring = f'61312{param}abcd'
-		bar = superstring[len('61312'):len(superstring)-5]
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00606'[13:]
-		user = f'SafeToby{num}'
-		cookie = f'rememberMe{num}'
-		value = base64.b64encode(secrets.token_bytes(32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			exec(bar)
+		except:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Error executing statement \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

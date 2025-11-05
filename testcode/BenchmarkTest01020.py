@@ -20,51 +20,33 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01020', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01020', methods=['GET'])
 	def BenchmarkTest01020_get():
 		return BenchmarkTest01020_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01020', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01020', methods=['POST'])
 	def BenchmarkTest01020_post():
 		RESPONSE = ""
 
-		import urllib.parse
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
+
+		import helpers.ThingFactory
 		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01020" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01020"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01020") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		map78971 = {}
-		map78971['keyA-78971'] = 'a-Value'
-		map78971['keyB-78971'] = param
-		map78971['keyC'] = 'another-Value'
-		bar = map78971['keyB-78971']
+		import pathlib
+		import helpers.utils
 
-		import random
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest01020'[13:]
-		user = f'Nancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.normalvariate())[2:]
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

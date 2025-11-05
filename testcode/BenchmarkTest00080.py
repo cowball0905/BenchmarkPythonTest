@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00080', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00080', methods=['GET'])
 	def BenchmarkTest00080_get():
-		response = make_response(render_template('web/ldapi-00/BenchmarkTest00080.html'))
-		response.set_cookie('BenchmarkTest00080', 'Ms+Bar',
+		response = make_response(render_template('web/deserialization-00/BenchmarkTest00080.html'))
+		response.set_cookie('BenchmarkTest00080', 'name%3A+safe+data%0Atext%3A+act+like+this+is+conf+data',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,43 +31,29 @@ def init(app):
 		return response
 		return BenchmarkTest00080_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00080', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00080', methods=['POST'])
 	def BenchmarkTest00080_post():
 		RESPONSE = ""
 
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00080", "noCookieValueSupplied"))
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		string57157 = 'help'
+		string57157 += param
+		string57157 += 'snapes on a plane'
+		bar = string57157[4:-17]
 
-		import helpers.ldap
-		import ldap3
+		import yaml
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
 		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+			yobj = yaml.load(bar, Loader=yaml.Loader)
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
+			RESPONSE += (
+				yobj['text']
+			)
 		except:
 			RESPONSE += (
-				"Error processing LDAP query."
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

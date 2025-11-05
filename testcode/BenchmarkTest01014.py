@@ -20,48 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01014', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01014', methods=['GET'])
 	def BenchmarkTest01014_get():
 		return BenchmarkTest01014_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01014', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01014', methods=['POST'])
 	def BenchmarkTest01014_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01014" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01014"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01014") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		bar = param
+		import configparser
+		
+		bar = 'safe!'
+		conf47305 = configparser.ConfigParser()
+		conf47305.add_section('section47305')
+		conf47305.set('section47305', 'keyA-47305', 'a-Value')
+		conf47305.set('section47305', 'keyB-47305', param)
+		bar = conf47305.get('section47305', 'keyB-47305')
 
-		import lxml.etree
 		import helpers.utils
 
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=$name]'
-			nodes = root.xpath(query, name=bar)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-		except:
+		except IOError as e:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

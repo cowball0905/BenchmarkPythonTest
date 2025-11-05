@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00986', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest00986', methods=['GET'])
 	def BenchmarkTest00986_get():
 		return BenchmarkTest00986_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00986', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest00986', methods=['POST'])
 	def BenchmarkTest00986_post():
 		RESPONSE = ""
 
@@ -41,34 +41,17 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		bar = "This should never happen"
+		if 'should' not in bar:
+		        bar = "Ifnot case passed"
 
-		import helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		RESPONSE += (
+			'The value of the bar parameter is now in a custom header.'
+		)
+
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00986': bar}))
+		
 
 		return RESPONSE
 

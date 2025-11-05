@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00160', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00160', methods=['GET'])
 	def BenchmarkTest00160_get():
 		return BenchmarkTest00160_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00160', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00160', methods=['POST'])
 	def BenchmarkTest00160_post():
 		RESPONSE = ""
 
@@ -32,22 +32,21 @@ def init(app):
 		if not param:
 			param = ""
 
-		string87339 = 'help'
-		string87339 += param
-		string87339 += 'snapes on a plane'
-		bar = string87339[4:-17]
+		bar = param
 
-		import re
-
-		regex = r'(abc)*(bcd)+'
-
-		if re.match(regex, bar) is not None:
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
 			RESPONSE += (
-				'String matches!'
+				"Eval argument must be a plain string literal."
 			)
-		else:
+			return RESPONSE		
+
+		try:
 			RESPONSE += (
-				'String does not match.'
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

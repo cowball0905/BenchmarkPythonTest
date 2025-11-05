@@ -20,45 +20,31 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00449', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00449', methods=['GET'])
 	def BenchmarkTest00449_get():
 		return BenchmarkTest00449_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00449', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00449', methods=['POST'])
 	def BenchmarkTest00449_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00449" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("BenchmarkTest00449")
+		if not param:
+		    param = ""
 
-		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		from flask import make_response
-		import io
+		import pathlib
 		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
-
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=True,
-			httponly=True)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

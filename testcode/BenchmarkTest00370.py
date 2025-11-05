@@ -20,46 +20,30 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00370', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00370', methods=['GET'])
 	def BenchmarkTest00370_get():
 		return BenchmarkTest00370_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00370', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00370', methods=['POST'])
 	def BenchmarkTest00370_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00370")
-		if not param:
-			param = ""
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00370" in request.form.getlist(name):
+				param = name
+				break
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		string6661 = 'help'
+		string6661 += param
+		string6661 += 'snapes on a plane'
+		bar = string6661[4:-17]
 
-		import platform
-		import subprocess
-		import helpers.utils
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
-
-		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
-
-			RESPONSE += (
-				helpers.utils.commandOutput(proc)
-			)
-		except IOError:
-			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+		)
 
 		return RESPONSE
 

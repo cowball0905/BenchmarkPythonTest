@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00825', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00825', methods=['GET'])
 	def BenchmarkTest00825_get():
 		return BenchmarkTest00825_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00825', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00825', methods=['POST'])
 	def BenchmarkTest00825_post():
 		RESPONSE = ""
 
@@ -33,36 +33,18 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
+		import flask
 
-		if '\'' in bar:
-			RESPONSE += (
-				"Employee ID must not contain apostrophes"
-			)
-			return RESPONSE
+		flask.session['userid'] = bar
 
-		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
+		RESPONSE += (
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
+		)
 
 		return RESPONSE
 

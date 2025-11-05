@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00828', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00828', methods=['GET'])
 	def BenchmarkTest00828_get():
 		return BenchmarkTest00828_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00828', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00828', methods=['POST'])
 	def BenchmarkTest00828_post():
 		RESPONSE = ""
 
@@ -33,34 +33,30 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = 'safe!'
-		conf59602 = configparser.ConfigParser()
-		conf59602.add_section('section59602')
-		conf59602.set('section59602', 'keyA-59602', 'a_Value')
-		conf59602.set('section59602', 'keyB-59602', param)
-		bar = conf59602.get('section59602', 'keyA-59602')
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import lxml.etree
-		import helpers.utils
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
 
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
-
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
+			exec(bar)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'Error executing statement \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

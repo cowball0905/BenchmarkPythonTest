@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01104', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01104', methods=['GET'])
 	def BenchmarkTest01104_get():
 		return BenchmarkTest01104_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01104', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01104', methods=['POST'])
 	def BenchmarkTest01104_post():
 		RESPONSE = ""
 
@@ -33,40 +33,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[1]
+		num = 86
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
-
-		import pathlib
-		import helpers.utils
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
 		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / bar).resolve()
-
-			if not str(p).startswith(str(testfiles)):
-				RESPONSE += (
-					"Invalid Path."
-				)
-				return RESPONSE
-
+			exec(bar)
+		except:
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Error executing statement \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

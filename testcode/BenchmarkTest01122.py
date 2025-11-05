@@ -20,41 +20,30 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01122', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01122', methods=['GET'])
 	def BenchmarkTest01122_get():
 		return BenchmarkTest01122_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01122', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01122', methods=['POST'])
 	def BenchmarkTest01122_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01122")
 
-		import html
+		num = 86
 		
-		bar = html.escape(param)
-
-		import random
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest01122'[13:]
-		user = f'Nancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.normalvariate())[2:]
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
 		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			bar = param
+
+
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

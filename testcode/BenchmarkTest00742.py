@@ -20,40 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00742', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00742', methods=['GET'])
 	def BenchmarkTest00742_get():
 		return BenchmarkTest00742_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00742', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00742', methods=['POST'])
 	def BenchmarkTest00742_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00742")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00742")
+		param = ""
+		if values:
+			param = values[0]
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		import configparser
+		
+		bar = 'safe!'
+		conf54233 = configparser.ConfigParser()
+		conf54233.add_section('section54233')
+		conf54233.set('section54233', 'keyA-54233', 'a-Value')
+		conf54233.set('section54233', 'keyB-54233', param)
+		bar = conf54233.get('section54233', 'keyB-54233')
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
+		import codecs
+		import helpers.utils
 
-		num = 'BenchmarkTest00742'[13:]
-		user = f'SafeToby{num}'
-		cookie = f'rememberMe{num}'
-		value = base64.b64encode(secrets.token_bytes(32))
+		try:
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
-		else:
-			mysession[cookie] = value
+
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
 			)
 
 		return RESPONSE

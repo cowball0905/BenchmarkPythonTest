@@ -20,39 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00791', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00791', methods=['GET'])
 	def BenchmarkTest00791_get():
 		return BenchmarkTest00791_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00791', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00791', methods=['POST'])
 	def BenchmarkTest00791_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00791")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00791")
+		param = ""
+		if values:
+			param = values[0]
+
+		bar = param + '_SafeStuff'
 
 		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		import secrets
+		from helpers.utils import mysession
 
-		import os
-		import subprocess
-		import helpers.utils
+		num = 'BenchmarkTest00791'[13:]
+		user = f'SafeToby{num}'
+		cookie = f'rememberMe{num}'
+		value = base64.b64encode(secrets.token_bytes(32))
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
 		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
-
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
-		RESPONSE += (
-			helpers.utils.commandOutput(proc)
-		)
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

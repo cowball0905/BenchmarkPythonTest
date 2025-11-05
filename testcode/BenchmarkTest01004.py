@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01004', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01004', methods=['GET'])
 	def BenchmarkTest01004_get():
 		return BenchmarkTest01004_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01004', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01004', methods=['POST'])
 	def BenchmarkTest01004_post():
 		RESPONSE = ""
 
@@ -41,15 +41,23 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		string98691 = 'help'
+		string98691 += param
+		string98691 += 'snapes on a plane'
+		bar = string98691[4:-17]
 
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
-		)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00074', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00074', methods=['GET'])
 	def BenchmarkTest00074_get():
-		response = make_response(render_template('web/redirect-00/BenchmarkTest00074.html'))
-		response.set_cookie('BenchmarkTest00074', 'http%3A%2F%2Flocalhost%3A5000%2F',
+		response = make_response(render_template('web/codeinj-00/BenchmarkTest00074.html'))
+		response.set_cookie('BenchmarkTest00074', '%27ECHOOO%27',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,20 +31,35 @@ def init(app):
 		return response
 		return BenchmarkTest00074_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00074', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00074', methods=['POST'])
 	def BenchmarkTest00074_post():
 		RESPONSE = ""
 
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00074", "noCookieValueSupplied"))
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		map90091 = {}
+		map90091['keyA-90091'] = 'a-Value'
+		map90091['keyB-90091'] = param
+		map90091['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map90091['keyB-90091']
+		bar = map90091['keyA-90091']
 
-		import flask
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Eval argument must be a plain string literal."
+			)
+			return RESPONSE		
 
-		return flask.redirect(bar)
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

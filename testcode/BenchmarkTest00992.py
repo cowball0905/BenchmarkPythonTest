@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest00992', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00992', methods=['GET'])
 	def BenchmarkTest00992_get():
 		return BenchmarkTest00992_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest00992', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00992', methods=['POST'])
 	def BenchmarkTest00992_post():
 		RESPONSE = ""
 
@@ -41,32 +41,27 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		import markupsafe
+		
+		bar = markupsafe.escape(param)
 
-		import pathlib
-		import helpers.utils
+		import flask
+		import urllib.parse
 
 		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / bar).resolve()
-
-			if not str(p).startswith(str(testfiles)):
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
 				RESPONSE += (
-					"Invalid Path."
+					'Invalid URL.'
 				)
 				return RESPONSE
+		except:
+			RESPONSE += (
+				'Error parsing URL.'
+			)
+			return RESPONSE
 
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		return flask.redirect(bar)
 
 		return RESPONSE
 

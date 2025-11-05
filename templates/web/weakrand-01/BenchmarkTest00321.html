@@ -10,14 +10,14 @@
 </head>
 <body>
 <form action="/benchmark/weakrand-01/BenchmarkTest00321" method="POST" id="FormBenchmarkTest00321" autocomplete="off">
- <div><label>Select your habits and edit the parameter [name,value]:</label></div><br>
-	<div><input type="checkbox" name="BenchmarkTest00321" value="whatever" checked >Reading. [BenchmarkTest00321, whatever]</div>
-	<div><input type="checkbox" name="BenchmarkTest00321" value="Movies" >Movies. [BenchmarkTest00321, Movies]</div>
-	<div><input type="checkbox" name="BenchmarkTest00321" value="Writing" >Writing. [BenchmarkTest00321, Writing]</div>
-	<div><input type="checkbox" name="BenchmarkTest00321" value="Singing" >Singing. [BenchmarkTest00321, Singing]</div>
-	<div><label>Parameter foo, value:</label><input type="text" id="foo" name="foo" value="bar" ></div><br>
-	<div><input type="submit" value="Submit" ></div>
- </form>
- 
+    <p>Please make your car selection, and edit the value to be sent [value]:</p>
+	<select name="BenchmarkTest00321" multiple>
+	    <option value="whatever" selected>Audi. [whatever]</option>
+	    <option value="Ford">Ford. [Ford]</option>
+	    <option value="Opel">Opel. [Opel]</option>
+        <option value="Subaru">Subaru. [Subaru]</option>
+	</select><br><br>
+    <input type="submit" value="Submit" >
+</form>
 </body>
 </html>

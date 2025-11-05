@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00385', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00385', methods=['GET'])
 	def BenchmarkTest00385_get():
 		return BenchmarkTest00385_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00385', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00385', methods=['POST'])
 	def BenchmarkTest00385_post():
 		RESPONSE = ""
 
@@ -34,23 +34,26 @@ def init(app):
 				param = name
 				break
 
-		string84298 = 'help'
-		string84298 += param
-		string84298 += 'snapes on a plane'
-		bar = string84298[4:-17]
-
 		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'wb') as fd:
-				RESPONSE += (
-					f'Now ready to write to file: {escape_for_html(fileName)}'
-				)
-		except IOError as e:
+		import random
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00385'[13:]
+		user = f'Nancy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.normalvariate())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

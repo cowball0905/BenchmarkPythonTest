@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00822', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00822', methods=['GET'])
 	def BenchmarkTest00822_get():
 		return BenchmarkTest00822_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00822', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00822', methods=['POST'])
 	def BenchmarkTest00822_post():
 		RESPONSE = ""
 
@@ -33,34 +33,13 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
+		num = 106
 		
-		bar = 'safe!'
-		conf74777 = configparser.ConfigParser()
-		conf74777.add_section('section74777')
-		conf74777.set('section74777', 'keyA-74777', 'a_Value')
-		conf74777.set('section74777', 'keyB-74777', param)
-		bar = conf74777.get('section74777', 'keyA-74777')
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
+		import flask
 
-		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
+		return flask.redirect(bar)
 
 		return RESPONSE
 

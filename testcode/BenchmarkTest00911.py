@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00911', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00911', methods=['GET'])
 	def BenchmarkTest00911_get():
 		return BenchmarkTest00911_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00911', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00911', methods=['POST'])
 	def BenchmarkTest00911_post():
 		RESPONSE = ""
 
@@ -35,33 +35,32 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 86
+		import configparser
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = 'safe!'
+		conf92454 = configparser.ConfigParser()
+		conf92454.add_section('section92454')
+		conf92454.set('section92454', 'keyA-92454', 'a_Value')
+		conf92454.set('section92454', 'keyB-92454', param)
+		bar = conf92454.get('section92454', 'keyA-92454')
 
-		import lxml.etree
+		import os
+		import subprocess
 		import helpers.utils
 
-		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
+		else:
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {bar}")
 
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
+		RESPONSE += (
+			helpers.utils.commandOutput(proc)
+		)
 
 		return RESPONSE
 

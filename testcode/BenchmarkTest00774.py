@@ -20,44 +20,49 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00774', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00774', methods=['GET'])
 	def BenchmarkTest00774_get():
 		return BenchmarkTest00774_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00774', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00774', methods=['POST'])
 	def BenchmarkTest00774_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00774")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00774")
+		param = ""
+		if values:
+			param = values[0]
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		string12140 = 'help'
+		string12140 += param
+		string12140 += 'snapes on a plane'
+		bar = string12140[4:-17]
 
-		from flask import make_response
-		import io
+		import lxml.etree
 		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		try:
+			if '\'' in bar:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=True,
-			httponly=True)
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

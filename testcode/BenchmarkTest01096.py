@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01096', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest01096', methods=['GET'])
 	def BenchmarkTest01096_get():
 		return BenchmarkTest01096_post()
 
-	@app.route('/benchmark/pathtraver-02/BenchmarkTest01096', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest01096', methods=['POST'])
 	def BenchmarkTest01096_post():
 		RESPONSE = ""
 
@@ -35,25 +35,23 @@ def init(app):
 
 		bar = param
 
-		import helpers.utils
+		import flask
+		import urllib.parse
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
+		except:
 			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
+				'Error parsing URL.'
 			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+			return RESPONSE
+
+		return flask.redirect(bar)
 
 		return RESPONSE
 

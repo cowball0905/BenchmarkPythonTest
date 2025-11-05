@@ -20,56 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest01193', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01193', methods=['GET'])
 	def BenchmarkTest01193_get():
 		return BenchmarkTest01193_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest01193', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01193', methods=['POST'])
 	def BenchmarkTest01193_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01193")
+		values = request.form.getlist("BenchmarkTest01193")
+		param = ""
+		if values:
+			param = values[0]
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
 		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
-
-			doc = xml.dom.minidom.parseString(bar, parser)
-
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{param}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
 			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
 		except:
 			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE
+
 

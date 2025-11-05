@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00715', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00715', methods=['GET'])
 	def BenchmarkTest00715_get():
 		return BenchmarkTest00715_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00715', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00715', methods=['POST'])
 	def BenchmarkTest00715_post():
 		RESPONSE = ""
 
@@ -32,33 +32,39 @@ def init(app):
 		if not param:
 			param = ""
 
-		string63619 = 'help'
+		string63619 = ''
+		data12 = ''
+		copy = string63619
+		string63619 = ''
 		string63619 += param
-		string63619 += 'snapes on a plane'
-		bar = string63619[4:-17]
+		copy += 'SomeOKString'
+		bar = copy
 
-		import pathlib
-		import helpers.utils
+		import hashlib, base64
+		import io, helpers.utils
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / bar).resolve()
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-			if not str(p).startswith(str(testfiles)):
-				RESPONSE += (
-					"Invalid Path."
-				)
-				return RESPONSE
-
+		if len(input) == 0:
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
+				'Cannot generate hash: Input was empty.'
 			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+			return RESPONSE
+
+		hash = hashlib.new('md5')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00504', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00504', methods=['GET'])
 	def BenchmarkTest00504_get():
 		return BenchmarkTest00504_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00504', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00504', methods=['POST'])
 	def BenchmarkTest00504_post():
 		RESPONSE = ""
 
@@ -36,25 +36,23 @@ def init(app):
 		if param:
 			bar = param.split(' ')[0]
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
+		import flask
+		import urllib.parse
 
-		num = 'BenchmarkTest00504'[13:]
-		user = f'SafeToby{num}'
-		cookie = f'rememberMe{num}'
-		value = base64.b64encode(secrets.token_bytes(32))
+		try:
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
+		except:
+			RESPONSE += (
+				'Error parsing URL.'
+			)
+			return RESPONSE
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		return flask.redirect(bar)
 
 		return RESPONSE
 

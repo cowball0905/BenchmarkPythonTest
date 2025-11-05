@@ -20,45 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00687', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00687', methods=['GET'])
 	def BenchmarkTest00687_get():
 		return BenchmarkTest00687_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00687', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00687', methods=['POST'])
 	def BenchmarkTest00687_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
+		param = request.args.get("BenchmarkTest00687")
+		if not param:
+			param = ""
+
+		num = 106
 		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import configparser
-		
-		bar = 'safe!'
-		conf69622 = configparser.ConfigParser()
-		conf69622.add_section('section69622')
-		conf69622.set('section69622', 'keyA-69622', 'a_Value')
-		conf69622.set('section69622', 'keyB-69622', param)
-		bar = conf69622.get('section69622', 'keyA-69622')
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		import re
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
 
-		regex = re.compile(r'^(([a-z])+.)+')
+			doc = xml.dom.minidom.parseString(bar, parser)
 
-		if regex.match(bar) is not None:
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
 			RESPONSE += (
-				'String matches!'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
-		else:
+		except:
 			RESPONSE += (
-				'String does not match.'
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
 			)
 
 		return RESPONSE

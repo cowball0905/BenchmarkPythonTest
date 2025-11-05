@@ -20,32 +20,35 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00541', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00541', methods=['GET'])
 	def BenchmarkTest00541_get():
 		return BenchmarkTest00541_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00541', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00541', methods=['POST'])
 	def BenchmarkTest00541_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00541")
-		if not param:
-		    param = ""
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00541")
+		
+		if headers:
+			param = headers[0]
 
-		map20464 = {}
-		map20464['keyA-20464'] = 'a-Value'
-		map20464['keyB-20464'] = param
-		map20464['keyC'] = 'another-Value'
-		bar = map20464['keyB-20464']
+		string20464 = 'help'
+		string20464 += param
+		string20464 += 'snapes on a plane'
+		bar = string20464[4:-17]
 
-		try:
-			RESPONSE += (
-				eval(bar)
-			)
-		except:
-			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
-			)
+		import helpers.db_sqlite
+
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (bar,))
+		RESPONSE += (
+			helpers.db_sqlite.results(cur, sql)
+		)
+		con.close()
 
 		return RESPONSE
 

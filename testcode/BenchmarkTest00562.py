@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00562', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00562', methods=['GET'])
 	def BenchmarkTest00562_get():
 		return BenchmarkTest00562_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00562', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00562', methods=['POST'])
 	def BenchmarkTest00562_post():
 		RESPONSE = ""
 
@@ -34,45 +34,26 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf75724 = configparser.ConfigParser()
-		conf75724.add_section('section75724')
-		conf75724.set('section75724', 'keyA-75724', 'a_Value')
-		conf75724.set('section75724', 'keyB-75724', param)
-		bar = conf75724.get('section75724', 'keyA-75724')
+		bar = param
 
-		import platform
-		import codecs
-		import helpers.utils
-		from urllib.parse import urlparse
-		from urllib.request import url2pathname
+		import random
+		from helpers.utils import mysession
 
-		startURIslashes = ""
+		num = 'BenchmarkTest00562'[13:]
+		user = f'Nancy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.normalvariate())[2:]
 
-		if platform.system() == "Windows":
-			startURIslashes = "/"
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
 		else:
-			startURIslashes = "//"
-
-		try:
-			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+			mysession[cookie] = value
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
-
-			RESPONSE += (
-				" And file already exists."
-			)
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
-		except IOError:
-			pass
 
 		return RESPONSE
 

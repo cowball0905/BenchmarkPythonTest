@@ -20,46 +20,57 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00837', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00837', methods=['GET'])
 	def BenchmarkTest00837_get():
 		return BenchmarkTest00837_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest00837', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00837', methods=['POST'])
 	def BenchmarkTest00837_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00837")
-		param = ""
-		if values:
-			param = values[0]
-
-		import configparser
+		import helpers.separate_request
 		
-		bar = 'safe!'
-		conf30006 = configparser.ConfigParser()
-		conf30006.add_section('section30006')
-		conf30006.set('section30006', 'keyA-30006', 'a_Value')
-		conf30006.set('section30006', 'keyB-30006', param)
-		bar = conf30006.get('section30006', 'keyA-30006')
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00837")
+		if not param:
+			param = ""
 
-		import secrets
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest00837'[13:]
-		user = f'SafeRicky{num}'
-		cookie = f'rememberMe{num}'
-		value = str(secrets.randbits(32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
 		else:
-			mysession[cookie] = value
+			bar = param
+
+		import helpers.utils
+
+		fileName = None
+		fd = None
+
+		if '../' in bar:
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				'File name must not include \'../\''
 			)
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

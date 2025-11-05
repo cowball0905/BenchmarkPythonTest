@@ -20,41 +20,24 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00440', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00440', methods=['GET'])
 	def BenchmarkTest00440_get():
 		return BenchmarkTest00440_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00440', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00440', methods=['POST'])
 	def BenchmarkTest00440_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00440" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("Referer")
+		if not param:
+		    param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		bar = param + '_SafeStuff'
 
-		import re
 
-		regex = re.compile(r'^(([a-z])+.)+')
-
-		if regex.match(bar) is not None:
-			RESPONSE += (
-				'String matches!'
-			)
-		else:
-			RESPONSE += (
-				'String does not match.'
-			)
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

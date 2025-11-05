@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00727', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00727', methods=['GET'])
 	def BenchmarkTest00727_get():
 		return BenchmarkTest00727_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00727', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00727', methods=['POST'])
 	def BenchmarkTest00727_post():
 		RESPONSE = ""
 
@@ -32,29 +32,37 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
+		import configparser
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = 'safe!'
+		conf86344 = configparser.ConfigParser()
+		conf86344.add_section('section86344')
+		conf86344.set('section86344', 'keyA-86344', 'a_Value')
+		conf86344.set('section86344', 'keyB-86344', param)
+		bar = conf86344.get('section86344', 'keyA-86344')
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		from flask import make_response
+		import io
 		import helpers.utils
 
-		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
 
+		RESPONSE += (
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+		)
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=False,
+			httponly=True)
 
 		return RESPONSE
 

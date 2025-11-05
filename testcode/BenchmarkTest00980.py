@@ -20,38 +20,55 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00980', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00980', methods=['GET'])
 	def BenchmarkTest00980_get():
 		return BenchmarkTest00980_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00980', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00980', methods=['POST'])
 	def BenchmarkTest00980_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00980")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00980" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00980"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00980") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		string64353 = 'help'
-		string64353 += param
-		string64353 += 'snapes on a plane'
-		bar = string64353[4:-17]
+		superstring = f'64353{param}abcd'
+		bar = superstring[len('64353'):len(superstring)-5]
 
-		import yaml
+		import hashlib, base64
+		import io, helpers.utils
 
-		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
+		if len(input) == 0:
 			RESPONSE += (
-				yobj['text']
+				'Cannot generate hash: Input was empty.'
 			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+			return RESPONSE
+
+		hash = hashlib.new('sha384')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

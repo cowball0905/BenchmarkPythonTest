@@ -20,49 +20,50 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00856', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00856', methods=['GET'])
 	def BenchmarkTest00856_get():
 		return BenchmarkTest00856_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00856', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00856', methods=['POST'])
 	def BenchmarkTest00856_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00856")
-		param = ""
-		if values:
-			param = values[0]
-
-		import helpers.ThingFactory
+		import helpers.separate_request
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00856")
+		if not param:
+			param = ""
 
-		import hashlib, base64
-		import io, helpers.utils
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		if len(input) == 0:
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
-			return RESPONSE
-
-		hash = hashlib.sha1()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		except:
+			RESPONSE += (
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+			)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00568', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00568', methods=['GET'])
 	def BenchmarkTest00568_get():
 		return BenchmarkTest00568_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00568', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00568', methods=['POST'])
 	def BenchmarkTest00568_post():
 		RESPONSE = ""
 
@@ -34,44 +34,30 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		map29937 = {}
+		map29937['keyA-29937'] = 'a-Value'
+		map29937['keyB-29937'] = param
+		map29937['keyC'] = 'another-Value'
+		bar = map29937['keyB-29937']
 
-		import helpers.utils
+		import random
+		from helpers.utils import mysession
 
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not contain \'../\''
-			)
-			return RESPONSE
+		num = 'BenchmarkTest00568'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
+				f'Welcome back: {user}<br/>'
 			)
-		except IOError as e:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

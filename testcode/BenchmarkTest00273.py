@@ -20,40 +20,30 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00273', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00273', methods=['GET'])
 	def BenchmarkTest00273_get():
 		return BenchmarkTest00273_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00273', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00273', methods=['POST'])
 	def BenchmarkTest00273_post():
 		RESPONSE = ""
 
-		values = request.form.getlist("BenchmarkTest00273")
-		param = ""
-		if values:
-			param = values[0]
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_form_parameter("BenchmarkTest00273")
+		if not param:
+			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		string82385 = 'help'
+		string82385 += param
+		string82385 += 'snapes on a plane'
+		bar = string82385[4:-17]
 
-		import flask
-		import urllib.parse
 
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
-			RESPONSE += (
-				'Error parsing URL.'
-			)
-			return RESPONSE
-
-		return flask.redirect(bar)
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

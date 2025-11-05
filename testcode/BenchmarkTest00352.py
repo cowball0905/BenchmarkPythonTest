@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00352', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00352', methods=['GET'])
 	def BenchmarkTest00352_get():
 		return BenchmarkTest00352_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest00352', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00352', methods=['POST'])
 	def BenchmarkTest00352_post():
 		RESPONSE = ""
 
@@ -35,21 +35,22 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		string67093 = 'help'
+		string67093 += param
+		string67093 += 'snapes on a plane'
+		bar = string67093[4:-17]
 
-		import re
+		import yaml
 
-		regex = r'(abc)*(bcd)+'
+		try:
+			yobj = yaml.safe_load(bar)
 
-		if re.match(regex, bar) is not None:
 			RESPONSE += (
-				'String matches!'
+				yobj['text']
 			)
-		else:
+		except:
 			RESPONSE += (
-				'String does not match.'
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

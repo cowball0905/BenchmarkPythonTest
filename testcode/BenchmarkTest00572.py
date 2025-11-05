@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00572', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00572', methods=['GET'])
 	def BenchmarkTest00572_get():
 		return BenchmarkTest00572_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00572', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00572', methods=['POST'])
 	def BenchmarkTest00572_post():
 		RESPONSE = ""
 
@@ -34,27 +34,26 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf29960 = configparser.ConfigParser()
-		conf29960.add_section('section29960')
-		conf29960.set('section29960', 'keyA-29960', 'a_Value')
-		conf29960.set('section29960', 'keyB-29960', param)
-		bar = conf29960.get('section29960', 'keyA-29960')
+		bar = param + '_SafeStuff'
 
-		import helpers.utils
+		import base64
+		import secrets
+		from helpers.utils import mysession
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'wb') as fd:
-				RESPONSE += (
-					f'Now ready to write to file: {escape_for_html(fileName)}'
-				)
-		except IOError as e:
+		num = 'BenchmarkTest00572'[13:]
+		user = f'SafeTheo{num}'
+		cookie = f'rememberMe{num}'
+		value = secrets.token_hex(32)
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

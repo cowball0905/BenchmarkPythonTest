@@ -20,53 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00874', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00874', methods=['GET'])
 	def BenchmarkTest00874_get():
 		return BenchmarkTest00874_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00874', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00874', methods=['POST'])
 	def BenchmarkTest00874_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00874")
-		param = ""
-		if values:
-			param = values[0]
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00874")
+		if not param:
+			param = ""
 
 		import configparser
 		
 		bar = 'safe!'
 		conf19250 = configparser.ConfigParser()
 		conf19250.add_section('section19250')
-		conf19250.set('section19250', 'keyA-19250', 'a-Value')
+		conf19250.set('section19250', 'keyA-19250', 'a_Value')
 		conf19250.set('section19250', 'keyB-19250', param)
-		bar = conf19250.get('section19250', 'keyB-19250')
+		bar = conf19250.get('section19250', 'keyA-19250')
 
-		import helpers.ldap
-		import ldap3
+		import random
+		from helpers.utils import mysession
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
-		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+		num = 'BenchmarkTest00874'[13:]
+		user = f'SafeRandy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().getrandbits(32))
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				"Error processing LDAP query."
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

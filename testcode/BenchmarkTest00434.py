@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00434', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00434', methods=['GET'])
 	def BenchmarkTest00434_get():
 		return BenchmarkTest00434_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00434', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00434', methods=['POST'])
 	def BenchmarkTest00434_post():
 		RESPONSE = ""
 
@@ -34,38 +34,29 @@ def init(app):
 				param = name
 				break
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
+		map33702 = {}
+		map33702['keyA-33702'] = 'a-Value'
+		map33702['keyB-33702'] = param
+		map33702['keyC'] = 'another-Value'
+		bar = map33702['keyB-33702']
+
+		import os
+		import subprocess
+		import helpers.utils
+
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
 		else:
-			bar = param
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {bar}")
 
-		import hashlib, base64
-		import io, helpers.utils
-
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.md5()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			helpers.utils.commandOutput(proc)
 		)
-		f.close()
 
 		return RESPONSE
 

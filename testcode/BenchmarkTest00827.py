@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00827', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00827', methods=['GET'])
 	def BenchmarkTest00827_get():
 		return BenchmarkTest00827_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00827', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00827', methods=['POST'])
 	def BenchmarkTest00827_post():
 		RESPONSE = ""
 
@@ -33,27 +33,18 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = param
-
-		import lxml.etree
-		import helpers.utils
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
-			run_query = lxml.etree.XPath(query)
-			nodes = run_query(root)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
+			exec(bar)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'Error executing statement \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

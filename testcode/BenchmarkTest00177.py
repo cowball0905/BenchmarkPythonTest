@@ -20,51 +20,57 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00177', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00177', methods=['GET'])
 	def BenchmarkTest00177_get():
 		return BenchmarkTest00177_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00177', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00177', methods=['POST'])
 	def BenchmarkTest00177_post():
 		RESPONSE = ""
 
-		param = request.form.get("BenchmarkTest00177")
-		if not param:
-			param = ""
+		values = request.form.getlist("BenchmarkTest00177")
+		param = ""
+		if values:
+			param = values[0]
 
-		num = 86
+		import configparser
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = 'safe!'
+		conf63043 = configparser.ConfigParser()
+		conf63043.add_section('section63043')
+		conf63043.set('section63043', 'keyA-63043', 'a-Value')
+		conf63043.set('section63043', 'keyB-63043', param)
+		bar = conf63043.get('section63043', 'keyB-63043')
 
-		import helpers.ldap
-		import ldap3
+		import helpers.utils
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
-		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+		fileName = None
+		fd = None
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
+		if '../' in bar:
 			RESPONSE += (
-				"Error processing LDAP query."
+				'File name must not include \'../\''
 			)
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

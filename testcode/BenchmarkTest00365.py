@@ -20,56 +20,29 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00365', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00365', methods=['GET'])
 	def BenchmarkTest00365_get():
 		return BenchmarkTest00365_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00365', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00365', methods=['POST'])
 	def BenchmarkTest00365_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00365")
-		if not param:
-			param = ""
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00365" in request.form.getlist(name):
+				param = name
+				break
 
-		import configparser
-		
-		bar = 'safe!'
-		conf93369 = configparser.ConfigParser()
-		conf93369.add_section('section93369')
-		conf93369.set('section93369', 'keyA-93369', 'a-Value')
-		conf93369.set('section93369', 'keyB-93369', param)
-		bar = conf93369.get('section93369', 'keyB-93369')
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import helpers.ldap
-		import ldap3
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
-		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
-
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except:
-			RESPONSE += (
-				"Error processing LDAP query."
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00271', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00271', methods=['GET'])
 	def BenchmarkTest00271_get():
 		return BenchmarkTest00271_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00271', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00271', methods=['POST'])
 	def BenchmarkTest00271_post():
 		RESPONSE = ""
 
@@ -33,37 +33,32 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		from flask import make_response
-		import io
+		import platform
+		import subprocess
 		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
+		else:
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
+		try:
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
 
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=False,
-			httponly=True)
+			RESPONSE += (
+				helpers.utils.commandOutput(proc)
+			)
+		except IOError:
+			RESPONSE += (
+				"Problem executing cmdi - subprocess.run(list) Test Case"
+			)
 
 		return RESPONSE
 

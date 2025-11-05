@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00477', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00477', methods=['GET'])
 	def BenchmarkTest00477_get():
 		return BenchmarkTest00477_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00477', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00477', methods=['POST'])
 	def BenchmarkTest00477_post():
 		RESPONSE = ""
 
@@ -32,31 +32,32 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import pathlib
-		import helpers.utils
+		import random
+		from helpers.utils import mysession
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / bar).resolve()
+		num = 'BenchmarkTest00477'[13:]
+		user = f'Isaac{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.randint(0, 2**32))
 
-			if not str(p).startswith(str(testfiles)):
-				RESPONSE += (
-					"Invalid Path."
-				)
-				return RESPONSE
-
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
+				f'Welcome back: {user}<br/>'
 			)
-		except OSError:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

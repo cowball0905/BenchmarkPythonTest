@@ -20,44 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00552', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00552', methods=['GET'])
 	def BenchmarkTest00552_get():
 		return BenchmarkTest00552_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00552', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00552', methods=['POST'])
 	def BenchmarkTest00552_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00552")
-		if not param:
-		    param = ""
-
-		import configparser
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00552")
 		
-		bar = 'safe!'
-		conf67597 = configparser.ConfigParser()
-		conf67597.add_section('section67597')
-		conf67597.set('section67597', 'keyA-67597', 'a-Value')
-		conf67597.set('section67597', 'keyB-67597', param)
-		bar = conf67597.get('section67597', 'keyB-67597')
+		if headers:
+			param = headers[0]
 
-		import pickle
-		import base64
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
+
+		import lxml.etree
 		import helpers.utils
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
-
 		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
 		except:
 			RESPONSE += (
-				'Unpickling failed!'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
-			return RESPONSE
-
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
 
 		return RESPONSE
 

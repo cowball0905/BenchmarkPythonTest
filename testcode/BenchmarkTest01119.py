@@ -20,45 +20,38 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01119', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01119', methods=['GET'])
 	def BenchmarkTest01119_get():
 		return BenchmarkTest01119_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01119', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01119', methods=['POST'])
 	def BenchmarkTest01119_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01119")
 
-		import configparser
+		num = 106
 		
-		bar = 'safe!'
-		conf83647 = configparser.ConfigParser()
-		conf83647.add_section('section83647')
-		conf83647.set('section83647', 'keyA-83647', 'a_Value')
-		conf83647.set('section83647', 'keyB-83647', param)
-		bar = conf83647.get('section83647', 'keyA-83647')
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import random
-		from helpers.utils import mysession
+		import helpers.utils
 
-		num = 'BenchmarkTest01119'[13:]
-		user = f'Randy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.getrandbits(32))
+		fileName = None
+		fd = None
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

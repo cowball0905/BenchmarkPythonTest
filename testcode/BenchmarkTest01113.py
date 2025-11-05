@@ -20,45 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01113', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01113', methods=['GET'])
 	def BenchmarkTest01113_get():
 		return BenchmarkTest01113_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01113', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01113', methods=['POST'])
 	def BenchmarkTest01113_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01113")
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		map91034 = {}
+		map91034['keyA-91034'] = 'a-Value'
+		map91034['keyB-91034'] = param
+		map91034['keyC'] = 'another-Value'
+		bar = map91034['keyB-91034']
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import codecs
 		import helpers.utils
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
 
+			RESPONSE += (
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
+			)
 
 		return RESPONSE
 

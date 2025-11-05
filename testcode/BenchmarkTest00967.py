@@ -20,56 +20,54 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00967', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00967', methods=['GET'])
 	def BenchmarkTest00967_get():
 		return BenchmarkTest00967_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00967', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00967', methods=['POST'])
 	def BenchmarkTest00967_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00967")
-		if not param:
-			param = ""
-
-		possible = "ABC"
-		guess = possible[0]
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00967" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00967"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00967") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		param = urllib.parse.unquote_plus(param)
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		import configparser
+		
+		bar = 'safe!'
+		conf68201 = configparser.ConfigParser()
+		conf68201.add_section('section68201')
+		conf68201.set('section68201', 'keyA-68201', 'a-Value')
+		conf68201.set('section68201', 'keyB-68201', param)
+		bar = conf68201.get('section68201', 'keyB-68201')
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		import secrets
+		from helpers.utils import mysession
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
+		num = 'BenchmarkTest00967'[13:]
+		user = f'SafeRicky{num}'
+		cookie = f'rememberMe{num}'
+		value = str(secrets.randbits(32))
 
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=True,
-			httponly=True)
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

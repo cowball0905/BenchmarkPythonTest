@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00984', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00984', methods=['GET'])
 	def BenchmarkTest00984_get():
 		return BenchmarkTest00984_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00984', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00984', methods=['POST'])
 	def BenchmarkTest00984_post():
 		RESPONSE = ""
 
@@ -41,45 +41,34 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
-
-		import platform
-		import codecs
 		import helpers.utils
-		from urllib.parse import urlparse
-		from urllib.request import url2pathname
+		bar = helpers.utils.escape_for_html(param)
 
-		startURIslashes = ""
+		import hashlib, base64
+		import io, helpers.utils
 
-		if platform.system() == "Windows":
-			startURIslashes = "/"
-		else:
-			startURIslashes = "//"
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		try:
-			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+		if len(input) == 0:
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				'Cannot generate hash: Input was empty.'
 			)
+			return RESPONSE
 
-			RESPONSE += (
-				" And file already exists."
-			)
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
-		except IOError:
-			pass
+		hash = hashlib.sha384()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

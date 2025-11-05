@@ -20,28 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00360', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00360', methods=['GET'])
 	def BenchmarkTest00360_get():
 		return BenchmarkTest00360_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00360', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00360', methods=['POST'])
 	def BenchmarkTest00360_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00360" in request.form.getlist(name):
+				param = name
+				break
+
+		possible = "ABC"
+		guess = possible[0]
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00360")
-		if not param:
-			param = ""
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		import helpers.utils
 
-		import flask
-
-		return flask.redirect(bar)
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
+			RESPONSE += (
+				f'Now ready to write to file: {escape_for_html(fileName)}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

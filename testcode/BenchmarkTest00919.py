@@ -20,52 +20,33 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00919', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00919', methods=['GET'])
 	def BenchmarkTest00919_get():
 		return BenchmarkTest00919_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00919', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00919', methods=['POST'])
 	def BenchmarkTest00919_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00919")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00919" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00919"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00919") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		map2800 = {}
-		map2800['keyA-2800'] = 'a-Value'
-		map2800['keyB-2800'] = param
-		map2800['keyC'] = 'another-Value'
-		bar = map2800['keyB-2800']
+		bar = param + '_SafeStuff'
 
-		import lxml.etree
-		import helpers.utils
-		import io
 
-		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			strIO = io.StringIO()
-			strIO.write('/Employees/Employee[@emplid=\'')
-			strIO.write(bar)
-			strIO.write('\']')
-			query = strIO.getvalue()
-
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

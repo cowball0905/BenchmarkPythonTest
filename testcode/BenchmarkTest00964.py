@@ -20,37 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00964', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00964', methods=['GET'])
 	def BenchmarkTest00964_get():
 		return BenchmarkTest00964_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00964', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest00964', methods=['POST'])
 	def BenchmarkTest00964_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00964")
-		if not param:
-			param = ""
-
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
-
-
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00964': bar}))
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00964" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00964"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00964") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
+		param = urllib.parse.unquote_plus(param)
+
+		bar = param
+
+		import random
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00964'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

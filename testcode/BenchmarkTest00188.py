@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00188', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00188', methods=['GET'])
 	def BenchmarkTest00188_get():
 		return BenchmarkTest00188_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00188', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00188', methods=['POST'])
 	def BenchmarkTest00188_post():
 		RESPONSE = ""
 
@@ -33,34 +33,16 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf20259 = configparser.ConfigParser()
-		conf20259.add_section('section20259')
-		conf20259.set('section20259', 'keyA-20259', 'a-Value')
-		conf20259.set('section20259', 'keyB-20259', param)
-		bar = conf20259.get('section20259', 'keyB-20259')
+		string20259 = 'help'
+		string20259 += param
+		string20259 += 'snapes on a plane'
+		bar = string20259[4:-17]
 
-		import helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+		)
 
 		return RESPONSE
 

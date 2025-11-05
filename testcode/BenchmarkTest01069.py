@@ -20,41 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01069', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01069', methods=['GET'])
 	def BenchmarkTest01069_get():
 		return BenchmarkTest01069_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01069', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01069', methods=['POST'])
 	def BenchmarkTest01069_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01069" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01069"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01069") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		num = 86
+		num = 106
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
+		bar = "This should never happen" if (7*42) - num > 200 else param
+
+		import base64
+		import secrets
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest01069'[13:]
+		user = f'SafeToby{num}'
+		cookie = f'rememberMe{num}'
+		value = base64.b64encode(secrets.token_bytes(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
 		else:
-			bar = param
-
-
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest01069': bar}))
-		
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

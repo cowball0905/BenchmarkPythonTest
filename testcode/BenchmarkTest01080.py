@@ -20,39 +20,53 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01080', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01080', methods=['GET'])
 	def BenchmarkTest01080_get():
 		return BenchmarkTest01080_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01080', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01080', methods=['POST'])
 	def BenchmarkTest01080_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01080" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01080"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01080") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		num = 106
+		import configparser
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = 'safe!'
+		conf96393 = configparser.ConfigParser()
+		conf96393.add_section('section96393')
+		conf96393.set('section96393', 'keyA-96393', 'a_Value')
+		conf96393.set('section96393', 'keyB-96393', param)
+		bar = conf96393.get('section96393', 'keyA-96393')
 
-		try:
+		import hashlib, base64
+		import io, helpers.utils
+
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		if len(input) == 0:
 			RESPONSE += (
-				eval(bar)
+				'Cannot generate hash: Input was empty.'
 			)
-		except:
-			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
-			)
+			return RESPONSE
+
+		hash = hashlib.new('md5')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

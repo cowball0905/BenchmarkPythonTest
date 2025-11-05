@@ -20,47 +20,35 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00853', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00853', methods=['GET'])
 	def BenchmarkTest00853_get():
 		return BenchmarkTest00853_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00853', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00853', methods=['POST'])
 	def BenchmarkTest00853_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00853")
-		param = ""
-		if values:
-			param = values[0]
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00853")
+		if not param:
+			param = ""
 
-		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import hashlib, base64
-		import io, helpers.utils
+		import helpers.db_sqlite
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.new('sha512')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (bar,))
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			helpers.db_sqlite.results(cur, sql)
 		)
-		f.close()
+		con.close()
 
 		return RESPONSE
 

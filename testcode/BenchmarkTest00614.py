@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00614', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00614', methods=['GET'])
 	def BenchmarkTest00614_get():
 		return BenchmarkTest00614_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00614', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00614', methods=['POST'])
 	def BenchmarkTest00614_post():
 		RESPONSE = ""
 
@@ -34,31 +34,39 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		num = 86
+		possible = "ABC"
+		guess = possible[0]
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
+
+		import platform
+		import subprocess
+		import helpers.utils
+
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
 		else:
-			bar = param
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
 
-		import random
-		import base64
-		from helpers.utils import mysession
+		try:
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
 
-		num = 'BenchmarkTest00614'[13:]
-		user = f'SafeBarbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				helpers.utils.commandOutput(proc)
 			)
-		else:
-			mysession[cookie] = value
+		except IOError:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				"Problem executing cmdi - subprocess.run(list) Test Case"
 			)
 
 		return RESPONSE

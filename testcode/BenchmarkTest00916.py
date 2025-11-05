@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00916', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00916', methods=['GET'])
 	def BenchmarkTest00916_get():
 		return BenchmarkTest00916_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00916', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00916', methods=['POST'])
 	def BenchmarkTest00916_post():
 		RESPONSE = ""
 
@@ -35,33 +35,19 @@ def init(app):
 		if not param:
 			param = ""
 
-		map53978 = {}
-		map53978['keyA-53978'] = 'a-Value'
-		map53978['keyB-53978'] = param
-		map53978['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map53978['keyB-53978']
-		bar = map53978['keyA-53978']
+		bar = param
 
-		import lxml.etree
-		import helpers.utils
+		import yaml
 
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
-
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			yobj = yaml.load(bar, Loader=yaml.Loader)
 
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				yobj['text']
 			)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

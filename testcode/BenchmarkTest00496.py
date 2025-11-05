@@ -20,15 +20,15 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00496', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00496', methods=['GET'])
 	def BenchmarkTest00496_get():
 		return BenchmarkTest00496_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00496', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00496', methods=['POST'])
 	def BenchmarkTest00496_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00496")
+		param = request.headers.get("Referer")
 		if not param:
 		    param = ""
 
@@ -37,24 +37,13 @@ def init(app):
 		string52901 += 'snapes on a plane'
 		bar = string52901[4:-17]
 
-		import random
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest00496'[13:]
-		user = f'Isaac{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.randint(0, 2**32))
+		RESPONSE += (
+			'The value of the bar parameter is now in a custom header.'
+		)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00496': bar}))
+		
 
 		return RESPONSE
 

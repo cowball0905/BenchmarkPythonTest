@@ -20,30 +20,25 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00171', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00171', methods=['GET'])
 	def BenchmarkTest00171_get():
 		return BenchmarkTest00171_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00171', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00171', methods=['POST'])
 	def BenchmarkTest00171_post():
 		RESPONSE = ""
 
-		param = request.form.get("BenchmarkTest00171")
-		if not param:
-			param = ""
+		values = request.form.getlist("BenchmarkTest00171")
+		param = ""
+		if values:
+			param = values[0]
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = param
 
-		try:
-			RESPONSE += (
-				eval(bar)
-			)
-		except:
-			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
-			)
+
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

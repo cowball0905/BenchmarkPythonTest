@@ -20,37 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00697', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00697', methods=['GET'])
 	def BenchmarkTest00697_get():
 		return BenchmarkTest00697_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00697', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00697', methods=['POST'])
 	def BenchmarkTest00697_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
+		param = request.args.get("BenchmarkTest00697")
+		if not param:
+			param = ""
+
+		import configparser
 		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		bar = 'safe!'
+		conf94097 = configparser.ConfigParser()
+		conf94097.add_section('section94097')
+		conf94097.set('section94097', 'keyA-94097', 'a-Value')
+		conf94097.set('section94097', 'keyB-94097', param)
+		bar = conf94097.get('section94097', 'keyB-94097')
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		import random
+		from helpers.utils import mysession
 
-		import flask
+		num = 'BenchmarkTest00697'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
 
-		flask.session[bar] = '12345'
-
-		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
-		)
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

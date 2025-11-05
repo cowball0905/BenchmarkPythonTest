@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00473', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00473', methods=['GET'])
 	def BenchmarkTest00473_get():
 		return BenchmarkTest00473_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00473', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00473', methods=['POST'])
 	def BenchmarkTest00473_post():
 		RESPONSE = ""
 
@@ -32,49 +32,31 @@ def init(app):
 		if not param:
 		    param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		map14500 = {}
+		map14500['keyA-14500'] = 'a-Value'
+		map14500['keyB-14500'] = param
+		map14500['keyC'] = 'another-Value'
+		bar = map14500['keyB-14500']
 
-		import platform
-		import codecs
+		import lxml.etree
 		import helpers.utils
-		from urllib.parse import urlparse
-		from urllib.request import url2pathname
-
-		startURIslashes = ""
-
-		if platform.system() == "Windows":
-			startURIslashes = "/"
-		else:
-			startURIslashes = "//"
 
 		try:
-			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-
+		except:
 			RESPONSE += (
-				" And file already exists."
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
-		except IOError:
-			pass
 
 		return RESPONSE
 

@@ -20,29 +20,31 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00453', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00453', methods=['GET'])
 	def BenchmarkTest00453_get():
 		return BenchmarkTest00453_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00453', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00453', methods=['POST'])
 	def BenchmarkTest00453_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00453" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("Referer")
+		if not param:
+		    param = ""
 
-		bar = param
+		import configparser
+		
+		bar = 'safe!'
+		conf67557 = configparser.ConfigParser()
+		conf67557.add_section('section67557')
+		conf67557.set('section67557', 'keyA-67557', 'a_Value')
+		conf67557.set('section67557', 'keyB-67557', param)
+		bar = conf67557.get('section67557', 'keyA-67557')
 
-		import flask
 
-		flask.session[bar] = '12345'
-
+		otherarg = "static text"
 		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
 		)
 
 		return RESPONSE

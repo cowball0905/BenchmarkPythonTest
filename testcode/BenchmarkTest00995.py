@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00995', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00995', methods=['GET'])
 	def BenchmarkTest00995_get():
 		return BenchmarkTest00995_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00995', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00995', methods=['POST'])
 	def BenchmarkTest00995_post():
 		RESPONSE = ""
 
@@ -41,14 +41,18 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
-		)
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

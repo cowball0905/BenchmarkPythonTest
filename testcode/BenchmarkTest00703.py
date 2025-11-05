@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00703', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00703', methods=['GET'])
 	def BenchmarkTest00703_get():
 		return BenchmarkTest00703_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00703', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00703', methods=['POST'])
 	def BenchmarkTest00703_post():
 		RESPONSE = ""
 
@@ -32,14 +32,33 @@ def init(app):
 		if not param:
 			param = ""
 
+		map65405 = {}
+		map65405['keyA-65405'] = 'a-Value'
+		map65405['keyB-65405'] = param
+		map65405['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map65405['keyB-65405']
+		bar = map65405['keyA-65405']
+
 		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		import secrets
+		from helpers.utils import mysession
 
+		num = 'BenchmarkTest00703'[13:]
+		user = f'SafeToby{num}'
+		cookie = f'rememberMe{num}'
+		value = base64.b64encode(secrets.token_bytes(32))
 
-		RESPONSE += (
-			f'Parameter value: {bar}'
-		)
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

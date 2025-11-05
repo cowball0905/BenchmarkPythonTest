@@ -20,49 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00522', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00522', methods=['GET'])
 	def BenchmarkTest00522_get():
 		return BenchmarkTest00522_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00522', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00522', methods=['POST'])
 	def BenchmarkTest00522_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00522")
-		if not param:
-		    param = ""
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00522")
+		
+		if headers:
+			param = headers[0]
 
-		map24907 = {}
-		map24907['keyA-24907'] = 'a-Value'
-		map24907['keyB-24907'] = param
-		map24907['keyC'] = 'another-Value'
-		bar = map24907['keyB-24907']
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import hashlib, base64
-		import io, helpers.utils
+		import codecs
+		import helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		try:
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
-		if len(input) == 0:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
-			return RESPONSE
 
-		hash = hashlib.sha1()
-		hash.update(input)
+			RESPONSE += (
+				" And file already exists."
+			)
 
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
+			)
 
 		return RESPONSE
 

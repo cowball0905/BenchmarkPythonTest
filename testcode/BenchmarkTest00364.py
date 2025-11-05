@@ -20,36 +20,36 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00364', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00364', methods=['GET'])
 	def BenchmarkTest00364_get():
 		return BenchmarkTest00364_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00364', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00364', methods=['POST'])
 	def BenchmarkTest00364_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00364")
-		if not param:
-			param = ""
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00364" in request.form.getlist(name):
+				param = name
+				break
 
 		num = 106
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Exec argument must be a plain string literal."
-			)
-			return RESPONSE
+		import helpers.utils
 
 		try:
-			exec(bar)
-		except:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

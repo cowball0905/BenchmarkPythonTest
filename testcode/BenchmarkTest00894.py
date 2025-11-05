@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00894', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00894', methods=['GET'])
 	def BenchmarkTest00894_get():
 		return BenchmarkTest00894_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00894', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00894', methods=['POST'])
 	def BenchmarkTest00894_post():
 		RESPONSE = ""
 
@@ -35,24 +35,31 @@ def init(app):
 		if not param:
 			param = ""
 
-		string49442 = 'help'
-		string49442 += param
-		string49442 += 'snapes on a plane'
-		bar = string49442[4:-17]
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
+		from flask import make_response
+		import io
 		import helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'wb') as fd:
-				RESPONSE += (
-					f'Now ready to write to file: {escape_for_html(fileName)}'
-				)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
+
+		RESPONSE += (
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+		)
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=True,
+			httponly=True)
 
 		return RESPONSE
 

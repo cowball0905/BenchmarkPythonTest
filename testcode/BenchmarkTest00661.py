@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00661', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00661', methods=['GET'])
 	def BenchmarkTest00661_get():
 		return BenchmarkTest00661_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00661', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00661', methods=['POST'])
 	def BenchmarkTest00661_post():
 		RESPONSE = ""
 
@@ -42,24 +42,23 @@ def init(app):
 		superstring = f'85641{param}abcd'
 		bar = superstring[len('85641'):len(superstring)-5]
 
-		import random
-		from helpers.utils import mysession
+		import pickle
+		import base64
+		import helpers.utils
 
-		num = 'BenchmarkTest00661'[13:]
-		user = f'Nancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.normalvariate())[2:]
+		helpers.utils.sharedstr = "no pickles to be seen here"
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
+		except:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				'Unpickling failed!'
 			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			return RESPONSE
+
+		RESPONSE += (
+			f'shared string is {helpers.utils.sharedstr}'
+		)
 
 		return RESPONSE
 

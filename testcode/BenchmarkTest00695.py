@@ -20,39 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00695', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00695', methods=['GET'])
 	def BenchmarkTest00695_get():
 		return BenchmarkTest00695_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00695', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00695', methods=['POST'])
 	def BenchmarkTest00695_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		param = request.args.get("BenchmarkTest00695")
+		if not param:
+			param = ""
 
-		map19326 = {}
-		map19326['keyA-19326'] = 'a-Value'
-		map19326['keyB-19326'] = param
-		map19326['keyC'] = 'another-Value'
-		bar = map19326['keyB-19326']
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import flask
+		import random
+		from helpers.utils import mysession
 
-		flask.session[bar] = '12345'
+		num = 'BenchmarkTest00695'[13:]
+		user = f'Isaac{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.randint(0, 2**32))
 
-		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
-		)
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

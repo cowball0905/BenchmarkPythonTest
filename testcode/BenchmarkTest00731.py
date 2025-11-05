@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00731', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00731', methods=['GET'])
 	def BenchmarkTest00731_get():
 		return BenchmarkTest00731_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00731', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00731', methods=['POST'])
 	def BenchmarkTest00731_post():
 		RESPONSE = ""
 
@@ -32,31 +32,36 @@ def init(app):
 		if not param:
 			param = ""
 
-		import helpers.ThingFactory
+		possible = "ABC"
+		guess = possible[0]
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import lxml.etree
-		import helpers.utils
+		import flask
+		import urllib.parse
 
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
-
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				'Error parsing URL.'
 			)
+			return RESPONSE
+
+		return flask.redirect(bar)
 
 		return RESPONSE
 

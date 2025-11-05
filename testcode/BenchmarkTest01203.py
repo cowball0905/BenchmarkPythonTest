@@ -20,40 +20,27 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01203', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01203', methods=['GET'])
 	def BenchmarkTest01203_get():
 		return BenchmarkTest01203_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01203', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01203', methods=['POST'])
 	def BenchmarkTest01203_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01203")
+		param = request.headers.get("Referer")
+		if not param:
+		    param = ""
 
-		import markupsafe
-		
-		bar = markupsafe.escape(param)
 
-		import random
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest01203'[13:]
-		user = f'Isaac{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.randint(0, 2**32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		dict = {}
+		dict['param'] = param
+		dict['otherarg'] = 'this is it'
+		RESPONSE += (
+			'param is \'{0[param]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+		)
 
 		return RESPONSE
+
 

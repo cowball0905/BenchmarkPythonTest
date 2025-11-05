@@ -20,55 +20,50 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00947', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00947', methods=['GET'])
 	def BenchmarkTest00947_get():
 		return BenchmarkTest00947_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00947', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00947', methods=['POST'])
 	def BenchmarkTest00947_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00947")
-		if not param:
-			param = ""
-
-		import configparser
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00947" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00947"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00947") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = 'safe!'
-		conf89616 = configparser.ConfigParser()
-		conf89616.add_section('section89616')
-		conf89616.set('section89616', 'keyA-89616', 'a_Value')
-		conf89616.set('section89616', 'keyB-89616', param)
-		bar = conf89616.get('section89616', 'keyA-89616')
+		param = urllib.parse.unquote_plus(param)
 
-		import hashlib, base64
-		import io, helpers.utils
+		bar = "This should never happen"
+		if 'should' not in bar:
+		        bar = "Ifnot case passed"
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		import lxml.etree
+		import helpers.utils
 
-		if len(input) == 0:
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
-			return RESPONSE
-
-		hash = hashlib.new('sha512')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

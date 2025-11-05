@@ -20,30 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00447', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00447', methods=['GET'])
 	def BenchmarkTest00447_get():
 		return BenchmarkTest00447_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00447', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00447', methods=['POST'])
 	def BenchmarkTest00447_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00447" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("BenchmarkTest00447")
+		if not param:
+		    param = ""
+
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
 		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
 
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not contain \'../\''
+			)
+			return RESPONSE
 
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00447': bar}))
-		
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
+			RESPONSE += (
+				f'Now ready to write to file: {escape_for_html(fileName)}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

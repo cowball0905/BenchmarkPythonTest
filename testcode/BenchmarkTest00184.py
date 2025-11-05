@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00184', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00184', methods=['GET'])
 	def BenchmarkTest00184_get():
 		return BenchmarkTest00184_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00184', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00184', methods=['POST'])
 	def BenchmarkTest00184_post():
 		RESPONSE = ""
 
@@ -33,18 +33,27 @@ def init(app):
 		if values:
 			param = values[0]
 
-		string5803 = ''
-		data12 = ''
-		copy = string5803
-		string5803 = ''
-		string5803 += param
-		copy += 'SomeOKString'
-		bar = copy
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
+		import helpers.utils
 
-		RESPONSE += (
-			f'Parameter value: {bar}'
-		)
+		fileName = None
+		fd = None
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

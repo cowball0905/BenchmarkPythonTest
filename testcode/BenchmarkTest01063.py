@@ -20,42 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01063', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01063', methods=['GET'])
 	def BenchmarkTest01063_get():
 		return BenchmarkTest01063_post()
 
-	@app.route('/benchmark/intoverflow-00/BenchmarkTest01063', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01063', methods=['POST'])
 	def BenchmarkTest01063_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01063" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01063"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01063") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		import markupsafe
-		
-		bar = markupsafe.escape(param)
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import re
+		import random
+		from helpers.utils import mysession
 
-		regex = re.compile(r'^(([a-z])+.)+')
+		num = 'BenchmarkTest01063'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
 
-		if regex.match(bar) is not None:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'String matches!'
+				f'Welcome back: {user}<br/>'
 			)
 		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				'String does not match.'
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

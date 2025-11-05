@@ -20,59 +20,29 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01028', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01028', methods=['GET'])
 	def BenchmarkTest01028_get():
 		return BenchmarkTest01028_post()
 
-	@app.route('/benchmark/weakrand-02/BenchmarkTest01028', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01028', methods=['POST'])
 	def BenchmarkTest01028_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01028" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01028"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01028") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		string27985 = 'help'
+		string27985 += param
+		string27985 += 'snapes on a plane'
+		bar = string27985[4:-17]
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest01028'[13:]
-		user = f'SafeTheo{num}'
-		cookie = f'rememberMe{num}'
-		value = secrets.token_hex(32)
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+		)
 
 		return RESPONSE
 

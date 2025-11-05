@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00195', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00195', methods=['GET'])
 	def BenchmarkTest00195_get():
 		return BenchmarkTest00195_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00195', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00195', methods=['POST'])
 	def BenchmarkTest00195_post():
 		RESPONSE = ""
 
@@ -33,30 +33,20 @@ def init(app):
 		if values:
 			param = values[0]
 
-		map47256 = {}
-		map47256['keyA-47256'] = 'a-Value'
-		map47256['keyB-47256'] = param
-		map47256['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map47256['keyB-47256']
-		bar = map47256['keyA-47256']
-
-		import pathlib
-		import helpers.utils
-
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
-
-		if not str(p).startswith(str(testfiles)):
-			RESPONSE += (
-				"Invalid Path."
-			)
-			return RESPONSE
+		num = 106
 		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+
+		import helpers.db_sqlite
+
+		sql = f'SELECT username from USERS where password = \'{bar}\''
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql)
+		RESPONSE += (
+			helpers.db_sqlite.results(cur, sql)
+		)
+		con.close()
 
 		return RESPONSE
 
