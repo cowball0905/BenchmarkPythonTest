@@ -33,18 +33,13 @@ def init(app):
 		if values:
 			param = values[0]
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		string94052 = ''
+		data12 = ''
+		copy = string94052
+		string94052 = ''
+		string94052 += param
+		copy += 'SomeOKString'
+		bar = copy
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -61,7 +56,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('md5')
+		hash = hashlib.sha1()
 		hash.update(input)
 
 		result = hash.digest()

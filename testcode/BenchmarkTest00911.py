@@ -20,47 +20,58 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00911', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00911', methods=['GET'])
 	def BenchmarkTest00911_get():
 		return BenchmarkTest00911_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00911', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00911', methods=['POST'])
 	def BenchmarkTest00911_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00911")
-		if not param:
-			param = ""
-
-		import configparser
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00911" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00911"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00911") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = 'safe!'
-		conf92454 = configparser.ConfigParser()
-		conf92454.add_section('section92454')
-		conf92454.set('section92454', 'keyA-92454', 'a_Value')
-		conf92454.set('section92454', 'keyB-92454', param)
-		bar = conf92454.get('section92454', 'keyA-92454')
+		param = urllib.parse.unquote_plus(param)
 
-		import os
-		import subprocess
+		bar = param
+
 		import helpers.utils
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
-		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
+		fileName = None
+		fd = None
 
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
-		RESPONSE += (
-			helpers.utils.commandOutput(proc)
-		)
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not include \'../\''
+			)
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

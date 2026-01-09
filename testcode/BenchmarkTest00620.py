@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00620', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00620', methods=['GET'])
 	def BenchmarkTest00620_get():
 		return BenchmarkTest00620_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00620', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00620', methods=['POST'])
 	def BenchmarkTest00620_post():
 		RESPONSE = ""
 
@@ -39,22 +39,23 @@ def init(app):
 				param = name
 				break
 
-		map68524 = {}
-		map68524['keyA-68524'] = 'a-Value'
-		map68524['keyB-68524'] = param
-		map68524['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map68524['keyB-68524']
-		bar = map68524['keyA-68524']
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import os
 		import helpers.utils
 
-		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-		if os.path.exists(fileName):
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

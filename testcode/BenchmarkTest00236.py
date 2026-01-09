@@ -33,18 +33,22 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 106
+		import configparser
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = 'safe!'
+		conf34285 = configparser.ConfigParser()
+		conf34285.add_section('section34285')
+		conf34285.set('section34285', 'keyA-34285', 'a_Value')
+		conf34285.set('section34285', 'keyB-34285', param)
+		bar = conf34285.get('section34285', 'keyA-34285')
 
-		import base64
-		import secrets
+		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00236'[13:]
-		user = f'SafeTheo{num}'
+		user = f'SafeRandy{num}'
 		cookie = f'rememberMe{num}'
-		value = secrets.token_hex(32)
+		value = str(random.SystemRandom().getrandbits(32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -53,7 +57,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
+				f'{user} has been remembered with cookie: '
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

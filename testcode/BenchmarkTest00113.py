@@ -32,9 +32,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
 		import lxml.etree
 		import helpers.utils

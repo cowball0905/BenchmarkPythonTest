@@ -35,22 +35,16 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
-		import random
+		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00310'[13:]
-		user = f'Randall{num}'
+		user = f'SafeRicky{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.random())[2:]
+		value = str(secrets.randbits(32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -59,7 +53,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
+				f'{user} has been remembered with cookie:'
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

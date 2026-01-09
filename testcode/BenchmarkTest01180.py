@@ -20,48 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest01180', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01180', methods=['GET'])
 	def BenchmarkTest01180_get():
 		return BenchmarkTest01180_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest01180', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01180', methods=['POST'])
 	def BenchmarkTest01180_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01180")
+		param = request.form.get("BenchmarkTest01180")
+		if not param:
+			param = ""
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import helpers.ldap
-		import ldap3
+		import helpers.utils
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
-		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
-
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
+		if '../' in param:
 			RESPONSE += (
-				"Error processing LDAP query."
+				'File name must not contain \'../\''
 			)
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{param}'
+			fd = open(fileName, 'wb')
+			RESPONSE += (
+				f'Now ready to write to file: {escape_for_html(fileName)}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
+
 

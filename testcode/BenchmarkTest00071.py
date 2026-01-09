@@ -38,8 +38,13 @@ def init(app):
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00071", "noCookieValueSupplied"))
 
-		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
+		string39223 = ''
+		data12 = ''
+		copy = string39223
+		string39223 = ''
+		string39223 += param
+		copy += 'SomeOKString'
+		bar = copy
 
 		import flask
 

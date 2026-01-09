@@ -20,40 +20,50 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01220', methods=['GET'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01220', methods=['GET'])
 	def BenchmarkTest01220_get():
 		return BenchmarkTest01220_post()
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01220', methods=['POST'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01220', methods=['POST'])
 	def BenchmarkTest01220_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest01220")
-		param = ""
-		if values:
-			param = values[0]
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
 
-		import lxml.etree
+		import platform
+		import codecs
 		import helpers.utils
+		from urllib.parse import urlparse
+		from urllib.request import url2pathname
+
+		startURIslashes = ""
+
+		if platform.system() == "Windows":
+			startURIslashes = "/"
+		else:
+			startURIslashes = "//"
 
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = '/Employees/Employee[@emplid=\'' + param + '\']'
-
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + param)
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{param}','r','utf-8')
 
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
-		except:
+
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				" And file already exists."
 			)
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
+			)
+		except IOError:
+			pass
 
 		return RESPONSE
 

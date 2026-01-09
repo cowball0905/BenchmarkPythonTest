@@ -38,9 +38,16 @@ def init(app):
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00075", "noCookieValueSupplied"))
 
-		num = 106
+		import helpers.ThingFactory
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
+
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
 
 		try:
 			exec(bar)

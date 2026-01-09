@@ -34,27 +34,17 @@ def init(app):
 				param = name
 				break
 
-		possible = "ABC"
-		guess = possible[1]
+		num = 106
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
 		import random
-		import base64
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00408'[13:]
-		user = f'SafeBarbara{num}'
+		user = f'SafeRandall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
+		value = str(random.SystemRandom().random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

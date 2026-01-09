@@ -33,29 +33,23 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
+		import os
 		import helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
 

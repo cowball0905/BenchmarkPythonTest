@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-00/BenchmarkTest00243', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00243', methods=['GET'])
 	def BenchmarkTest00243_get():
 		return BenchmarkTest00243_post()
 
-	@app.route('/benchmark/weakrand-00/BenchmarkTest00243', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00243', methods=['POST'])
 	def BenchmarkTest00243_post():
 		RESPONSE = ""
 
@@ -33,19 +33,21 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		string30318 = ''
+		data12 = ''
+		copy = string30318
+		string30318 = ''
+		string30318 += param
+		copy += 'SomeOKString'
+		bar = copy
 
 		import random
-		import base64
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00243'[13:]
-		user = f'SafeBarbara{num}'
+		user = f'SafeIsaac{num}'
 		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
+		value = str(random.SystemRandom().randint(0, 2**32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

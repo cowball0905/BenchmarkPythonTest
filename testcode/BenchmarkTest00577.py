@@ -34,26 +34,22 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		possible = "ABC"
-		guess = possible[1]
+		import configparser
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = 'safe!'
+		conf56077 = configparser.ConfigParser()
+		conf56077.add_section('section56077')
+		conf56077.set('section56077', 'keyA-56077', 'a_Value')
+		conf56077.set('section56077', 'keyB-56077', param)
+		bar = conf56077.get('section56077', 'keyA-56077')
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00577'[13:]
-		user = f'SafeRandy{num}'
+		user = f'SafeRandall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().getrandbits(32))
+		value = str(random.SystemRandom().random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

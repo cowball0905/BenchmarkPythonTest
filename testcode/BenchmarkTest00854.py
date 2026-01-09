@@ -35,23 +35,21 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf52261 = configparser.ConfigParser()
-		conf52261.add_section('section52261')
-		conf52261.set('section52261', 'keyA-52261', 'a_Value')
-		conf52261.set('section52261', 'keyB-52261', param)
-		bar = conf52261.get('section52261', 'keyA-52261')
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
+
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

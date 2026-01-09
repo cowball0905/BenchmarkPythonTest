@@ -34,9 +34,8 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		superstring = f'85324{param}abcd'
+		bar = superstring[len('85324'):len(superstring)-5]
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -53,7 +52,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.md5()
+		hash = hashlib.sha512()
 		hash.update(input)
 
 		result = hash.digest()

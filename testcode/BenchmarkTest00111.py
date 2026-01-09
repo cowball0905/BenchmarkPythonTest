@@ -32,29 +32,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
 		import lxml.etree
 		import helpers.utils
 
 		try:
-			if '\'' in bar:
-				RESPONSE += (
-					"Employee ID must not contain apostrophes"
-				)
-				return RESPONSE
-
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
-			nodes = root.xpath(query)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

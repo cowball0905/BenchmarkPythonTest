@@ -33,14 +33,10 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf37760 = configparser.ConfigParser()
-		conf37760.add_section('section37760')
-		conf37760.set('section37760', 'keyA-37760', 'a_Value')
-		conf37760.set('section37760', 'keyB-37760', param)
-		bar = conf37760.get('section37760', 'keyA-37760')
+		string37760 = 'help'
+		string37760 += param
+		string37760 += 'snapes on a plane'
+		bar = string37760[4:-17]
 
 		import lxml.etree
 		import helpers.utils
@@ -48,9 +44,9 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
-			run_query = lxml.etree.XPath(query)
-			nodes = run_query(root)
+			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
+
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

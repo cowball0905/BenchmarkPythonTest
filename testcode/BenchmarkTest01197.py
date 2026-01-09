@@ -20,47 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01197', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01197', methods=['GET'])
 	def BenchmarkTest01197_get():
 		return BenchmarkTest01197_post()
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01197', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01197', methods=['POST'])
 	def BenchmarkTest01197_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest01197")
+		param = request.headers.get("BenchmarkTest01197")
 		if not param:
-			param = ""
+		    param = ""
 
 
-		import lxml.etree
-		import helpers.utils
+		import hashlib, base64
+		import io, helpers.utils
 
-		try:
-			if '\'' in param:
-				RESPONSE += (
-					"Employee ID must not contain apostrophes"
-				)
-				return RESPONSE
+		input = ''
+		if isinstance(param, str):
+			input = param.encode('utf-8')
+		elif isinstance(param, io.IOBase):
+			input = param.read(1000)
 
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{param}\']'
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
+		if len(input) == 0:
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				'Cannot generate hash: Input was empty.'
 			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
+			return RESPONSE
+
+		hash = hashlib.sha1()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

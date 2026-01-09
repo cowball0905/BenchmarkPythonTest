@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00469', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00469', methods=['GET'])
 	def BenchmarkTest00469_get():
 		return BenchmarkTest00469_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00469', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00469', methods=['POST'])
 	def BenchmarkTest00469_post():
 		RESPONSE = ""
 
@@ -32,9 +32,9 @@ def init(app):
 		if not param:
 		    param = ""
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
 		import lxml.etree
 		import helpers.utils
@@ -42,9 +42,8 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
-
-			nodes = root.xpath(query)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

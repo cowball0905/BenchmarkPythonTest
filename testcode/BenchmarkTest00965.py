@@ -41,19 +41,26 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		map27056 = {}
-		map27056['keyA-27056'] = 'a-Value'
-		map27056['keyB-27056'] = param
-		map27056['keyC'] = 'another-Value'
-		bar = map27056['keyB-27056']
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00965'[13:]
-		user = f'Randall{num}'
+		user = f'SafeRandy{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.random())[2:]
+		value = str(random.SystemRandom().getrandbits(32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

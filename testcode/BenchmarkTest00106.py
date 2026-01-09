@@ -32,14 +32,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
+		num = 106
 		
-		bar = 'safe!'
-		conf69844 = configparser.ConfigParser()
-		conf69844.add_section('section69844')
-		conf69844.set('section69844', 'keyA-69844', 'a-Value')
-		conf69844.set('section69844', 'keyB-69844', param)
-		bar = conf69844.get('section69844', 'keyB-69844')
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
 		import lxml.etree
 		import helpers.utils

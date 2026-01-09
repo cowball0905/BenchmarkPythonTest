@@ -20,41 +20,41 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01108', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01108', methods=['GET'])
 	def BenchmarkTest01108_get():
 		return BenchmarkTest01108_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01108', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01108', methods=['POST'])
 	def BenchmarkTest01108_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01108")
 
-		string26380 = 'help'
-		string26380 += param
-		string26380 += 'snapes on a plane'
-		bar = string26380[4:-17]
-
-		import pickle
 		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
+
 		import helpers.utils
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
-
 		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				'Unpickling failed!'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-			return RESPONSE
-
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

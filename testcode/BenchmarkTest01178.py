@@ -20,35 +20,29 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01178', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest01178', methods=['GET'])
 	def BenchmarkTest01178_get():
+		response = make_response(render_template('web/redirect-00/BenchmarkTest01178.html'))
+		response.set_cookie('BenchmarkTest01178', 'http%3A%2F%2Flocalhost%3A5000%2F',
+			max_age=60*3,
+			secure=True,
+			path=request.path,
+			domain='localhost')
+		return response
 		return BenchmarkTest01178_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01178', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest01178', methods=['POST'])
 	def BenchmarkTest01178_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01178")
+		import urllib.parse
+		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest01178", "noCookieValueSupplied"))
 
-		string45958 = 'help'
-		string45958 += param
-		string45958 += 'snapes on a plane'
-		bar = string45958[4:-17]
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Exec argument must be a plain string literal."
-			)
-			return RESPONSE
+		import flask
 
-		try:
-			exec(bar)
-		except:
-			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
-			)
+		return flask.redirect(param)
 
 		return RESPONSE
+
 

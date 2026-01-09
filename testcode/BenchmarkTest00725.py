@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00725', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00725', methods=['GET'])
 	def BenchmarkTest00725_get():
 		return BenchmarkTest00725_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00725', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00725', methods=['POST'])
 	def BenchmarkTest00725_post():
 		RESPONSE = ""
 
@@ -32,17 +32,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		import html
+		import markupsafe
 		
-		bar = html.escape(param)
+		bar = markupsafe.escape(param)
 
+		import flask
+
+		flask.session['userid'] = bar
 
 		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
 		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00725': bar}))
-		
 
 		return RESPONSE
 

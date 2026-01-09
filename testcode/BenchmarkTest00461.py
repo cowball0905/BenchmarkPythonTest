@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00461', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00461', methods=['GET'])
 	def BenchmarkTest00461_get():
 		return BenchmarkTest00461_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00461', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00461', methods=['POST'])
 	def BenchmarkTest00461_post():
 		RESPONSE = ""
 
@@ -32,33 +32,39 @@ def init(app):
 		if not param:
 		    param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf63945 = configparser.ConfigParser()
-		conf63945.add_section('section63945')
-		conf63945.set('section63945', 'keyA-63945', 'a_Value')
-		conf63945.set('section63945', 'keyB-63945', param)
-		bar = conf63945.get('section63945', 'keyA-63945')
+		map63945 = {}
+		map63945['keyA-63945'] = 'a-Value'
+		map63945['keyB-63945'] = param
+		map63945['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map63945['keyB-63945']
+		bar = map63945['keyA-63945']
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
+		import xml.dom.minidom
+		import xml.sax.handler
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
 
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
 			)
 
 		return RESPONSE

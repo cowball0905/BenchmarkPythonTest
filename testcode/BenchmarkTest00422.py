@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00422', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00422', methods=['GET'])
 	def BenchmarkTest00422_get():
 		return BenchmarkTest00422_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00422', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00422', methods=['POST'])
 	def BenchmarkTest00422_post():
 		RESPONSE = ""
 
@@ -34,36 +34,19 @@ def init(app):
 				param = name
 				break
 
-		possible = "ABC"
-		guess = possible[1]
+		import helpers.ThingFactory
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
-
-		import flask
-		import urllib.parse
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
 		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
+			RESPONSE += (
+				eval(bar)
+			)
 		except:
 			RESPONSE += (
-				'Error parsing URL.'
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
-			return RESPONSE
-
-		return flask.redirect(bar)
 
 		return RESPONSE
 

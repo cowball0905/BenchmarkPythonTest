@@ -34,16 +34,23 @@ def init(app):
 				param = name
 				break
 
-		bar = param + '_SafeStuff'
+		import configparser
+		
+		bar = 'safe!'
+		conf26982 = configparser.ConfigParser()
+		conf26982.add_section('section26982')
+		conf26982.set('section26982', 'keyA-26982', 'a_Value')
+		conf26982.set('section26982', 'keyB-26982', param)
+		bar = conf26982.get('section26982', 'keyA-26982')
 
+		import random
 		import base64
-		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00402'[13:]
-		user = f'SafeTruman{num}'
+		user = f'SafeBarbara{num}'
 		cookie = f'rememberMe{num}'
-		value = secrets.token_urlsafe(32)
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -52,7 +59,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
+				f'{user} has been remembered with cookie: '
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

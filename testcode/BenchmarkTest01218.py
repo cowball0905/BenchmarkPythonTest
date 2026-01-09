@@ -20,41 +20,53 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01218', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01218', methods=['GET'])
 	def BenchmarkTest01218_get():
 		return BenchmarkTest01218_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01218', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01218', methods=['POST'])
 	def BenchmarkTest01218_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest01218")
-		if not param:
-			param = ""
+		import urllib.parse
+		
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest01218" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01218"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest01218") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
 
-		from flask import make_response
-		import io
+		import lxml.etree
 		import helpers.utils
+		import io
 
-		input = ''
-		if isinstance(param, str):
-			input = param.encode('utf-8')
-		elif isinstance(param, io.IOBase):
-			input = param.read(1000)
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			strIO = io.StringIO()
+			strIO.write('/Employees/Employee[@emplid=\'')
+			strIO.write(param)
+			strIO.write('\']')
+			query = strIO.getvalue()
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=True,
-			httponly=True)
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

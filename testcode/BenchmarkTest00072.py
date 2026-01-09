@@ -38,15 +38,19 @@ def init(app):
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00072", "noCookieValueSupplied"))
 
-		bar = param + '_SafeStuff'
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
 		import flask
 
-		flask.session['userid'] = bar
+		flask.session[bar] = '12345'
 
 		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
+			f'Item: \'{escape_for_html(bar)}'
+			'\' with value: 12345 saved in session.'
 		)
 
 		return RESPONSE

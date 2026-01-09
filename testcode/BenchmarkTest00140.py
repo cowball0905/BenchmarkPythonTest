@@ -32,7 +32,11 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = param + '_SafeStuff'
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -49,7 +53,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha512')
+		hash = hashlib.md5()
 		hash.update(input)
 
 		result = hash.digest()

@@ -32,26 +32,22 @@ def init(app):
 		if not param:
 		    param = ""
 
-		superstring = f'4618{param}abcd'
-		bar = superstring[len('4618'):len(superstring)-5]
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import pickle
-		import base64
-		import helpers.utils
-
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		import yaml
 
 		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
+			yobj = yaml.safe_load(bar)
+
+			RESPONSE += (
+				yobj['text']
+			)
 		except:
 			RESPONSE += (
-				'Unpickling failed!'
+				"There was an error loading the configuration"
 			)
-			return RESPONSE
-
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
 
 		return RESPONSE
 

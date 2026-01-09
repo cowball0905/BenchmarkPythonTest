@@ -33,31 +33,26 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf35995 = configparser.ConfigParser()
-		conf35995.add_section('section35995')
-		conf35995.set('section35995', 'keyA-35995', 'a_Value')
-		conf35995.set('section35995', 'keyB-35995', param)
-		bar = conf35995.get('section35995', 'keyA-35995')
+		string35995 = 'help'
+		string35995 += param
+		string35995 += 'snapes on a plane'
+		bar = string35995[4:-17]
 
 		import pathlib
 		import helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
-
-		if not str(p).startswith(str(testfiles)):
+		try:
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = testfiles / bar
 			RESPONSE += (
-				"Invalid Path."
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-			return RESPONSE
-		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		except OSError:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

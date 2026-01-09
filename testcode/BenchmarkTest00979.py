@@ -41,14 +41,14 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		import configparser
-		
-		bar = 'safe!'
-		conf49721 = configparser.ConfigParser()
-		conf49721.add_section('section49721')
-		conf49721.set('section49721', 'keyA-49721', 'a-Value')
-		conf49721.set('section49721', 'keyB-49721', param)
-		bar = conf49721.get('section49721', 'keyB-49721')
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -65,7 +65,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha1')
+		hash = hashlib.sha512()
 		hash.update(input)
 
 		result = hash.digest()

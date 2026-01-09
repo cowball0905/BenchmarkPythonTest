@@ -33,33 +33,36 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		map25489 = {}
+		map25489['keyA-25489'] = 'a-Value'
+		map25489['keyB-25489'] = param
+		map25489['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map25489['keyB-25489']
+		bar = map25489['keyA-25489']
 
+		import pathlib
 		import helpers.utils
 
-		fileName = None
-		fd = None
-
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = (testfiles / bar).resolve()
+
+			if not str(p).startswith(str(testfiles)):
+				RESPONSE += (
+					"Invalid Path."
+				)
+				return RESPONSE
+
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-		except IOError as e:
+		except OSError:
 			RESPONSE += (
 				f'Problem reading from file \'{fileName}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

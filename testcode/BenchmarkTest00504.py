@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00504', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00504', methods=['GET'])
 	def BenchmarkTest00504_get():
 		return BenchmarkTest00504_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00504', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00504', methods=['POST'])
 	def BenchmarkTest00504_post():
 		RESPONSE = ""
 
@@ -32,27 +32,25 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import flask
-		import urllib.parse
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Eval argument must be a plain string literal."
+			)
+			return RESPONSE		
 
 		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
+			RESPONSE += (
+				eval(bar)
+			)
 		except:
 			RESPONSE += (
-				'Error parsing URL.'
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
-			return RESPONSE
-
-		return flask.redirect(bar)
 
 		return RESPONSE
 

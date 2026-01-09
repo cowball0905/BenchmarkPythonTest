@@ -32,40 +32,28 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		import configparser
+		
+		bar = 'safe!'
+		conf88272 = configparser.ConfigParser()
+		conf88272.add_section('section88272')
+		conf88272.set('section88272', 'keyA-88272', 'a-Value')
+		conf88272.set('section88272', 'keyB-88272', param)
+		bar = conf88272.get('section88272', 'keyB-88272')
 
 		import helpers.utils
 
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not contain \'../\''
-			)
-			return RESPONSE
-
 		try:
 			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
 		except IOError as e:
 			RESPONSE += (
 				f'Problem reading from file \'{escape_for_html(fileName)}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

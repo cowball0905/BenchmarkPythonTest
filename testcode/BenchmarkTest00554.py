@@ -34,22 +34,26 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
 		else:
 			bar = param
 
 		import lxml.etree
 		import helpers.utils
+		import io
 
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
-			run_query = lxml.etree.XPath(query)
-			nodes = run_query(root)
+			strIO = io.StringIO()
+			strIO.write('/Employees/Employee[@emplid=\'')
+			strIO.write(bar)
+			strIO.write('\']')
+			query = strIO.getvalue()
+
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

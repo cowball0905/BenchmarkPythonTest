@@ -20,26 +20,39 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01199', methods=['GET'])
+	@app.route('/benchmark/weakrand-04/BenchmarkTest01199', methods=['GET'])
 	def BenchmarkTest01199_get():
 		return BenchmarkTest01199_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01199', methods=['POST'])
+	@app.route('/benchmark/weakrand-04/BenchmarkTest01199', methods=['POST'])
 	def BenchmarkTest01199_post():
 		RESPONSE = ""
 
 		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest01199" in request.form.getlist(name):
-				param = name
-				break
+		headers = request.headers.getlist("BenchmarkTest01199")
+		
+		if headers:
+			param = headers[0]
 
 
+		import random
+		from helpers.utils import mysession
 
-		otherarg = "static text"
-		RESPONSE += (
-			f'param is \'{param}\' and otherarg is \'{otherarg}\''
-		)
+		num = 'BenchmarkTest01199'[13:]
+		user = f'Randall{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.random())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

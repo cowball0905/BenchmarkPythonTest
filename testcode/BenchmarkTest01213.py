@@ -20,46 +20,27 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01213', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01213', methods=['GET'])
 	def BenchmarkTest01213_get():
 		return BenchmarkTest01213_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01213', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01213', methods=['POST'])
 	def BenchmarkTest01213_post():
 		RESPONSE = ""
 
+		values = request.args.getlist("BenchmarkTest01213")
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest01213")
-		
-		if headers:
-			param = headers[0]
+		if values:
+			param = values[0]
 
 
-		import hashlib, base64
-		import io, helpers.utils
 
-		input = ''
-		if isinstance(param, str):
-			input = param.encode('utf-8')
-		elif isinstance(param, io.IOBase):
-			input = param.read(1000)
-
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.sha1()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			'The value of the param parameter is now in a custom header.'
 		)
-		f.close()
+
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest01213': param}))
+		
 
 		return RESPONSE
 

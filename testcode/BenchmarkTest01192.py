@@ -20,36 +20,35 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01192', methods=['GET'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01192', methods=['GET'])
 	def BenchmarkTest01192_get():
 		return BenchmarkTest01192_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01192', methods=['POST'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01192', methods=['POST'])
 	def BenchmarkTest01192_post():
 		RESPONSE = ""
 
-		param = request.form.get("BenchmarkTest01192")
-		if not param:
-			param = ""
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest01192" in request.form.getlist(name):
+				param = name
+				break
 
 
-		import random
-		from helpers.utils import mysession
+		import pathlib
+		import helpers.utils
 
-		num = 'BenchmarkTest01192'[13:]
-		user = f'Isaac{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.randint(0, 2**32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		try:
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = testfiles / param
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-		else:
-			mysession[cookie] = value
+		except OSError:
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

@@ -32,20 +32,15 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01139")
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = param
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest01139'[13:]
-		user = f'Isaac{num}'
+		user = f'SafeNancy{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.randint(0, 2**32))
+		value = str(random.SystemRandom().normalvariate())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

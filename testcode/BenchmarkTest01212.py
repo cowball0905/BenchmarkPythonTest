@@ -20,40 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01212', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest01212', methods=['GET'])
 	def BenchmarkTest01212_get():
 		return BenchmarkTest01212_post()
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01212', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest01212', methods=['POST'])
 	def BenchmarkTest01212_post():
 		RESPONSE = ""
 
+		values = request.args.getlist("BenchmarkTest01212")
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest01212")
-		
-		if headers:
-			param = headers[0]
+		if values:
+			param = values[0]
 
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
+		import xml.dom.minidom
+		import xml.sax.handler
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{param.replace('\'', '&apos;')}\']")
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
+
+			doc = xml.dom.minidom.parseString(param, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
 
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'There was an error reading your XML doc:<br>{escape_for_html(param)}'
 			)
-
 
 		return RESPONSE
 

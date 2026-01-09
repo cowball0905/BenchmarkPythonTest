@@ -38,7 +38,10 @@ def init(app):
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00073", "noCookieValueSupplied"))
 
-		bar = param
+		string41416 = 'help'
+		string41416 += param
+		string41416 += 'snapes on a plane'
+		bar = string41416[4:-17]
 
 		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
 			RESPONSE += (

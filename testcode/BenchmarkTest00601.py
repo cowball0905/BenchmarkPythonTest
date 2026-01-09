@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00601', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00601', methods=['GET'])
 	def BenchmarkTest00601_get():
 		return BenchmarkTest00601_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00601', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00601', methods=['POST'])
 	def BenchmarkTest00601_post():
 		RESPONSE = ""
 
@@ -34,18 +34,19 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import flask
-
-		return flask.redirect(bar)
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

@@ -10,17 +10,14 @@
 </head>
 <body>
 <form action="/benchmark/xss-00/BenchmarkTest00097" method="POST" id="FormBenchmarkTest00097" autocomplete="off">
-	<div><label>Please enter your details:</label></div>
-	<br>
-	<div><label>Email:</label></div>
-	<div><input type="text" id="email" name="email" ></div>
-	<div><label>Password:</label></div>
-	<div><input type="text" id="password" name="password" value="" ></div>
-	<div>&nbsp;</div>
-	<div><label>Parameter: BenchmarkTest00097 <br>Value:</label>
-	<input type="text" id="BenchmarkTest00097" name="BenchmarkTest00097" value="SafeText" ></div>
-	<br>
-	<div><input type="submit" value="Login" ></div>
-</form>
+ <div><label>Select your habits and edit the parameter [name,value]:</label></div><br>
+	<div><input type="checkbox" name="BenchmarkTest00097" value="SafeText" checked >Reading. [BenchmarkTest00097, SafeText]</div>
+	<div><input type="checkbox" name="BenchmarkTest00097" value="Movies" >Movies. [BenchmarkTest00097, Movies]</div>
+	<div><input type="checkbox" name="BenchmarkTest00097" value="Writing" >Writing. [BenchmarkTest00097, Writing]</div>
+	<div><input type="checkbox" name="BenchmarkTest00097" value="Singing" >Singing. [BenchmarkTest00097, Singing]</div>
+	<div><label>Parameter foo, value:</label><input type="text" id="foo" name="foo" value="bar" ></div><br>
+	<div><input type="submit" value="Submit" ></div>
+ </form>
+ 
 </body>
 </html>

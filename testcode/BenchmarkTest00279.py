@@ -35,19 +35,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf59781 = configparser.ConfigParser()
-		conf59781.add_section('section59781')
-		conf59781.set('section59781', 'keyA-59781', 'a-Value')
-		conf59781.set('section59781', 'keyB-59781', param)
-		bar = conf59781.get('section59781', 'keyB-59781')
+		string59781 = ''
+		data12 = ''
+		copy = string59781
+		string59781 = ''
+		string59781 += param
+		copy += 'SomeOKString'
+		bar = copy
 
 
 		otherarg = "static text"
 		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
 		)
 
 		return RESPONSE

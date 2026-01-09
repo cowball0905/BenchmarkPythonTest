@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00828', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00828', methods=['GET'])
 	def BenchmarkTest00828_get():
 		return BenchmarkTest00828_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00828', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00828', methods=['POST'])
 	def BenchmarkTest00828_post():
 		RESPONSE = ""
 
@@ -33,30 +33,21 @@ def init(app):
 		if values:
 			param = values[0]
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Exec argument must be a plain string literal."
-			)
-			return RESPONSE
+		import yaml
 
 		try:
-			exec(bar)
+			yobj = yaml.safe_load(bar)
+
+			RESPONSE += (
+				yobj['text']
+			)
 		except:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

@@ -20,38 +20,25 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01224', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01224', methods=['GET'])
 	def BenchmarkTest01224_get():
 		return BenchmarkTest01224_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01224', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01224', methods=['POST'])
 	def BenchmarkTest01224_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest01224")
-		param = ""
-		if values:
-			param = values[0]
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
 
-		import random
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest01224'[13:]
-		user = f'SafeRandy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().getrandbits(32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			'param is \'%s\' and otherarg is \'%s\'' % (param, otherarg)
+		)
 
 		return RESPONSE
 

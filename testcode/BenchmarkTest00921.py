@@ -41,41 +41,32 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		string33980 = 'help'
-		string33980 += param
-		string33980 += 'snapes on a plane'
-		bar = string33980[4:-17]
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import platform
-		import codecs
+		import pathlib
 		import helpers.utils
-		from urllib.parse import urlparse
-		from urllib.request import url2pathname
-
-		startURIslashes = ""
-
-		if platform.system() == "Windows":
-			startURIslashes = "/"
-		else:
-			startURIslashes = "//"
 
 		try:
-			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = (testfiles / bar).resolve()
+
+			if not str(p).startswith(str(testfiles)):
+				RESPONSE += (
+					"Invalid Path."
+				)
+				return RESPONSE
 
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-
+		except OSError:
 			RESPONSE += (
-				" And file already exists."
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
-		except IOError:
-			pass
 
 		return RESPONSE
 

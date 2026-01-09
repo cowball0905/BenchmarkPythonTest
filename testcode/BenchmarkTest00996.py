@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00996', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00996', methods=['GET'])
 	def BenchmarkTest00996_get():
 		return BenchmarkTest00996_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00996', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00996', methods=['POST'])
 	def BenchmarkTest00996_post():
 		RESPONSE = ""
 
@@ -45,21 +45,21 @@ def init(app):
 		map4033['keyA-4033'] = 'a-Value'
 		map4033['keyB-4033'] = param
 		map4033['keyC'] = 'another-Value'
+		bar = "safe!"
 		bar = map4033['keyB-4033']
+		bar = map4033['keyA-4033']
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
+		import yaml
 
 		try:
+			yobj = yaml.safe_load(bar)
+
 			RESPONSE += (
-				eval(bar)
+				yobj['text']
 			)
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

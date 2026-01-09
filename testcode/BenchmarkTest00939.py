@@ -41,29 +41,20 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		import configparser
-		
-		bar = 'safe!'
-		conf93063 = configparser.ConfigParser()
-		conf93063.add_section('section93063')
-		conf93063.set('section93063', 'keyA-93063', 'a_Value')
-		conf93063.set('section93063', 'keyB-93063', param)
-		bar = conf93063.get('section93063', 'keyA-93063')
+		map93063 = {}
+		map93063['keyA-93063'] = 'a-Value'
+		map93063['keyB-93063'] = param
+		map93063['keyC'] = 'another-Value'
+		bar = map93063['keyB-93063']
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
-		if '\'' in bar:
-			RESPONSE += (
-				"Employee ID must not contain apostrophes"
-			)
-			return RESPONSE
-
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

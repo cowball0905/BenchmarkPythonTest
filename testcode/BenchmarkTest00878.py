@@ -35,10 +35,14 @@ def init(app):
 		if not param:
 			param = ""
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -55,7 +59,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('md5')
+		hash = hashlib.sha384()
 		hash.update(input)
 
 		result = hash.digest()

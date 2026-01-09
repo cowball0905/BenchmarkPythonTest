@@ -32,18 +32,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		string18509 = 'help'
-		string18509 += param
-		string18509 += 'snapes on a plane'
-		bar = string18509[4:-17]
+		import html
+		
+		bar = html.escape(param)
 
 		import random
+		import base64
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00134'[13:]
-		user = f'SafeNancy{num}'
+		user = f'SafeBarbara{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00269', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00269', methods=['GET'])
 	def BenchmarkTest00269_get():
 		return BenchmarkTest00269_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00269', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00269', methods=['POST'])
 	def BenchmarkTest00269_post():
 		RESPONSE = ""
 
@@ -33,30 +33,23 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 86
+		import helpers.ThingFactory
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import os
-		import subprocess
-		import helpers.utils
+		import yaml
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
-		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
+		try:
+			yobj = yaml.load(bar, Loader=yaml.Loader)
 
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
-		RESPONSE += (
-			helpers.utils.commandOutput(proc)
-		)
+			RESPONSE += (
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
+			)
 
 		return RESPONSE
 

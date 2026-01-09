@@ -32,22 +32,26 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import flask
 
-		flask.session['userid'] = bar
+		flask.session[bar] = '12345'
 
 		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
+			f'Item: \'{escape_for_html(bar)}'
+			'\' with value: 12345 saved in session.'
 		)
 
 		return RESPONSE

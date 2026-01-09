@@ -20,33 +20,31 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01196', methods=['GET'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01196', methods=['GET'])
 	def BenchmarkTest01196_get():
 		return BenchmarkTest01196_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01196', methods=['POST'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01196', methods=['POST'])
 	def BenchmarkTest01196_post():
 		RESPONSE = ""
 
-		values = request.form.getlist("BenchmarkTest01196")
-		param = ""
-		if values:
-			param = values[0]
+		param = request.headers.get("BenchmarkTest01196")
+		if not param:
+		    param = ""
 
 
-		if not param.startswith('\'') or not param.endswith('\'') or '\'' in param[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
+		import helpers.utils
 
 		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{param}'
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				eval(param)
-			)
-		except:
-			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(param)}\''
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

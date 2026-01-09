@@ -32,29 +32,31 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01113")
 
-		map91034 = {}
-		map91034['keyA-91034'] = 'a-Value'
-		map91034['keyB-91034'] = param
-		map91034['keyC'] = 'another-Value'
-		bar = map91034['keyB-91034']
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import codecs
+		import pathlib
 		import helpers.utils
 
 		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = (testfiles / bar).resolve()
+
+			if not str(p).startswith(str(testfiles)):
+				RESPONSE += (
+					"Invalid Path."
+				)
+				return RESPONSE
 
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-
+		except OSError:
 			RESPONSE += (
-				" And file already exists."
-			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00925', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00925', methods=['GET'])
 	def BenchmarkTest00925_get():
 		return BenchmarkTest00925_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00925', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00925', methods=['POST'])
 	def BenchmarkTest00925_post():
 		RESPONSE = ""
 
@@ -41,30 +41,20 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		map82988 = {}
-		map82988['keyA-82988'] = 'a-Value'
-		map82988['keyB-82988'] = param
-		map82988['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map82988['keyB-82988']
-		bar = map82988['keyA-82988']
-
-		import pathlib
-		import helpers.utils
-
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
-
-		if not str(p).startswith(str(testfiles)):
-			RESPONSE += (
-				"Invalid Path."
-			)
-			return RESPONSE
+		import configparser
 		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		bar = 'safe!'
+		conf82988 = configparser.ConfigParser()
+		conf82988.add_section('section82988')
+		conf82988.set('section82988', 'keyA-82988', 'a-Value')
+		conf82988.set('section82988', 'keyB-82988', param)
+		bar = conf82988.get('section82988', 'keyB-82988')
+
+
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+		)
 
 		return RESPONSE
 

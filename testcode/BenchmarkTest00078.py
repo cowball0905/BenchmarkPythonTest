@@ -38,14 +38,10 @@ def init(app):
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00078", "noCookieValueSupplied"))
 
-		import configparser
-		
-		bar = 'safe!'
-		conf9895 = configparser.ConfigParser()
-		conf9895.add_section('section9895')
-		conf9895.set('section9895', 'keyA-9895', 'a_Value')
-		conf9895.set('section9895', 'keyB-9895', param)
-		bar = conf9895.get('section9895', 'keyA-9895')
+		string9895 = 'help'
+		string9895 += param
+		string9895 += 'snapes on a plane'
+		bar = string9895[4:-17]
 
 		import pickle
 		import base64

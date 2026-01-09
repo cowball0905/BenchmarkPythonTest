@@ -33,43 +33,26 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 86
+		num = 106
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import platform
-		import codecs
+		import pathlib
 		import helpers.utils
-		from urllib.parse import urlparse
-		from urllib.request import url2pathname
 
-		startURIslashes = ""
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = (testfiles / bar).resolve()
 
-		if platform.system() == "Windows":
-			startURIslashes = "/"
+		if not str(p).startswith(str(testfiles)):
+			RESPONSE += (
+				"Invalid Path."
+			)
+			return RESPONSE
+		
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:
-			startURIslashes = "//"
-
-		try:
-			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
-			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
-			)
-
-			RESPONSE += (
-				" And file already exists."
-			)
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
-		except IOError:
-			pass
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

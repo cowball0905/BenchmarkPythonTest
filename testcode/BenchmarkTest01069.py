@@ -37,14 +37,13 @@ def init(app):
 		
 		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import base64
-		import secrets
+		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest01069'[13:]
-		user = f'SafeToby{num}'
+		user = f'SafeRandall{num}'
 		cookie = f'rememberMe{num}'
-		value = base64.b64encode(secrets.token_bytes(32))
+		value = str(random.SystemRandom().random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -53,7 +52,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
+				f'{user} has been remembered with cookie: '
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

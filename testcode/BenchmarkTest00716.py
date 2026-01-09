@@ -32,11 +32,13 @@ def init(app):
 		if not param:
 			param = ""
 
-		map31356 = {}
-		map31356['keyA-31356'] = 'a-Value'
-		map31356['keyB-31356'] = param
-		map31356['keyC'] = 'another-Value'
-		bar = map31356['keyB-31356']
+		string31356 = ''
+		data12 = ''
+		copy = string31356
+		string31356 = ''
+		string31356 += param
+		copy += 'SomeOKString'
+		bar = copy
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -53,7 +55,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha1')
+		hash = hashlib.sha1()
 		hash.update(input)
 
 		result = hash.digest()

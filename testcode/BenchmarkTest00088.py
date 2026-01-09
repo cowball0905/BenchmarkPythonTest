@@ -32,35 +32,27 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
+		possible = "ABC"
+		guess = possible[1]
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
+		import os
 		import helpers.utils
 
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not contain \'../\''
-			)
-			return RESPONSE
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
 

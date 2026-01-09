@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01035', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01035', methods=['GET'])
 	def BenchmarkTest01035_get():
 		return BenchmarkTest01035_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01035', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01035', methods=['POST'])
 	def BenchmarkTest01035_post():
 		RESPONSE = ""
 
@@ -33,17 +33,19 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		string60666 = 'help'
+		string60666 += param
+		string60666 += 'snapes on a plane'
+		bar = string60666[4:-17]
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))
@@ -55,7 +57,6 @@ def init(app):
 			RESPONSE += (
 				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
-
 
 		return RESPONSE
 

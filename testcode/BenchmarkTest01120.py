@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01120', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01120', methods=['GET'])
 	def BenchmarkTest01120_get():
 		return BenchmarkTest01120_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01120', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01120', methods=['POST'])
 	def BenchmarkTest01120_post():
 		RESPONSE = ""
 
@@ -36,20 +36,34 @@ def init(app):
 		map35084['keyA-35084'] = 'a-Value'
 		map35084['keyB-35084'] = param
 		map35084['keyC'] = 'another-Value'
+		bar = "safe!"
 		bar = map35084['keyB-35084']
+		bar = map35084['keyA-35084']
 
+		import elementpath
+		import xml.etree.ElementTree as ET
 		import helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'wb') as fd:
-				RESPONSE += (
-					f'Now ready to write to file: {escape_for_html(fileName)}'
-				)
-		except IOError as e:
+		if '\'' in bar:
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
+				"Employee ID must not contain apostrophes"
+			)
+			return RESPONSE
+
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01174', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01174', methods=['GET'])
 	def BenchmarkTest01174_get():
 		return BenchmarkTest01174_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01174', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01174', methods=['POST'])
 	def BenchmarkTest01174_post():
 		RESPONSE = ""
 
@@ -32,22 +32,30 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01174")
 
-		import configparser
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = 'safe!'
-		conf80725 = configparser.ConfigParser()
-		conf80725.add_section('section80725')
-		conf80725.set('section80725', 'keyA-80725', 'a-Value')
-		conf80725.set('section80725', 'keyB-80725', param)
-		bar = conf80725.get('section80725', 'keyB-80725')
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
+
+		import yaml
 
 		try:
+			yobj = yaml.safe_load(bar)
+
 			RESPONSE += (
-				eval(bar)
+				yobj['text']
 			)
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

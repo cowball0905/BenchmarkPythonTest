@@ -41,21 +41,27 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		map51700 = {}
-		map51700['keyA-51700'] = 'a-Value'
-		map51700['keyB-51700'] = param
-		map51700['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map51700['keyB-51700']
-		bar = map51700['keyA-51700']
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import random
+		import base64
+		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00961'[13:]
-		user = f'Isaac{num}'
+		user = f'SafeTruman{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.randint(0, 2**32))
+		value = secrets.token_urlsafe(32)
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -64,7 +70,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
+				f'{user} has been remembered with cookie:'
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

@@ -32,12 +32,13 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		map73751 = {}
+		map73751['keyA-73751'] = 'a-Value'
+		map73751['keyB-73751'] = param
+		map73751['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map73751['keyB-73751']
+		bar = map73751['keyA-73751']
 
 		import lxml.etree
 		import helpers.utils
@@ -45,8 +46,7 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
-
+			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
 			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:

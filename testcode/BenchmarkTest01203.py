@@ -20,26 +20,29 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01203', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest01203', methods=['GET'])
 	def BenchmarkTest01203_get():
 		return BenchmarkTest01203_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01203', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest01203', methods=['POST'])
 	def BenchmarkTest01203_post():
 		RESPONSE = ""
 
-		param = request.headers.get("Referer")
+		param = request.args.get("BenchmarkTest01203")
 		if not param:
-		    param = ""
+			param = ""
 
 
+		import helpers.db_sqlite
 
-		dict = {}
-		dict['param'] = param
-		dict['otherarg'] = 'this is it'
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (param,))
 		RESPONSE += (
-			'param is \'{0[param]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+			helpers.db_sqlite.results(cur, sql)
 		)
+		con.close()
 
 		return RESPONSE
 

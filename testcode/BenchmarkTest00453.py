@@ -32,19 +32,14 @@ def init(app):
 		if not param:
 		    param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf67557 = configparser.ConfigParser()
-		conf67557.add_section('section67557')
-		conf67557.set('section67557', 'keyA-67557', 'a_Value')
-		conf67557.set('section67557', 'keyB-67557', param)
-		bar = conf67557.get('section67557', 'keyA-67557')
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
 
 		otherarg = "static text"
 		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
 		)
 
 		return RESPONSE

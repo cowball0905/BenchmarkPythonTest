@@ -32,17 +32,17 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import random
+		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00693'[13:]
-		user = f'Nancy{num}'
+		user = f'SafeRicky{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.normalvariate())[2:]
+		value = str(secrets.randbits(32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -51,7 +51,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
+				f'{user} has been remembered with cookie:'
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

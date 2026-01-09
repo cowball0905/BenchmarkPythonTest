@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00896', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00896', methods=['GET'])
 	def BenchmarkTest00896_get():
 		return BenchmarkTest00896_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00896', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00896', methods=['POST'])
 	def BenchmarkTest00896_post():
 		RESPONSE = ""
 
@@ -35,13 +35,37 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
+		import helpers.ThingFactory
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import flask
+		import helpers.ldap
+		import ldap3
 
-		return flask.redirect(bar)
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
+		try:
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
+
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except:
+			RESPONSE += (
+				"Error processing LDAP query."
+			)
 
 		return RESPONSE
 

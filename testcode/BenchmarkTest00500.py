@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00500', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00500', methods=['GET'])
 	def BenchmarkTest00500_get():
 		return BenchmarkTest00500_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00500', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00500', methods=['POST'])
 	def BenchmarkTest00500_post():
 		RESPONSE = ""
 
@@ -32,37 +32,27 @@ def init(app):
 		if not param:
 		    param = ""
 
-		import configparser
+		possible = "ABC"
+		guess = possible[1]
 		
-		bar = 'safe!'
-		conf63597 = configparser.ConfigParser()
-		conf63597.add_section('section63597')
-		conf63597.set('section63597', 'keyA-63597', 'a_Value')
-		conf63597.set('section63597', 'keyB-63597', param)
-		bar = conf63597.get('section63597', 'keyA-63597')
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		import flask
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
+		flask.session['userid'] = bar
 
 		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
 		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=True,
-			httponly=True)
 
 		return RESPONSE
 

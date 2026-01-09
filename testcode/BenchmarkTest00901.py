@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00901', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00901', methods=['GET'])
 	def BenchmarkTest00901_get():
 		return BenchmarkTest00901_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00901', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00901', methods=['POST'])
 	def BenchmarkTest00901_post():
 		RESPONSE = ""
 
@@ -35,23 +35,26 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
+		import configparser
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = 'safe!'
+		conf39670 = configparser.ConfigParser()
+		conf39670.add_section('section39670')
+		conf39670.set('section39670', 'keyA-39670', 'a_Value')
+		conf39670.set('section39670', 'keyB-39670', param)
+		bar = conf39670.get('section39670', 'keyA-39670')
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
+		import yaml
 
 		try:
+			yobj = yaml.safe_load(bar)
+
 			RESPONSE += (
-				eval(bar)
+				yobj['text']
 			)
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

@@ -34,14 +34,14 @@ def init(app):
 				param = name
 				break
 
-		import configparser
-		
-		bar = 'safe!'
-		conf30805 = configparser.ConfigParser()
-		conf30805.add_section('section30805')
-		conf30805.set('section30805', 'keyA-30805', 'a_Value')
-		conf30805.set('section30805', 'keyB-30805', param)
-		bar = conf30805.get('section30805', 'keyA-30805')
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -58,7 +58,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha384')
+		hash = hashlib.md5()
 		hash.update(input)
 
 		result = hash.digest()

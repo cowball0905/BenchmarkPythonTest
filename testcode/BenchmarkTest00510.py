@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00510', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00510', methods=['GET'])
 	def BenchmarkTest00510_get():
 		return BenchmarkTest00510_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00510', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00510', methods=['POST'])
 	def BenchmarkTest00510_post():
 		RESPONSE = ""
 
@@ -32,16 +32,27 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
+
+		import pickle
+		import base64
+		import helpers.utils
+
+		helpers.utils.sharedstr = "no pickles to be seen here"
 
 		try:
-			exec(bar)
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
 		except:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				'Unpickling failed!'
 			)
+			return RESPONSE
+
+		RESPONSE += (
+			f'shared string is {helpers.utils.sharedstr}'
+		)
 
 		return RESPONSE
 

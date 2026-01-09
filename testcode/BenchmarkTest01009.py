@@ -20,47 +20,32 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01009', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01009', methods=['GET'])
 	def BenchmarkTest01009_get():
 		return BenchmarkTest01009_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01009', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01009', methods=['POST'])
 	def BenchmarkTest01009_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01009" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01009"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01009") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		string37461 = ''
-		data12 = ''
-		copy = string37461
-		string37461 = ''
+		string37461 = 'help'
 		string37461 += param
-		copy += 'SomeOKString'
-		bar = copy
+		string37461 += 'snapes on a plane'
+		bar = string37461[4:-17]
 
-		import yaml
+		import os
+		import helpers.utils
 
-		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
-
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
 

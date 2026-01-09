@@ -32,9 +32,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -51,7 +51,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('md5')
+		hash = hashlib.sha1()
 		hash.update(input)
 
 		result = hash.digest()

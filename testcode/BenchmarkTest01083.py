@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01083', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest01083', methods=['GET'])
 	def BenchmarkTest01083_get():
 		return BenchmarkTest01083_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01083', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest01083', methods=['POST'])
 	def BenchmarkTest01083_post():
 		RESPONSE = ""
 
@@ -37,31 +37,13 @@ def init(app):
 		if param:
 			bar = param.split(' ')[0]
 
-		import hashlib, base64
-		import io, helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.new('sha1')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			'The value of the bar parameter is now in a custom header.'
 		)
-		f.close()
+
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest01083': bar}))
+		
 
 		return RESPONSE
 

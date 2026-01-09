@@ -32,25 +32,15 @@ def init(app):
 		if not param:
 			param = ""
 
-		map67731 = {}
-		map67731['keyA-67731'] = 'a-Value'
-		map67731['keyB-67731'] = param
-		map67731['keyC'] = 'another-Value'
-		bar = map67731['keyB-67731']
-
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
 		try:
-			RESPONSE += (
-				eval(bar)
-			)
+			exec(bar)
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				f'Error executing statement \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

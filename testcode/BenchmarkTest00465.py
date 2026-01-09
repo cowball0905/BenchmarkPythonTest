@@ -32,25 +32,19 @@ def init(app):
 		if not param:
 		    param = ""
 
-		string85360 = 'help'
-		string85360 += param
-		string85360 += 'snapes on a plane'
-		bar = string85360[4:-17]
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
-		if '\'' in bar:
-			RESPONSE += (
-				"Employee ID must not contain apostrophes"
-			)
-			return RESPONSE
-
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
+
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

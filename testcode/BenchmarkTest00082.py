@@ -20,49 +20,30 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00082', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00082', methods=['GET'])
 	def BenchmarkTest00082_get():
-		response = make_response(render_template('web/deserialization-00/BenchmarkTest00082.html'))
-		response.set_cookie('BenchmarkTest00082', 'name%3A+safe+data%0Atext%3A+act+like+this+is+conf+data',
-			max_age=60*3,
-			secure=True,
-			path=request.path,
-			domain='localhost')
-		return response
 		return BenchmarkTest00082_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00082', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00082', methods=['POST'])
 	def BenchmarkTest00082_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00082", "noCookieValueSupplied"))
+		param = request.form.get("BenchmarkTest00082")
+		if not param:
+			param = ""
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		map15517 = {}
+		map15517['keyA-15517'] = 'a-Value'
+		map15517['keyB-15517'] = param
+		map15517['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map15517['keyB-15517']
+		bar = map15517['keyA-15517']
 
-		import yaml
 
-		try:
-			yobj = yaml.safe_load(bar)
-
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

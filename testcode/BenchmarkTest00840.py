@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00840', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00840', methods=['GET'])
 	def BenchmarkTest00840_get():
 		return BenchmarkTest00840_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00840', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00840', methods=['POST'])
 	def BenchmarkTest00840_post():
 		RESPONSE = ""
 
@@ -35,21 +35,19 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		map52374 = {}
+		map52374['keyA-52374'] = 'a-Value'
+		map52374['keyB-52374'] = param
+		map52374['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map52374['keyB-52374']
+		bar = map52374['keyA-52374']
 
-		import os
-		import helpers.utils
 
-		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-		if os.path.exists(fileName):
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+		)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00842', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00842', methods=['GET'])
 	def BenchmarkTest00842_get():
 		return BenchmarkTest00842_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00842', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00842', methods=['POST'])
 	def BenchmarkTest00842_post():
 		RESPONSE = ""
 
@@ -35,22 +35,15 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 86
+		num = 106
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import pathlib
-		import helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = testfiles / bar
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+		)
 
 		return RESPONSE
 

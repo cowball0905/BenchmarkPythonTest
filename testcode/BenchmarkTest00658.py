@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00658', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00658', methods=['GET'])
 	def BenchmarkTest00658_get():
 		return BenchmarkTest00658_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00658', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00658', methods=['POST'])
 	def BenchmarkTest00658_post():
 		RESPONSE = ""
 
@@ -39,13 +39,26 @@ def init(app):
 				param = name
 				break
 
-		import markupsafe
-		
-		bar = markupsafe.escape(param)
+		map88474 = {}
+		map88474['keyA-88474'] = 'a-Value'
+		map88474['keyB-88474'] = param
+		map88474['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map88474['keyB-88474']
+		bar = map88474['keyA-88474']
 
-		import flask
+		import yaml
 
-		return flask.redirect(bar)
+		try:
+			yobj = yaml.load(bar, Loader=yaml.Loader)
+
+			RESPONSE += (
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
+			)
 
 		return RESPONSE
 

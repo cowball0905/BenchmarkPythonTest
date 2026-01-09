@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00731', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00731', methods=['GET'])
 	def BenchmarkTest00731_get():
 		return BenchmarkTest00731_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00731', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00731', methods=['POST'])
 	def BenchmarkTest00731_post():
 		RESPONSE = ""
 
@@ -32,36 +32,34 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = param
 
-		import flask
-		import urllib.parse
+		import helpers.ldap
+		import ldap3
 
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
 		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
 				RESPONSE += (
-					'Invalid URL.'
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
 				)
-				return RESPONSE
+				found = True
+			conn.unbind()
+
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
 		except:
 			RESPONSE += (
-				'Error parsing URL.'
+				"Error processing LDAP query."
 			)
-			return RESPONSE
-
-		return flask.redirect(bar)
 
 		return RESPONSE
 

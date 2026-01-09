@@ -34,14 +34,18 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		bar = param
 
 		import lxml.etree
 		import helpers.utils
 
 		try:
+			if '\'' in bar:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
+
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
 			query = f'/Employees/Employee[@emplid=\'{bar}\']'

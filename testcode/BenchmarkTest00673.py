@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00673', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00673', methods=['GET'])
 	def BenchmarkTest00673_get():
 		return BenchmarkTest00673_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00673', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00673', methods=['POST'])
 	def BenchmarkTest00673_post():
 		RESPONSE = ""
 
@@ -32,27 +32,14 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		superstring = f'49441{param}abcd'
+		bar = superstring[len('49441'):len(superstring)-5]
 
-		import helpers.utils
 
-		fileName = None
-		fd = None
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'rb') as fd:
-				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-				)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+		)
 
 		return RESPONSE
 

@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00076', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00076', methods=['GET'])
 	def BenchmarkTest00076_get():
-		response = make_response(render_template('web/codeinj-00/BenchmarkTest00076.html'))
-		response.set_cookie('BenchmarkTest00076', '%27RESPONSE+%2B%3D+%5C%27ECHOOO%5C%27%27',
+		response = make_response(render_template('web/ldapi-00/BenchmarkTest00076.html'))
+		response.set_cookie('BenchmarkTest00076', 'Ms+Bar',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,31 +31,46 @@ def init(app):
 		return response
 		return BenchmarkTest00076_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00076', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00076', methods=['POST'])
 	def BenchmarkTest00076_post():
 		RESPONSE = ""
 
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00076", "noCookieValueSupplied"))
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		map93153 = {}
+		map93153['keyA-93153'] = 'a-Value'
+		map93153['keyB-93153'] = param
+		map93153['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map93153['keyB-93153']
+		bar = map93153['keyA-93153']
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Exec argument must be a plain string literal."
-			)
-			return RESPONSE
+		import helpers.ldap
+		import ldap3
 
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
 		try:
-			exec(bar)
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
+
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
 		except:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				"Error processing LDAP query."
 			)
 
 		return RESPONSE

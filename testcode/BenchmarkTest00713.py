@@ -32,11 +32,13 @@ def init(app):
 		if not param:
 			param = ""
 
-		map97260 = {}
-		map97260['keyA-97260'] = 'a-Value'
-		map97260['keyB-97260'] = param
-		map97260['keyC'] = 'another-Value'
-		bar = map97260['keyB-97260']
+		string97260 = ''
+		data12 = ''
+		copy = string97260
+		string97260 = ''
+		string97260 += param
+		copy += 'SomeOKString'
+		bar = copy
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -53,7 +55,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('md5')
+		hash = hashlib.md5()
 		hash.update(input)
 
 		result = hash.digest()

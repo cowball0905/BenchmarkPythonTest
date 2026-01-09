@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00897', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00897', methods=['GET'])
 	def BenchmarkTest00897_get():
 		return BenchmarkTest00897_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00897', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00897', methods=['POST'])
 	def BenchmarkTest00897_post():
 		RESPONSE = ""
 
@@ -35,32 +35,36 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
+		num = 106
 		
-		bar = 'safe!'
-		conf66026 = configparser.ConfigParser()
-		conf66026.add_section('section66026')
-		conf66026.set('section66026', 'keyA-66026', 'a-Value')
-		conf66026.set('section66026', 'keyB-66026', param)
-		bar = conf66026.get('section66026', 'keyB-66026')
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import flask
-		import urllib.parse
+		import helpers.ldap
+		import ldap3
 
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
 		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
 				RESPONSE += (
-					'Invalid URL.'
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
 				)
-				return RESPONSE
+				found = True
+			conn.unbind()
+
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
 		except:
 			RESPONSE += (
-				'Error parsing URL.'
+				"Error processing LDAP query."
 			)
-			return RESPONSE
-
-		return flask.redirect(bar)
 
 		return RESPONSE
 

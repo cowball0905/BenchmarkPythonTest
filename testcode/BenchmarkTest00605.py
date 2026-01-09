@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00605', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00605', methods=['GET'])
 	def BenchmarkTest00605_get():
 		return BenchmarkTest00605_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00605', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00605', methods=['POST'])
 	def BenchmarkTest00605_post():
 		RESPONSE = ""
 
@@ -34,23 +34,26 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
+
+		import pickle
+		import base64
+		import helpers.utils
+
+		helpers.utils.sharedstr = "no pickles to be seen here"
 
 		try:
-			RESPONSE += (
-				eval(bar)
-			)
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				'Unpickling failed!'
 			)
+			return RESPONSE
+
+		RESPONSE += (
+			f'shared string is {helpers.utils.sharedstr}'
+		)
 
 		return RESPONSE
 

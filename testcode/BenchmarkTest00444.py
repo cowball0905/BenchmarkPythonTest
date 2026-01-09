@@ -32,38 +32,27 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
+		import os
 		import helpers.utils
 
-		fileName = None
-		fd = None
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
 

@@ -32,11 +32,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		map37343 = {}
-		map37343['keyA-37343'] = 'a-Value'
-		map37343['keyB-37343'] = param
-		map37343['keyC'] = 'another-Value'
-		bar = map37343['keyB-37343']
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
 		import random
 		from helpers.utils import mysession

@@ -38,9 +38,30 @@ def init(app):
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00069", "noCookieValueSupplied"))
 
-		bar = param + '_SafeStuff'
+		import configparser
+		
+		bar = 'safe!'
+		conf74259 = configparser.ConfigParser()
+		conf74259.add_section('section74259')
+		conf74259.set('section74259', 'keyA-74259', 'a-Value')
+		conf74259.set('section74259', 'keyB-74259', param)
+		bar = conf74259.get('section74259', 'keyB-74259')
 
 		import flask
+		import urllib.parse
+
+		try:
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
+		except:
+			RESPONSE += (
+				'Error parsing URL.'
+			)
+			return RESPONSE
 
 		return flask.redirect(bar)
 

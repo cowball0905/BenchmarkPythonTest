@@ -32,11 +32,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		map39976 = {}
-		map39976['keyA-39976'] = 'a-Value'
-		map39976['keyB-39976'] = param
-		map39976['keyC'] = 'another-Value'
-		bar = map39976['keyB-39976']
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
 		import base64
 		import secrets

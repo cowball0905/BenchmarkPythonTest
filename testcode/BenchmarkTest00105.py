@@ -32,18 +32,12 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
+		num = 86
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
 		import lxml.etree
 		import helpers.utils
@@ -51,9 +45,9 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
-
-			nodes = root.xpath(query)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			run_query = lxml.etree.XPath(query)
+			nodes = run_query(root)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

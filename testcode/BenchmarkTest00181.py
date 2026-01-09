@@ -33,15 +33,31 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import pathlib
 		import helpers.utils
 
 		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = testfiles / bar
+		p = (testfiles / bar).resolve()
+
+		if not str(p).startswith(str(testfiles)):
+			RESPONSE += (
+				"Invalid Path."
+			)
+			return RESPONSE
+		
 		if p.exists():
 			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:

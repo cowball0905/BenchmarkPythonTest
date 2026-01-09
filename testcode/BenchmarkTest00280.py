@@ -35,19 +35,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		map40477 = {}
+		map40477['keyA-40477'] = 'a-Value'
+		map40477['keyB-40477'] = param
+		map40477['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map40477['keyB-40477']
+		bar = map40477['keyA-40477']
 
 
-		otherarg = "static text"
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
 		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
 		)
 
 		return RESPONSE

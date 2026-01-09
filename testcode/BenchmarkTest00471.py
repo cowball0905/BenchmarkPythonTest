@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00471', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00471', methods=['GET'])
 	def BenchmarkTest00471_get():
 		return BenchmarkTest00471_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00471', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00471', methods=['POST'])
 	def BenchmarkTest00471_post():
 		RESPONSE = ""
 
@@ -32,22 +32,31 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import lxml.etree
 		import helpers.utils
+		import io
 
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
+			strIO = io.StringIO()
+			strIO.write('/Employees/Employee[@emplid=\'')
+			strIO.write(bar)
+			strIO.write('\']')
+			query = strIO.getvalue()
 
 			nodes = root.xpath(query)
 			node_strings = []

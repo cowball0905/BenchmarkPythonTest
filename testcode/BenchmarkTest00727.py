@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00727', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00727', methods=['GET'])
 	def BenchmarkTest00727_get():
 		return BenchmarkTest00727_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00727', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00727', methods=['POST'])
 	def BenchmarkTest00727_post():
 		RESPONSE = ""
 
@@ -32,37 +32,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf86344 = configparser.ConfigParser()
-		conf86344.add_section('section86344')
-		conf86344.set('section86344', 'keyA-86344', 'a_Value')
-		conf86344.set('section86344', 'keyB-86344', param)
-		bar = conf86344.get('section86344', 'keyA-86344')
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		import flask
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
+		flask.session[bar] = '12345'
 
 		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+			f'Item: \'{escape_for_html(bar)}'
+			'\' with value: 12345 saved in session.'
 		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=False,
-			httponly=True)
 
 		return RESPONSE
 

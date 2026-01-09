@@ -34,30 +34,29 @@ def init(app):
 				param = name
 				break
 
-		import configparser
-		
-		bar = 'safe!'
-		conf97183 = configparser.ConfigParser()
-		conf97183.add_section('section97183')
-		conf97183.set('section97183', 'keyA-97183', 'a-Value')
-		conf97183.set('section97183', 'keyB-97183', param)
-		bar = conf97183.get('section97183', 'keyB-97183')
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
 		import helpers.utils
 
-		fileName = None
-		fd = None
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not contain \'../\''
+			)
+			return RESPONSE
 
 		try:
 			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
 		except IOError as e:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
 		finally:

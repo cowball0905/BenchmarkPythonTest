@@ -34,18 +34,16 @@ def init(app):
 				param = name
 				break
 
-		string99262 = ''
-		data12 = ''
-		copy = string99262
-		string99262 = ''
-		string99262 += param
-		copy += 'SomeOKString'
-		bar = copy
+		map99262 = {}
+		map99262['keyA-99262'] = 'a-Value'
+		map99262['keyB-99262'] = param
+		map99262['keyC'] = 'another-Value'
+		bar = map99262['keyB-99262']
 
 
 		otherarg = "static text"
 		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
 		)
 
 		return RESPONSE

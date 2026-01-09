@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00260', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00260', methods=['GET'])
 	def BenchmarkTest00260_get():
 		return BenchmarkTest00260_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00260', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00260', methods=['POST'])
 	def BenchmarkTest00260_post():
 		RESPONSE = ""
 
@@ -33,32 +33,17 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf39218 = configparser.ConfigParser()
-		conf39218.add_section('section39218')
-		conf39218.set('section39218', 'keyA-39218', 'a_Value')
-		conf39218.set('section39218', 'keyB-39218', param)
-		bar = conf39218.get('section39218', 'keyA-39218')
+		superstring = f'39218{param}abcd'
+		bar = superstring[len('39218'):len(superstring)-5]
 
 		import flask
-		import urllib.parse
 
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
-			RESPONSE += (
-				'Error parsing URL.'
-			)
-			return RESPONSE
+		flask.session['userid'] = bar
 
-		return flask.redirect(bar)
+		RESPONSE += (
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
+		)
 
 		return RESPONSE
 

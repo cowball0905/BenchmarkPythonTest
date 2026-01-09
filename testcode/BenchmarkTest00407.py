@@ -34,17 +34,26 @@ def init(app):
 				param = name
 				break
 
-		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import random
-		import base64
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00407'[13:]
-		user = f'SafeBarbara{num}'
+		user = f'SafeRandall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
+		value = str(random.SystemRandom().random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

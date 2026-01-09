@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00669', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00669', methods=['GET'])
 	def BenchmarkTest00669_get():
 		return BenchmarkTest00669_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00669', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00669', methods=['POST'])
 	def BenchmarkTest00669_post():
 		RESPONSE = ""
 
@@ -37,22 +37,11 @@ def init(app):
 		string40799 += 'snapes on a plane'
 		bar = string40799[4:-17]
 
-		import pathlib
-		import helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
-
-		if not str(p).startswith(str(testfiles)):
-			RESPONSE += (
-				"Invalid Path."
-			)
-			return RESPONSE
-		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+		)
 
 		return RESPONSE
 

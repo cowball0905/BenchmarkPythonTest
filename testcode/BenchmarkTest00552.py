@@ -35,7 +35,7 @@ def init(app):
 			param = headers[0]
 
 		possible = "ABC"
-		guess = possible[1]
+		guess = possible[0]
 		
 		match guess:
 			case 'A':
@@ -51,6 +51,12 @@ def init(app):
 		import helpers.utils
 
 		try:
+			if '\'' in bar:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
+
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
 			query = f'/Employees/Employee[@emplid=\'{bar}\']'

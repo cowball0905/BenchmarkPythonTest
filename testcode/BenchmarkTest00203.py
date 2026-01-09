@@ -33,15 +33,33 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = param
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import elementpath
 		import xml.etree.ElementTree as ET
 		import helpers.utils
 
+		if '\'' in bar:
+			RESPONSE += (
+				"Employee ID must not contain apostrophes"
+			)
+			return RESPONSE
+
 		try:
 			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))
@@ -53,7 +71,6 @@ def init(app):
 			RESPONSE += (
 				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
-
 
 		return RESPONSE
 

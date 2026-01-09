@@ -20,51 +20,49 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest01105', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01105', methods=['GET'])
 	def BenchmarkTest01105_get():
 		return BenchmarkTest01105_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest01105', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01105', methods=['POST'])
 	def BenchmarkTest01105_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01105")
 
 		map12023 = {}
 		map12023['keyA-12023'] = 'a-Value'
 		map12023['keyB-12023'] = param
 		map12023['keyC'] = 'another-Value'
+		bar = "safe!"
 		bar = map12023['keyB-12023']
+		bar = map12023['keyA-12023']
 
-		import helpers.ldap
-		import ldap3
+		import helpers.utils
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
+		fileName = None
+		fd = None
+
 		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
-
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				"Error processing LDAP query."
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

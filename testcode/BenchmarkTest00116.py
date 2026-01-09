@@ -32,11 +32,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		map46443 = {}
-		map46443['keyA-46443'] = 'a-Value'
-		map46443['keyB-46443'] = param
-		map46443['keyC'] = 'another-Value'
-		bar = map46443['keyB-46443']
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
 		import random
 		import base64

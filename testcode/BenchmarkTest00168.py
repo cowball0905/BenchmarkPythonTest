@@ -32,25 +32,40 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = param
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import os
+		import platform
 		import subprocess
 		import helpers.utils
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
 		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
 
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
-		RESPONSE += (
-			helpers.utils.commandOutput(proc)
-		)
+		try:
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+
+			RESPONSE += (
+				helpers.utils.commandOutput(proc)
+			)
+		except IOError:
+			RESPONSE += (
+				"Problem executing cmdi - subprocess.run(list) Test Case"
+			)
 
 		return RESPONSE
 

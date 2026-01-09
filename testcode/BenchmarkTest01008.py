@@ -20,51 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest01008', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01008', methods=['GET'])
 	def BenchmarkTest01008_get():
 		return BenchmarkTest01008_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest01008', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01008', methods=['POST'])
 	def BenchmarkTest01008_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01008" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01008"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01008") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		num = 86
+		import configparser
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = 'safe!'
+		conf92283 = configparser.ConfigParser()
+		conf92283.add_section('section92283')
+		conf92283.set('section92283', 'keyA-92283', 'a-Value')
+		conf92283.set('section92283', 'keyB-92283', param)
+		bar = conf92283.get('section92283', 'keyB-92283')
 
-		import os
-		import subprocess
 		import helpers.utils
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
-		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
-
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
-		RESPONSE += (
-			helpers.utils.commandOutput(proc)
-		)
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
+			RESPONSE += (
+				f'Now ready to write to file: {escape_for_html(fileName)}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

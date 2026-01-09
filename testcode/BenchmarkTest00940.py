@@ -45,22 +45,18 @@ def init(app):
 		map33295['keyA-33295'] = 'a-Value'
 		map33295['keyB-33295'] = param
 		map33295['keyC'] = 'another-Value'
+		bar = "safe!"
 		bar = map33295['keyB-33295']
+		bar = map33295['keyA-33295']
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
-		if '\'' in bar:
-			RESPONSE += (
-				"Employee ID must not contain apostrophes"
-			)
-			return RESPONSE
-
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

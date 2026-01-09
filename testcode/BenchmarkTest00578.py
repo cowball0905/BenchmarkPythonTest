@@ -34,18 +34,19 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		map38971 = {}
+		map38971['keyA-38971'] = 'a-Value'
+		map38971['keyB-38971'] = param
+		map38971['keyC'] = 'another-Value'
+		bar = map38971['keyB-38971']
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00578'[13:]
-		user = f'SafeRandy{num}'
+		user = f'SafeRandall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().getrandbits(32))
+		value = str(random.SystemRandom().random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

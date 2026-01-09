@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00659', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00659', methods=['GET'])
 	def BenchmarkTest00659_get():
 		return BenchmarkTest00659_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00659', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00659', methods=['POST'])
 	def BenchmarkTest00659_post():
 		RESPONSE = ""
 
@@ -39,36 +39,22 @@ def init(app):
 				param = name
 				break
 
-		possible = "ABC"
-		guess = possible[1]
+		import html
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = html.escape(param)
 
-		import flask
-		import urllib.parse
+		import yaml
 
 		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
+			yobj = yaml.safe_load(bar)
+
+			RESPONSE += (
+				yobj['text']
+			)
 		except:
 			RESPONSE += (
-				'Error parsing URL.'
+				"There was an error loading the configuration"
 			)
-			return RESPONSE
-
-		return flask.redirect(bar)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01133', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01133', methods=['GET'])
 	def BenchmarkTest01133_get():
 		return BenchmarkTest01133_post()
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01133', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01133', methods=['POST'])
 	def BenchmarkTest01133_post():
 		RESPONSE = ""
 
@@ -32,29 +32,27 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01133")
 
-		string16689 = 'help'
-		string16689 += param
-		string16689 += 'snapes on a plane'
-		bar = string16689[4:-17]
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import lxml.etree
-		import helpers.utils
+		import secrets
+		from helpers.utils import mysession
 
-		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+		num = 'BenchmarkTest01133'[13:]
+		user = f'SafeRobbie{num}'
+		cookie = f'rememberMe{num}'
+		value = str(secrets.randbelow(2**32))
 
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

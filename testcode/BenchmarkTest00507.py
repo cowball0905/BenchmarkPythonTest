@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00507', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00507', methods=['GET'])
 	def BenchmarkTest00507_get():
 		return BenchmarkTest00507_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00507', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00507', methods=['POST'])
 	def BenchmarkTest00507_post():
 		RESPONSE = ""
 
@@ -32,24 +32,36 @@ def init(app):
 		if not param:
 		    param = ""
 
-		num = 106
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
+		import pickle
+		import base64
+		import helpers.utils
+
+		helpers.utils.sharedstr = "no pickles to be seen here"
 
 		try:
-			RESPONSE += (
-				eval(bar)
-			)
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				'Unpickling failed!'
 			)
+			return RESPONSE
+
+		RESPONSE += (
+			f'shared string is {helpers.utils.sharedstr}'
+		)
 
 		return RESPONSE
 

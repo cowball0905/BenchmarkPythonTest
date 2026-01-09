@@ -33,17 +33,17 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		import html
+		
+		bar = html.escape(param)
 
-		import secrets
+		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00786'[13:]
-		user = f'SafeRobbie{num}'
+		user = f'SafeRandy{num}'
 		cookie = f'rememberMe{num}'
-		value = str(secrets.randbelow(2**32))
+		value = str(random.SystemRandom().getrandbits(32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -52,7 +52,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
+				f'{user} has been remembered with cookie: '
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

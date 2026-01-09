@@ -33,30 +33,25 @@ def init(app):
 		if values:
 			param = values[0]
 
-		string8238 = 'help'
-		string8238 += param
-		string8238 += 'snapes on a plane'
-		bar = string8238[4:-17]
+		map8238 = {}
+		map8238['keyA-8238'] = 'a-Value'
+		map8238['keyB-8238'] = param
+		map8238['keyC'] = 'another-Value'
+		bar = map8238['keyB-8238']
 
 		import helpers.utils
 
 		try:
 			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
 		except IOError as e:
 			RESPONSE += (
 				f'Problem reading from file \'{escape_for_html(fileName)}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

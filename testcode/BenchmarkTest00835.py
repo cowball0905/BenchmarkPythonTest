@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00835', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00835', methods=['GET'])
 	def BenchmarkTest00835_get():
 		return BenchmarkTest00835_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00835', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00835', methods=['POST'])
 	def BenchmarkTest00835_post():
 		RESPONSE = ""
 
@@ -35,18 +35,24 @@ def init(app):
 		if not param:
 			param = ""
 
-		map39726 = {}
-		map39726['keyA-39726'] = 'a-Value'
-		map39726['keyB-39726'] = param
-		map39726['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map39726['keyB-39726']
-		bar = map39726['keyA-39726']
+		import configparser
+		
+		bar = 'safe!'
+		conf39726 = configparser.ConfigParser()
+		conf39726.add_section('section39726')
+		conf39726.set('section39726', 'keyA-39726', 'a-Value')
+		conf39726.set('section39726', 'keyB-39726', param)
+		bar = conf39726.get('section39726', 'keyB-39726')
 
+		import pathlib
+		import helpers.utils
 
-		RESPONSE += (
-			f'Parameter value: {bar}'
-		)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

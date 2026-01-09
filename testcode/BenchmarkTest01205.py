@@ -20,27 +20,26 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01205', methods=['GET'])
+	@app.route('/benchmark/weakrand-04/BenchmarkTest01205', methods=['GET'])
 	def BenchmarkTest01205_get():
 		return BenchmarkTest01205_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01205', methods=['POST'])
+	@app.route('/benchmark/weakrand-04/BenchmarkTest01205', methods=['POST'])
 	def BenchmarkTest01205_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest01205")
+		param = request.args.get("BenchmarkTest01205")
 		if not param:
-		    param = ""
+			param = ""
 
 
-		import random
-		import base64
+		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest01205'[13:]
-		user = f'Barbara{num}'
+		user = f'SafeRobbie{num}'
 		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.randbytes(32)))
+		value = str(secrets.randbelow(2**32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -49,7 +48,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
+				f'{user} has been remembered with cookie:'
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

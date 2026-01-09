@@ -33,22 +33,18 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00219'[13:]
-		user = f'Randy{num}'
+		user = f'Nancy{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.getrandbits(32))
+		value = str(random.normalvariate())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

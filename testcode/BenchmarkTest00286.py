@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00286', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00286', methods=['GET'])
 	def BenchmarkTest00286_get():
 		return BenchmarkTest00286_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00286', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00286', methods=['POST'])
 	def BenchmarkTest00286_post():
 		RESPONSE = ""
 
@@ -40,15 +40,20 @@ def init(app):
 		bar = 'safe!'
 		conf59255 = configparser.ConfigParser()
 		conf59255.add_section('section59255')
-		conf59255.set('section59255', 'keyA-59255', 'a-Value')
+		conf59255.set('section59255', 'keyA-59255', 'a_Value')
 		conf59255.set('section59255', 'keyB-59255', param)
-		bar = conf59255.get('section59255', 'keyB-59255')
+		bar = conf59255.get('section59255', 'keyA-59255')
 
+		import helpers.db_sqlite
 
-		otherarg = "static text"
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (bar,))
 		RESPONSE += (
-			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+			helpers.db_sqlite.results(cur, sql)
 		)
+		con.close()
 
 		return RESPONSE
 

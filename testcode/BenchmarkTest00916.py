@@ -20,35 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00916', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00916', methods=['GET'])
 	def BenchmarkTest00916_get():
 		return BenchmarkTest00916_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00916', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00916', methods=['POST'])
 	def BenchmarkTest00916_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00916")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00916" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00916"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00916") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		bar = param
+		string53978 = 'help'
+		string53978 += param
+		string53978 += 'snapes on a plane'
+		bar = string53978[4:-17]
 
-		import yaml
+		import helpers.utils
 
 		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				yobj['text']
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-		except:
+		except IOError as e:
 			RESPONSE += (
-				"There was an error loading the configuration"
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

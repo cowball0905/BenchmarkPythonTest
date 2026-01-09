@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00349', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00349', methods=['GET'])
 	def BenchmarkTest00349_get():
 		return BenchmarkTest00349_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00349', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00349', methods=['POST'])
 	def BenchmarkTest00349_post():
 		RESPONSE = ""
 
@@ -35,20 +35,31 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = param
+		map69172 = {}
+		map69172['keyA-69172'] = 'a-Value'
+		map69172['keyB-69172'] = param
+		map69172['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map69172['keyB-69172']
+		bar = map69172['keyA-69172']
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+		import pickle
+		import base64
+		import helpers.utils
+
+		helpers.utils.sharedstr = "no pickles to be seen here"
+
+		try:
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
+		except:
 			RESPONSE += (
-				"Exec argument must be a plain string literal."
+				'Unpickling failed!'
 			)
 			return RESPONSE
 
-		try:
-			exec(bar)
-		except:
-			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
-			)
+		RESPONSE += (
+			f'shared string is {helpers.utils.sharedstr}'
+		)
 
 		return RESPONSE
 

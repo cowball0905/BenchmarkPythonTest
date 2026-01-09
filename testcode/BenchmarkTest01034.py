@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01034', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01034', methods=['GET'])
 	def BenchmarkTest01034_get():
 		return BenchmarkTest01034_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01034', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01034', methods=['POST'])
 	def BenchmarkTest01034_post():
 		RESPONSE = ""
 
@@ -33,22 +33,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf51694 = configparser.ConfigParser()
-		conf51694.add_section('section51694')
-		conf51694.set('section51694', 'keyA-51694', 'a_Value')
-		conf51694.set('section51694', 'keyB-51694', param)
-		bar = conf51694.get('section51694', 'keyA-51694')
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))
@@ -60,7 +56,6 @@ def init(app):
 			RESPONSE += (
 				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
-
 
 		return RESPONSE
 

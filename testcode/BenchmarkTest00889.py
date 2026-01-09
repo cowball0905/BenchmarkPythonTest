@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00889', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00889', methods=['GET'])
 	def BenchmarkTest00889_get():
 		return BenchmarkTest00889_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00889', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00889', methods=['POST'])
 	def BenchmarkTest00889_post():
 		RESPONSE = ""
 
@@ -35,35 +35,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
-		import hashlib, base64
-		import io, helpers.utils
+		import flask
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		flask.session[bar] = '12345'
 
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.sha512()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			f'Item: \'{escape_for_html(bar)}'
+			'\' with value: 12345 saved in session.'
 		)
-		f.close()
 
 		return RESPONSE
 

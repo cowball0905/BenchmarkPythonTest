@@ -20,44 +20,39 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01191', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest01191', methods=['GET'])
 	def BenchmarkTest01191_get():
 		return BenchmarkTest01191_post()
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01191', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest01191', methods=['POST'])
 	def BenchmarkTest01191_post():
 		RESPONSE = ""
 
-		param = request.form.get("BenchmarkTest01191")
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_form_parameter("BenchmarkTest01191")
 		if not param:
 			param = ""
 
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import os
+		import subprocess
 		import helpers.utils
 
-		if '\'' in param:
-			RESPONSE += (
-				"Employee ID must not contain apostrophes"
-			)
-			return RESPONSE
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
+		else:
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {param}")
 
-		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{param}\']"
-			nodes = elementpath.select(root, query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
-			)
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
+		RESPONSE += (
+			helpers.utils.commandOutput(proc)
+		)
 
 		return RESPONSE
 

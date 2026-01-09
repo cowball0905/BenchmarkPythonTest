@@ -38,14 +38,18 @@ def init(app):
 		map16095['keyA-16095'] = 'a-Value'
 		map16095['keyB-16095'] = param
 		map16095['keyC'] = 'another-Value'
-		bar = "safe!"
 		bar = map16095['keyB-16095']
-		bar = map16095['keyA-16095']
 
 		import lxml.etree
 		import helpers.utils
 
 		try:
+			if '\'' in bar:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
+
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
 			query = f'/Employees/Employee[@emplid=\'{bar}\']'

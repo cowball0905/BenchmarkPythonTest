@@ -33,17 +33,22 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 106
+		import configparser
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = 'safe!'
+		conf28150 = configparser.ConfigParser()
+		conf28150.add_section('section28150')
+		conf28150.set('section28150', 'keyA-28150', 'a-Value')
+		conf28150.set('section28150', 'keyB-28150', param)
+		bar = conf28150.get('section28150', 'keyB-28150')
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00223'[13:]
-		user = f'Nancy{num}'
+		user = f'Isaac{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.normalvariate())[2:]
+		value = str(random.randint(0, 2**32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

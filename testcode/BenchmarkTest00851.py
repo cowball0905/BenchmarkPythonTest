@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00851', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00851', methods=['GET'])
 	def BenchmarkTest00851_get():
 		return BenchmarkTest00851_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00851', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00851', methods=['POST'])
 	def BenchmarkTest00851_post():
 		RESPONSE = ""
 
@@ -35,17 +35,45 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
+		possible = "ABC"
+		guess = possible[1]
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
-		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
-		)
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
+			RESPONSE += (
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
+			)
+		except:
+			RESPONSE += (
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+			)
 
 		return RESPONSE
 

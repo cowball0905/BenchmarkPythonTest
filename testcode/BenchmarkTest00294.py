@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00294', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00294', methods=['GET'])
 	def BenchmarkTest00294_get():
 		return BenchmarkTest00294_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00294', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00294', methods=['POST'])
 	def BenchmarkTest00294_post():
 		RESPONSE = ""
 
@@ -35,29 +35,38 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
+		import xml.dom.minidom
+		import xml.sax.handler
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
 
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
 			)
-
 
 		return RESPONSE
 

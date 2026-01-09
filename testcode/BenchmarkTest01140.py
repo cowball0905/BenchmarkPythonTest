@@ -32,21 +32,15 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01140")
 
-		map84778 = {}
-		map84778['keyA-84778'] = 'a-Value'
-		map84778['keyB-84778'] = param
-		map84778['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map84778['keyB-84778']
-		bar = map84778['keyA-84778']
+		bar = param + '_SafeStuff'
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest01140'[13:]
-		user = f'Randall{num}'
+		user = f'SafeNancy{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.random())[2:]
+		value = str(random.SystemRandom().normalvariate())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

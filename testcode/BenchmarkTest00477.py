@@ -32,22 +32,20 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		import random
+		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00477'[13:]
-		user = f'Isaac{num}'
+		user = f'SafeRicky{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.randint(0, 2**32))
+		value = str(secrets.randbits(32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -56,7 +54,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
+				f'{user} has been remembered with cookie:'
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

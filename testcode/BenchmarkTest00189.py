@@ -33,14 +33,16 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = param
+		map53820 = {}
+		map53820['keyA-53820'] = 'a-Value'
+		map53820['keyB-53820'] = param
+		map53820['keyC'] = 'another-Value'
+		bar = map53820['keyB-53820']
 
 
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
+		otherarg = "static text"
 		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
 		)
 
 		return RESPONSE

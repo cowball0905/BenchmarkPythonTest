@@ -20,48 +20,27 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01002', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest01002', methods=['GET'])
 	def BenchmarkTest01002_get():
 		return BenchmarkTest01002_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01002', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest01002', methods=['POST'])
 	def BenchmarkTest01002_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01002" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01002"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01002") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		import configparser
+		import markupsafe
 		
-		bar = 'safe!'
-		conf19987 = configparser.ConfigParser()
-		conf19987.add_section('section19987')
-		conf19987.set('section19987', 'keyA-19987', 'a-Value')
-		conf19987.set('section19987', 'keyB-19987', param)
-		bar = conf19987.get('section19987', 'keyB-19987')
+		bar = markupsafe.escape(param)
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Exec argument must be a plain string literal."
-			)
-			return RESPONSE
 
-		try:
-			exec(bar)
-		except:
-			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
-			)
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

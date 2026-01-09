@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00899', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00899', methods=['GET'])
 	def BenchmarkTest00899_get():
 		return BenchmarkTest00899_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00899', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00899', methods=['POST'])
 	def BenchmarkTest00899_post():
 		RESPONSE = ""
 
@@ -35,17 +35,35 @@ def init(app):
 		if not param:
 			param = ""
 
-		import html
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = html.escape(param)
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import flask
+		import os
+		import subprocess
+		import helpers.utils
 
-		flask.session[bar] = '12345'
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
+		else:
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {bar}")
 
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
 		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
+			helpers.utils.commandOutput(proc)
 		)
 
 		return RESPONSE

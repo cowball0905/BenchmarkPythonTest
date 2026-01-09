@@ -32,18 +32,37 @@ def init(app):
 		if not param:
 		    param = ""
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		import configparser
+		
+		bar = 'safe!'
+		conf57737 = configparser.ConfigParser()
+		conf57737.add_section('section57737')
+		conf57737.set('section57737', 'keyA-57737', 'a_Value')
+		conf57737.set('section57737', 'keyB-57737', param)
+		bar = conf57737.get('section57737', 'keyA-57737')
 
-		import os
+		import pathlib
 		import helpers.utils
 
-		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-		if os.path.exists(fileName):
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
+		try:
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = (testfiles / bar).resolve()
+
+			if not str(p).startswith(str(testfiles)):
+				RESPONSE += (
+					"Invalid Path."
+				)
+				return RESPONSE
+
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
+			)
+		except OSError:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

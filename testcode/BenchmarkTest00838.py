@@ -35,32 +35,32 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 86
+		possible = "ABC"
+		guess = possible[1]
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import helpers.utils
 
 		try:
 			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
 		except IOError as e:
 			RESPONSE += (
 				f'Problem reading from file \'{escape_for_html(fileName)}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

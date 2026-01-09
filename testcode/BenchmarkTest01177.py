@@ -20,43 +20,48 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01177', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest01177', methods=['GET'])
 	def BenchmarkTest01177_get():
+		response = make_response(render_template('web/securecookie-00/BenchmarkTest01177.html'))
+		response.set_cookie('BenchmarkTest01177', 'whatever',
+			max_age=60*3,
+			secure=True,
+			path=request.path,
+			domain='localhost')
+		return response
 		return BenchmarkTest01177_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01177', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest01177', methods=['POST'])
 	def BenchmarkTest01177_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01177")
+		import urllib.parse
+		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest01177", "noCookieValueSupplied"))
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Exec argument must be a plain string literal."
-			)
-			return RESPONSE
+		from flask import make_response
+		import io
+		import helpers.utils
 
-		try:
-			exec(bar)
-		except:
-			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
-			)
+		input = ''
+		if isinstance(param, str):
+			input = param.encode('utf-8')
+		elif isinstance(param, io.IOBase):
+			input = param.read(1000)
+
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
+
+		RESPONSE += (
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+		)
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=False,
+			httponly=True)
 
 		return RESPONSE
+
 

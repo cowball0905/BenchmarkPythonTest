@@ -33,26 +33,28 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 86
+		import configparser
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = 'safe!'
+		conf72771 = configparser.ConfigParser()
+		conf72771.add_section('section72771')
+		conf72771.set('section72771', 'keyA-72771', 'a-Value')
+		conf72771.set('section72771', 'keyB-72771', param)
+		bar = conf72771.get('section72771', 'keyB-72771')
 
 		import lxml.etree
 		import helpers.utils
+		import io
 
 		try:
-			if '\'' in bar:
-				RESPONSE += (
-					"Employee ID must not contain apostrophes"
-				)
-				return RESPONSE
-
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			strIO = io.StringIO()
+			strIO.write('/Employees/Employee[@emplid=\'')
+			strIO.write(bar)
+			strIO.write('\']')
+			query = strIO.getvalue()
+
 			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00684', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00684', methods=['GET'])
 	def BenchmarkTest00684_get():
 		return BenchmarkTest00684_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00684', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00684', methods=['POST'])
 	def BenchmarkTest00684_post():
 		RESPONSE = ""
 
@@ -32,34 +32,32 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		bar = param
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		import lxml.etree
+		import helpers.utils
 
 		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
+			if '\'' in bar:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
 
-			doc = xml.dom.minidom.parseString(bar, parser)
-
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
 			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
 		except:
 			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

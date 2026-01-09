@@ -33,20 +33,18 @@ def init(app):
 		if values:
 			param = values[0]
 
-		map82962 = {}
-		map82962['keyA-82962'] = 'a-Value'
-		map82962['keyB-82962'] = param
-		map82962['keyC'] = 'another-Value'
-		bar = map82962['keyB-82962']
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
 		import base64
 		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00234'[13:]
-		user = f'SafeTheo{num}'
+		user = f'SafeTruman{num}'
 		cookie = f'rememberMe{num}'
-		value = secrets.token_hex(32)
+		value = secrets.token_urlsafe(32)
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

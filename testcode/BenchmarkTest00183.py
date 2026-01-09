@@ -33,30 +33,27 @@ def init(app):
 		if values:
 			param = values[0]
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		map40535 = {}
+		map40535['keyA-40535'] = 'a-Value'
+		map40535['keyB-40535'] = param
+		map40535['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map40535['keyB-40535']
+		bar = map40535['keyA-40535']
 
-		import pathlib
 		import helpers.utils
 
+		fileName = None
+		fd = None
+
 		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = testfiles / bar
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
 			RESPONSE += (
 				f'Problem reading from file \'{fileName}\': '
 				f'{escape_for_html(e.strerror)}'

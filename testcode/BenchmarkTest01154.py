@@ -32,14 +32,10 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01154")
 
-		import configparser
+		import helpers.ThingFactory
 		
-		bar = 'safe!'
-		conf14623 = configparser.ConfigParser()
-		conf14623.add_section('section14623')
-		conf14623.set('section14623', 'keyA-14623', 'a-Value')
-		conf14623.set('section14623', 'keyB-14623', param)
-		bar = conf14623.get('section14623', 'keyB-14623')
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -56,7 +52,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('md5')
+		hash = hashlib.sha512()
 		hash.update(input)
 
 		result = hash.digest()

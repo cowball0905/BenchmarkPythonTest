@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00459', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00459', methods=['GET'])
 	def BenchmarkTest00459_get():
 		return BenchmarkTest00459_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00459', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00459', methods=['POST'])
 	def BenchmarkTest00459_post():
 		RESPONSE = ""
 
@@ -32,23 +32,40 @@ def init(app):
 		if not param:
 		    param = ""
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import helpers.db_sqlite
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		sql = f'SELECT username from USERS where password = ?'
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql, (bar,))
-		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
-		)
-		con.close()
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
+			RESPONSE += (
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
+			)
+		except:
+			RESPONSE += (
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+			)
 
 		return RESPONSE
 

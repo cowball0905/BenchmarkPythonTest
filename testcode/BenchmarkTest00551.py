@@ -34,14 +34,24 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		map41756 = {}
+		map41756['keyA-41756'] = 'a-Value'
+		map41756['keyB-41756'] = param
+		map41756['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map41756['keyB-41756']
+		bar = map41756['keyA-41756']
 
 		import lxml.etree
 		import helpers.utils
 
 		try:
+			if '\'' in bar:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
+
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
 			query = f'/Employees/Employee[@emplid=\'{bar}\']'

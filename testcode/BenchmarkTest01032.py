@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01032', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01032', methods=['GET'])
 	def BenchmarkTest01032_get():
 		return BenchmarkTest01032_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01032', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01032', methods=['POST'])
 	def BenchmarkTest01032_post():
 		RESPONSE = ""
 
@@ -33,22 +33,29 @@ def init(app):
 		if not param:
 			param = ""
 
-		map71116 = {}
-		map71116['keyA-71116'] = 'a-Value'
-		map71116['keyB-71116'] = param
-		map71116['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map71116['keyB-71116']
-		bar = map71116['keyA-71116']
+		import configparser
+		
+		bar = 'safe!'
+		conf71116 = configparser.ConfigParser()
+		conf71116.add_section('section71116')
+		conf71116.set('section71116', 'keyA-71116', 'a_Value')
+		conf71116.set('section71116', 'keyB-71116', param)
+		bar = conf71116.get('section71116', 'keyA-71116')
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			if '\'' in bar:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
+
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

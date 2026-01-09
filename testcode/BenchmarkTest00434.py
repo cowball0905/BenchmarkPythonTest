@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00434', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00434', methods=['GET'])
 	def BenchmarkTest00434_get():
 		return BenchmarkTest00434_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00434', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00434', methods=['POST'])
 	def BenchmarkTest00434_post():
 		RESPONSE = ""
 
@@ -34,29 +34,23 @@ def init(app):
 				param = name
 				break
 
-		map33702 = {}
-		map33702['keyA-33702'] = 'a-Value'
-		map33702['keyB-33702'] = param
-		map33702['keyC'] = 'another-Value'
-		bar = map33702['keyB-33702']
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import os
-		import subprocess
-		import helpers.utils
+		import yaml
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
-		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
+		try:
+			yobj = yaml.safe_load(bar)
 
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
-		RESPONSE += (
-			helpers.utils.commandOutput(proc)
-		)
+			RESPONSE += (
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
+			)
 
 		return RESPONSE
 

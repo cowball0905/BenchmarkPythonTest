@@ -35,7 +35,7 @@ def init(app):
 			param = headers[0]
 
 		possible = "ABC"
-		guess = possible[1]
+		guess = possible[0]
 		
 		match guess:
 			case 'A':
@@ -47,24 +47,31 @@ def init(app):
 			case _:
 				bar = 'bob\'s your uncle'
 
-		import codecs
 		import helpers.utils
 
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not contain \'../\''
+			)
+			return RESPONSE
+
 		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-
+		except IOError as e:
 			RESPONSE += (
-				" And file already exists."
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

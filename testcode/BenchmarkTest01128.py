@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01128', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01128', methods=['GET'])
 	def BenchmarkTest01128_get():
 		return BenchmarkTest01128_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01128', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01128', methods=['POST'])
 	def BenchmarkTest01128_post():
 		RESPONSE = ""
 
@@ -32,34 +32,29 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01128")
 
-		import configparser
-		
-		bar = 'safe!'
-		conf7098 = configparser.ConfigParser()
-		conf7098.add_section('section7098')
-		conf7098.set('section7098', 'keyA-7098', 'a-Value')
-		conf7098.set('section7098', 'keyB-7098', param)
-		bar = conf7098.get('section7098', 'keyB-7098')
+		string7098 = 'help'
+		string7098 += param
+		string7098 += 'snapes on a plane'
+		bar = string7098[4:-17]
 
-		import lxml.etree
-		import helpers.utils
+		import random
+		import base64
+		from helpers.utils import mysession
 
-		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
+		num = 'BenchmarkTest01128'[13:]
+		user = f'Barbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.randbytes(32)))
 
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

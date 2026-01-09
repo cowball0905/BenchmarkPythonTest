@@ -32,26 +32,27 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		map56743 = {}
+		map56743['keyA-56743'] = 'a-Value'
+		map56743['keyB-56743'] = param
+		map56743['keyC'] = 'another-Value'
+		bar = map56743['keyB-56743']
 
 		import pathlib
 		import helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
-
-		if not str(p).startswith(str(testfiles)):
+		try:
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = testfiles / bar
 			RESPONSE += (
-				"Invalid Path."
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-			return RESPONSE
-		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		except OSError:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

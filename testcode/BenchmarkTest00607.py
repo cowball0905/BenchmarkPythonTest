@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00607', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00607', methods=['GET'])
 	def BenchmarkTest00607_get():
 		return BenchmarkTest00607_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00607', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00607', methods=['POST'])
 	def BenchmarkTest00607_post():
 		RESPONSE = ""
 
@@ -34,24 +34,31 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		string50110 = 'help'
+		string50110 += param
+		string50110 += 'snapes on a plane'
+		bar = string50110[4:-17]
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Exec argument must be a plain string literal."
-			)
-			return RESPONSE
+		import platform
+		import subprocess
+		import helpers.utils
+
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
+		else:
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
 
 		try:
-			exec(bar)
-		except:
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				helpers.utils.commandOutput(proc)
+			)
+		except IOError:
+			RESPONSE += (
+				"Problem executing cmdi - subprocess.run(list) Test Case"
 			)
 
 		return RESPONSE

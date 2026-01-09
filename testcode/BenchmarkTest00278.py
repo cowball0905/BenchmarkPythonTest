@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00278', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00278', methods=['GET'])
 	def BenchmarkTest00278_get():
 		return BenchmarkTest00278_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00278', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00278', methods=['POST'])
 	def BenchmarkTest00278_post():
 		RESPONSE = ""
 
@@ -35,36 +35,13 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = param + '_SafeStuff'
 
-		import helpers.utils
 
-		fileName = None
-		fd = None
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'rb') as fd:
-				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-				)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

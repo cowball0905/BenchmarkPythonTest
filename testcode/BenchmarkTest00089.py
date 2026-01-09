@@ -32,18 +32,21 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		map83150 = {}
+		map83150['keyA-83150'] = 'a-Value'
+		map83150['keyB-83150'] = param
+		map83150['keyC'] = 'another-Value'
+		bar = map83150['keyB-83150']
 
-		import os
+		import pathlib
 		import helpers.utils
 
-		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-		if os.path.exists(fileName):
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

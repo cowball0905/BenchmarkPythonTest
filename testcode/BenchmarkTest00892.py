@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00892', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00892', methods=['GET'])
 	def BenchmarkTest00892_get():
 		return BenchmarkTest00892_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00892', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00892', methods=['POST'])
 	def BenchmarkTest00892_post():
 		RESPONSE = ""
 
@@ -35,41 +35,26 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Eval argument must be a plain string literal."
+			)
+			return RESPONSE		
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
-
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=False,
-			httponly=True)
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

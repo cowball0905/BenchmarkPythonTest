@@ -33,36 +33,22 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf84331 = configparser.ConfigParser()
-		conf84331.add_section('section84331')
-		conf84331.set('section84331', 'keyA-84331', 'a_Value')
-		conf84331.set('section84331', 'keyB-84331', param)
-		bar = conf84331.get('section84331', 'keyA-84331')
+		string84331 = 'help'
+		string84331 += param
+		string84331 += 'snapes on a plane'
+		bar = string84331[4:-17]
 
 		import helpers.utils
 
-		fileName = None
-		fd = None
-
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not include \'../\''
-			)
-			return RESPONSE
-
 		try:
 			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
 		except IOError as e:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
 		finally:

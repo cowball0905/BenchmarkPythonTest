@@ -32,16 +32,27 @@ def init(app):
 		if not param:
 			param = ""
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
 		import pathlib
 		import helpers.utils
 
 		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = testfiles / bar
+		p = (testfiles / bar).resolve()
+
+		if not str(p).startswith(str(testfiles)):
+			RESPONSE += (
+				"Invalid Path."
+			)
+			return RESPONSE
+		
 		if p.exists():
 			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:

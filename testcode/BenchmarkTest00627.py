@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00627', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00627', methods=['GET'])
 	def BenchmarkTest00627_get():
 		return BenchmarkTest00627_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00627', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00627', methods=['POST'])
 	def BenchmarkTest00627_post():
 		RESPONSE = ""
 
@@ -39,17 +39,22 @@ def init(app):
 				param = name
 				break
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		import configparser
+		
+		bar = 'safe!'
+		conf80161 = configparser.ConfigParser()
+		conf80161.add_section('section80161')
+		conf80161.set('section80161', 'keyA-80161', 'a_Value')
+		conf80161.set('section80161', 'keyB-80161', param)
+		bar = conf80161.get('section80161', 'keyA-80161')
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00627'[13:]
-		user = f'Randy{num}'
+		user = f'Randall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.getrandbits(32))
+		value = str(random.random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

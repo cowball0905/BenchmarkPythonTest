@@ -34,28 +34,34 @@ def init(app):
 				param = name
 				break
 
-		num = 106
+		import configparser
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = 'safe!'
+		conf4255 = configparser.ConfigParser()
+		conf4255.add_section('section4255')
+		conf4255.set('section4255', 'keyA-4255', 'a_Value')
+		conf4255.set('section4255', 'keyB-4255', param)
+		bar = conf4255.get('section4255', 'keyA-4255')
 
-		import codecs
 		import helpers.utils
 
 		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-
+		except IOError as e:
 			RESPONSE += (
-				" And file already exists."
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

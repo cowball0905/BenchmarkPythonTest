@@ -35,16 +35,26 @@ def init(app):
 		if not param:
 			param = ""
 
-		superstring = f'73882{param}abcd'
-		bar = superstring[len('73882'):len(superstring)-5]
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00317'[13:]
-		user = f'SafeNancy{num}'
+		user = f'SafeIsaac{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
+		value = str(random.SystemRandom().randint(0, 2**32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

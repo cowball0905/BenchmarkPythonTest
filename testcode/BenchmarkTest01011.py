@@ -33,31 +33,36 @@ def init(app):
 		if not param:
 			param = ""
 
-		map92400 = {}
-		map92400['keyA-92400'] = 'a-Value'
-		map92400['keyB-92400'] = param
-		map92400['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map92400['keyB-92400']
-		bar = map92400['keyA-92400']
+		import configparser
+		
+		bar = 'safe!'
+		conf92400 = configparser.ConfigParser()
+		conf92400.add_section('section92400')
+		conf92400.set('section92400', 'keyA-92400', 'a_Value')
+		conf92400.set('section92400', 'keyB-92400', param)
+		bar = conf92400.get('section92400', 'keyA-92400')
 
-		import codecs
+		import pathlib
 		import helpers.utils
 
 		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = (testfiles / bar).resolve()
+
+			if not str(p).startswith(str(testfiles)):
+				RESPONSE += (
+					"Invalid Path."
+				)
+				return RESPONSE
 
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-
+		except OSError:
 			RESPONSE += (
-				" And file already exists."
-			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

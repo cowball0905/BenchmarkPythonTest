@@ -20,41 +20,29 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01229', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest01229', methods=['GET'])
 	def BenchmarkTest01229_get():
 		return BenchmarkTest01229_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01229', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest01229', methods=['POST'])
 	def BenchmarkTest01229_post():
 		RESPONSE = ""
 
 		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest01229")
-		if not param:
-			param = ""
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01229")
 
 
-		import random
-		import base64
-		from helpers.utils import mysession
+		import helpers.db_sqlite
 
-		num = 'BenchmarkTest01229'[13:]
-		user = f'SafeBarbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (param,))
+		RESPONSE += (
+			helpers.db_sqlite.results(cur, sql)
+		)
+		con.close()
 
 		return RESPONSE
 

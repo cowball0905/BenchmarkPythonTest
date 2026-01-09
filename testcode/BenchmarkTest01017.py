@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01017', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest01017', methods=['GET'])
 	def BenchmarkTest01017_get():
 		return BenchmarkTest01017_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01017', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest01017', methods=['POST'])
 	def BenchmarkTest01017_post():
 		RESPONSE = ""
 
@@ -33,30 +33,19 @@ def init(app):
 		if not param:
 			param = ""
 
-		string25383 = 'help'
-		string25383 += param
-		string25383 += 'snapes on a plane'
-		bar = string25383[4:-17]
+		map25383 = {}
+		map25383['keyA-25383'] = 'a-Value'
+		map25383['keyB-25383'] = param
+		map25383['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map25383['keyB-25383']
+		bar = map25383['keyA-25383']
 
-		import helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+		)
 
 		return RESPONSE
 

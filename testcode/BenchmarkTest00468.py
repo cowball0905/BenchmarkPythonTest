@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00468', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00468', methods=['GET'])
 	def BenchmarkTest00468_get():
 		return BenchmarkTest00468_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00468', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00468', methods=['POST'])
 	def BenchmarkTest00468_post():
 		RESPONSE = ""
 
@@ -32,18 +32,26 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = "This should never happen"
-		if 'should' in bar:
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
 			bar = param
 
 		import lxml.etree
 		import helpers.utils
 
 		try:
+			if '\'' in bar:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
+
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
-
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
 			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:

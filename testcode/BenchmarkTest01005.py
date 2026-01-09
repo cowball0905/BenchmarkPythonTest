@@ -20,55 +20,55 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest01005', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01005', methods=['GET'])
 	def BenchmarkTest01005_get():
 		return BenchmarkTest01005_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest01005', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01005', methods=['POST'])
 	def BenchmarkTest01005_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01005" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01005"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01005") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		bar = param
+		map96560 = {}
+		map96560['keyA-96560'] = 'a-Value'
+		map96560['keyB-96560'] = param
+		map96560['keyC'] = 'another-Value'
+		bar = map96560['keyB-96560']
 
-		import helpers.ldap
-		import ldap3
+		import platform
+		import codecs
+		import helpers.utils
+		from urllib.parse import urlparse
+		from urllib.request import url2pathname
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
+		startURIslashes = ""
+
+		if platform.system() == "Windows":
+			startURIslashes = "/"
+		else:
+			startURIslashes = "//"
+
 		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
 			RESPONSE += (
-				"Error processing LDAP query."
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
+
+			RESPONSE += (
+				" And file already exists."
+			)
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
+			)
+		except IOError:
+			pass
 
 		return RESPONSE
 

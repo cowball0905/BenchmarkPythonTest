@@ -35,16 +35,18 @@ def init(app):
 			param = headers[0]
 
 		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		if 'should' in bar:
+			bar = param
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
+
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))
@@ -56,7 +58,6 @@ def init(app):
 			RESPONSE += (
 				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
-
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00363', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00363', methods=['GET'])
 	def BenchmarkTest00363_get():
 		return BenchmarkTest00363_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00363', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00363', methods=['POST'])
 	def BenchmarkTest00363_post():
 		RESPONSE = ""
 
@@ -34,26 +34,15 @@ def init(app):
 				param = name
 				break
 
-		num = 86
+		num = 106
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'wb') as fd:
-				RESPONSE += (
-					f'Now ready to write to file: {escape_for_html(fileName)}'
-				)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+		)
 
 		return RESPONSE
 

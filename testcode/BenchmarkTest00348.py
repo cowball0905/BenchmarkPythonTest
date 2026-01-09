@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00348', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00348', methods=['GET'])
 	def BenchmarkTest00348_get():
 		return BenchmarkTest00348_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00348', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00348', methods=['POST'])
 	def BenchmarkTest00348_post():
 		RESPONSE = ""
 
@@ -35,27 +35,40 @@ def init(app):
 		if not param:
 			param = ""
 
-		map47736 = {}
-		map47736['keyA-47736'] = 'a-Value'
-		map47736['keyB-47736'] = param
-		map47736['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map47736['keyB-47736']
-		bar = map47736['keyA-47736']
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
+		import helpers.ldap
+		import ldap3
 
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
 		try:
-			RESPONSE += (
-				eval(bar)
-			)
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
+
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				"Error processing LDAP query."
 			)
 
 		return RESPONSE

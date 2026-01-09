@@ -32,19 +32,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		string62225 = 'help'
-		string62225 += param
-		string62225 += 'snapes on a plane'
-		bar = string62225[4:-17]
+		import html
+		
+		bar = html.escape(param)
 
 		import base64
 		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00126'[13:]
-		user = f'SafeToby{num}'
+		user = f'SafeTheo{num}'
 		cookie = f'rememberMe{num}'
-		value = base64.b64encode(secrets.token_bytes(32))
+		value = secrets.token_hex(32)
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

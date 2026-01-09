@@ -33,9 +33,14 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
 		import lxml.etree
 		import helpers.utils
@@ -43,9 +48,8 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
-			run_query = lxml.etree.XPath(query)
-			nodes = run_query(root)
+			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

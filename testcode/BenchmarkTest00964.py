@@ -41,15 +41,20 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = param
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00964'[13:]
-		user = f'Randall{num}'
+		user = f'SafeRandy{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.random())[2:]
+		value = str(random.SystemRandom().getrandbits(32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

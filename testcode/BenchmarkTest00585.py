@@ -34,13 +34,9 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		string45337 = ''
-		data12 = ''
-		copy = string45337
-		string45337 = ''
-		string45337 += param
-		copy += 'SomeOKString'
-		bar = copy
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -57,7 +53,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha1')
+		hash = hashlib.sha1()
 		hash.update(input)
 
 		result = hash.digest()

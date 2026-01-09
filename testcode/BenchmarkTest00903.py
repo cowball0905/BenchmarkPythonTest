@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00903', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00903', methods=['GET'])
 	def BenchmarkTest00903_get():
 		return BenchmarkTest00903_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00903', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00903', methods=['POST'])
 	def BenchmarkTest00903_post():
 		RESPONSE = ""
 
@@ -35,18 +35,26 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
+
+		import yaml
 
 		try:
-			exec(bar)
+			yobj = yaml.safe_load(bar)
+
+			RESPONSE += (
+				yobj['text']
+			)
 		except:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

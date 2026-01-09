@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00689', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00689', methods=['GET'])
 	def BenchmarkTest00689_get():
 		return BenchmarkTest00689_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00689', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00689', methods=['POST'])
 	def BenchmarkTest00689_post():
 		RESPONSE = ""
 
@@ -32,39 +32,37 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
+		possible = "ABC"
+		guess = possible[1]
 		
-		bar = 'safe!'
-		conf23354 = configparser.ConfigParser()
-		conf23354.add_section('section23354')
-		conf23354.set('section23354', 'keyA-23354', 'a-Value')
-		conf23354.set('section23354', 'keyB-23354', param)
-		bar = conf23354.get('section23354', 'keyB-23354')
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import lxml.etree
-		import helpers.utils
+		import random
+		import base64
+		from helpers.utils import mysession
 
-		try:
-			if '\'' in bar:
-				RESPONSE += (
-					"Employee ID must not contain apostrophes"
-				)
-				return RESPONSE
+		num = 'BenchmarkTest00689'[13:]
+		user = f'Barbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.randbytes(32)))
 
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

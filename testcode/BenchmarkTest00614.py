@@ -20,54 +20,57 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00614', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00614', methods=['GET'])
 	def BenchmarkTest00614_get():
 		return BenchmarkTest00614_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00614', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00614', methods=['POST'])
 	def BenchmarkTest00614_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00614")
 		
-		if headers:
-			param = headers[0]
-
-		possible = "ABC"
-		guess = possible[0]
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		import platform
-		import subprocess
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
+
 		import helpers.utils
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
+		fileName = None
+		fd = None
 
 		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				helpers.utils.commandOutput(proc)
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
-		except IOError:
+		except IOError as e:
 			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

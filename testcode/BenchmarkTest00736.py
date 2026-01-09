@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00736', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00736', methods=['GET'])
 	def BenchmarkTest00736_get():
 		return BenchmarkTest00736_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00736', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00736', methods=['POST'])
 	def BenchmarkTest00736_post():
 		RESPONSE = ""
 
@@ -40,19 +40,26 @@ def init(app):
 		bar = map81232['keyB-81232']
 		bar = map81232['keyA-81232']
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
+		import platform
+		import subprocess
+		import helpers.utils
+
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
+		else:
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
 
 		try:
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+
 			RESPONSE += (
-				eval(bar)
+				helpers.utils.commandOutput(proc)
 			)
-		except:
+		except IOError:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				"Problem executing cmdi - subprocess.run(list) Test Case"
 			)
 
 		return RESPONSE

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01115', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01115', methods=['GET'])
 	def BenchmarkTest01115_get():
 		return BenchmarkTest01115_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01115', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01115', methods=['POST'])
 	def BenchmarkTest01115_post():
 		RESPONSE = ""
 
@@ -32,24 +32,16 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01115")
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		string70586 = 'help'
+		string70586 += param
+		string70586 += 'snapes on a plane'
+		bar = string70586[4:-17]
 
-		import pathlib
-		import helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = testfiles / bar
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+		)
 
 		return RESPONSE
 

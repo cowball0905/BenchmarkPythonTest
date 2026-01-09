@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00622', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00622', methods=['GET'])
 	def BenchmarkTest00622_get():
 		return BenchmarkTest00622_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00622', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00622', methods=['POST'])
 	def BenchmarkTest00622_post():
 		RESPONSE = ""
 
@@ -39,31 +39,28 @@ def init(app):
 				param = name
 				break
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
-
-		import pathlib
-		import helpers.utils
-
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
-
-		if not str(p).startswith(str(testfiles)):
-			RESPONSE += (
-				"Invalid Path."
-			)
-			return RESPONSE
+		num = 106
 		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		bar = "This should never happen" if (7*42) - num > 200 else param
+
+		import random
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest00622'[13:]
+		user = f'Randy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.getrandbits(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			RESPONSE += (
+				f'Welcome back: {user}<br/>'
+			)
 		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

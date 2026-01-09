@@ -32,11 +32,14 @@ def init(app):
 		if not param:
 		    param = ""
 
-		map12821 = {}
-		map12821['keyA-12821'] = 'a-Value'
-		map12821['keyB-12821'] = param
-		map12821['keyC'] = 'another-Value'
-		bar = map12821['keyB-12821']
+		import configparser
+		
+		bar = 'safe!'
+		conf12821 = configparser.ConfigParser()
+		conf12821.add_section('section12821')
+		conf12821.set('section12821', 'keyA-12821', 'a-Value')
+		conf12821.set('section12821', 'keyB-12821', param)
+		bar = conf12821.get('section12821', 'keyB-12821')
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -53,7 +56,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('md5')
+		hash = hashlib.new('sha512')
 		hash.update(input)
 
 		result = hash.digest()

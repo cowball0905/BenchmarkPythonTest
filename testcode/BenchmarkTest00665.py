@@ -32,38 +32,29 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		map59129 = {}
+		map59129['keyA-59129'] = 'a-Value'
+		map59129['keyB-59129'] = param
+		map59129['keyC'] = 'another-Value'
+		bar = map59129['keyB-59129']
 
 		import helpers.utils
 
+		fileName = None
+		fd = None
+
 		try:
 			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
 		except IOError as e:
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'Problem reading from file \'{fileName}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

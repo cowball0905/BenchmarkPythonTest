@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01018', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest01018', methods=['GET'])
 	def BenchmarkTest01018_get():
 		return BenchmarkTest01018_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01018', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest01018', methods=['POST'])
 	def BenchmarkTest01018_post():
 		RESPONSE = ""
 
@@ -33,24 +33,16 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf85812 = configparser.ConfigParser()
-		conf85812.add_section('section85812')
-		conf85812.set('section85812', 'keyA-85812', 'a_Value')
-		conf85812.set('section85812', 'keyB-85812', param)
-		bar = conf85812.get('section85812', 'keyA-85812')
+		superstring = f'85812{param}abcd'
+		bar = superstring[len('85812'):len(superstring)-5]
 
-		import pathlib
-		import helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = testfiles / bar
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
+		RESPONSE += (
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+		)
 
 		return RESPONSE
 

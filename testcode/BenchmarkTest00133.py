@@ -32,9 +32,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
 		import random
 		from helpers.utils import mysession

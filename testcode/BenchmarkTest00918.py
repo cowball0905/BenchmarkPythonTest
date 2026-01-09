@@ -20,46 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00918', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00918', methods=['GET'])
 	def BenchmarkTest00918_get():
 		return BenchmarkTest00918_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00918', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00918', methods=['POST'])
 	def BenchmarkTest00918_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00918")
-		if not param:
-			param = ""
-
-		possible = "ABC"
-		guess = possible[1]
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00918" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00918"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00918") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		param = urllib.parse.unquote_plus(param)
 
-		import yaml
+		import configparser
+		
+		bar = 'safe!'
+		conf26719 = configparser.ConfigParser()
+		conf26719.add_section('section26719')
+		conf26719.set('section26719', 'keyA-26719', 'a-Value')
+		conf26719.set('section26719', 'keyB-26719', param)
+		bar = conf26719.get('section26719', 'keyB-26719')
 
-		try:
-			yobj = yaml.safe_load(bar)
+		import pathlib
+		import helpers.utils
 
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

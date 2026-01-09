@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01036', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01036', methods=['GET'])
 	def BenchmarkTest01036_get():
 		return BenchmarkTest01036_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01036', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01036', methods=['POST'])
 	def BenchmarkTest01036_post():
 		RESPONSE = ""
 
@@ -33,24 +33,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
-		if '\'' in bar:
-			RESPONSE += (
-				"Employee ID must not contain apostrophes"
-			)
-			return RESPONSE
-
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

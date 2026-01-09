@@ -41,22 +41,23 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		import configparser
-		
-		bar = 'safe!'
-		conf68201 = configparser.ConfigParser()
-		conf68201.add_section('section68201')
-		conf68201.set('section68201', 'keyA-68201', 'a-Value')
-		conf68201.set('section68201', 'keyB-68201', param)
-		bar = conf68201.get('section68201', 'keyB-68201')
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import secrets
+		import random
+		import base64
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00967'[13:]
-		user = f'SafeRicky{num}'
+		user = f'SafeBarbara{num}'
 		cookie = f'rememberMe{num}'
-		value = str(secrets.randbits(32))
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -65,7 +66,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
+				f'{user} has been remembered with cookie: '
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

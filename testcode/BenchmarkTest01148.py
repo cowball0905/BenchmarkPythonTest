@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01148', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01148', methods=['GET'])
 	def BenchmarkTest01148_get():
 		return BenchmarkTest01148_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01148', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01148', methods=['POST'])
 	def BenchmarkTest01148_post():
 		RESPONSE = ""
 
@@ -32,34 +32,35 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01148")
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
-
-		import random
 		import base64
-		from helpers.utils import mysession
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		num = 'BenchmarkTest01148'[13:]
-		user = f'SafeBarbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
+		import hashlib, base64
+		import io, helpers.utils
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		if len(input) == 0:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				'Cannot generate hash: Input was empty.'
 			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			return RESPONSE
+
+		hash = hashlib.sha1()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

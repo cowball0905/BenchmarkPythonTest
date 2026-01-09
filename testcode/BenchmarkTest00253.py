@@ -33,11 +33,9 @@ def init(app):
 		if values:
 			param = values[0]
 
-		map99928 = {}
-		map99928['keyA-99928'] = 'a-Value'
-		map99928['keyB-99928'] = param
-		map99928['keyC'] = 'another-Value'
-		bar = map99928['keyB-99928']
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -54,7 +52,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.sha384()
+		hash = hashlib.sha512()
 		hash.update(input)
 
 		result = hash.digest()

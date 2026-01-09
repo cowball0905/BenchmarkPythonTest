@@ -35,23 +35,16 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
 
-		otherarg = "static text"
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
 		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
 		)
 
 		return RESPONSE

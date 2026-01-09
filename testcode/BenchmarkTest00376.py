@@ -34,13 +34,14 @@ def init(app):
 				param = name
 				break
 
-		map65916 = {}
-		map65916['keyA-65916'] = 'a-Value'
-		map65916['keyB-65916'] = param
-		map65916['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map65916['keyB-65916']
-		bar = map65916['keyA-65916']
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
 		import lxml.etree
 		import helpers.utils
@@ -48,8 +49,7 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
-
+			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
 			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:

@@ -20,34 +20,27 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00169', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00169', methods=['GET'])
 	def BenchmarkTest00169_get():
 		return BenchmarkTest00169_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00169', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00169', methods=['POST'])
 	def BenchmarkTest00169_post():
 		RESPONSE = ""
 
-		param = request.form.get("BenchmarkTest00169")
-		if not param:
-			param = ""
+		values = request.form.getlist("BenchmarkTest00169")
+		param = ""
+		if values:
+			param = values[0]
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import yaml
 
-		try:
-			yobj = yaml.safe_load(bar)
-
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

@@ -20,34 +20,25 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00495', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00495', methods=['GET'])
 	def BenchmarkTest00495_get():
 		return BenchmarkTest00495_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00495', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00495', methods=['POST'])
 	def BenchmarkTest00495_post():
 		RESPONSE = ""
 
-		param = request.headers.get("Referer")
+		param = request.headers.get("BenchmarkTest00495")
 		if not param:
 		    param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf59200 = configparser.ConfigParser()
-		conf59200.add_section('section59200')
-		conf59200.set('section59200', 'keyA-59200', 'a_Value')
-		conf59200.set('section59200', 'keyB-59200', param)
-		bar = conf59200.get('section59200', 'keyA-59200')
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
+		import flask
 
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00495': bar}))
-		
+		return flask.redirect(bar)
 
 		return RESPONSE
 

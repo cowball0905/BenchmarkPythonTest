@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest01099', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01099', methods=['GET'])
 	def BenchmarkTest01099_get():
 		return BenchmarkTest01099_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest01099', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01099', methods=['POST'])
 	def BenchmarkTest01099_post():
 		RESPONSE = ""
 
@@ -33,18 +33,26 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		string28092 = ''
+		data12 = ''
+		copy = string28092
+		string28092 = ''
+		string28092 += param
+		copy += 'SomeOKString'
+		bar = copy
 
-		import flask
+		import yaml
 
-		flask.session[bar] = '12345'
+		try:
+			yobj = yaml.load(bar, Loader=yaml.Loader)
 
-		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
-		)
+			RESPONSE += (
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
+			)
 
 		return RESPONSE
 

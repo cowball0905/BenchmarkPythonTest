@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01166', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01166', methods=['GET'])
 	def BenchmarkTest01166_get():
 		return BenchmarkTest01166_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01166', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01166', methods=['POST'])
 	def BenchmarkTest01166_post():
 		RESPONSE = ""
 
@@ -32,30 +32,22 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01166")
 
-		bar = param
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
-
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=False,
-			httponly=True)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

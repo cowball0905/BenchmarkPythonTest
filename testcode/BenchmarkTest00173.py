@@ -33,19 +33,26 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf69285 = configparser.ConfigParser()
-		conf69285.add_section('section69285')
-		conf69285.set('section69285', 'keyA-69285', 'a_Value')
-		conf69285.set('section69285', 'keyB-69285', param)
-		bar = conf69285.get('section69285', 'keyA-69285')
+		string69285 = 'help'
+		string69285 += param
+		string69285 += 'snapes on a plane'
+		bar = string69285[4:-17]
 
+		import platform
 		import codecs
 		import helpers.utils
+		from urllib.parse import urlparse
+		from urllib.request import url2pathname
+
+		startURIslashes = ""
+
+		if platform.system() == "Windows":
+			startURIslashes = "/"
+		else:
+			startURIslashes = "//"
 
 		try:
+			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
 			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
 			RESPONSE += (
@@ -55,11 +62,12 @@ def init(app):
 			RESPONSE += (
 				" And file already exists."
 			)
-
 		except FileNotFoundError:
 			RESPONSE += (
 				" But file doesn't exist yet."
 			)
+		except IOError:
+			pass
 
 		return RESPONSE
 

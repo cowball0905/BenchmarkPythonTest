@@ -20,33 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00170', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00170', methods=['GET'])
 	def BenchmarkTest00170_get():
 		return BenchmarkTest00170_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00170', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00170', methods=['POST'])
 	def BenchmarkTest00170_post():
 		RESPONSE = ""
 
-		param = request.form.get("BenchmarkTest00170")
-		if not param:
-			param = ""
+		values = request.form.getlist("BenchmarkTest00170")
+		param = ""
+		if values:
+			param = values[0]
 
-		num = 106
+		import configparser
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = 'safe!'
+		conf64047 = configparser.ConfigParser()
+		conf64047.add_section('section64047')
+		conf64047.set('section64047', 'keyA-64047', 'a_Value')
+		conf64047.set('section64047', 'keyB-64047', param)
+		bar = conf64047.get('section64047', 'keyA-64047')
 
-		import yaml
+		import codecs
+		import helpers.utils
 
 		try:
-			yobj = yaml.safe_load(bar)
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
 			RESPONSE += (
-				yobj['text']
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
-		except:
+
 			RESPONSE += (
-				"There was an error loading the configuration"
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
 			)
 
 		return RESPONSE

@@ -20,54 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01187', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest01187', methods=['GET'])
 	def BenchmarkTest01187_get():
-		response = make_response(render_template('web/pathtraver-01/BenchmarkTest01187.html'))
-		response.set_cookie('BenchmarkTest01187', 'FileName',
-			max_age=60*3,
-			secure=True,
-			path=request.path,
-			domain='localhost')
-		return response
 		return BenchmarkTest01187_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01187', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest01187', methods=['POST'])
 	def BenchmarkTest01187_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest01187", "noCookieValueSupplied"))
+		values = request.form.getlist("BenchmarkTest01187")
+		param = ""
+		if values:
+			param = values[0]
 
 
+		from flask import make_response
+		import io
 		import helpers.utils
 
-		fileName = None
-		fd = None
+		input = ''
+		if isinstance(param, str):
+			input = param.encode('utf-8')
+		elif isinstance(param, io.IOBase):
+			input = param.read(1000)
 
-		if '../' in param:
-			RESPONSE += (
-				'File name must not include \'../\''
-			)
-			return RESPONSE
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{param}'
-			fd = open(fileName, 'rb')
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		RESPONSE += (
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+		)
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=False,
+			httponly=True)
 
 		return RESPONSE
 

@@ -41,17 +41,18 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		import markupsafe
+		num = 106
 		
-		bar = markupsafe.escape(param)
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import secrets
+		import random
+		import base64
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00968'[13:]
-		user = f'SafeRicky{num}'
+		user = f'SafeBarbara{num}'
 		cookie = f'rememberMe{num}'
-		value = str(secrets.randbits(32))
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -60,7 +61,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
+				f'{user} has been remembered with cookie: '
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

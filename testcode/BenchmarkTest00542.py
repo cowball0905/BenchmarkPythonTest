@@ -34,18 +34,22 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		map29056 = {}
+		map29056['keyA-29056'] = 'a-Value'
+		map29056['keyB-29056'] = param
+		map29056['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map29056['keyB-29056']
+		bar = map29056['keyA-29056']
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

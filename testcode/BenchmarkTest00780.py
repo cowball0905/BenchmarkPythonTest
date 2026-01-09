@@ -33,18 +33,22 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		map73537 = {}
+		map73537['keyA-73537'] = 'a-Value'
+		map73537['keyB-73537'] = param
+		map73537['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map73537['keyB-73537']
+		bar = map73537['keyA-73537']
 
-		import random
 		import base64
+		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00780'[13:]
-		user = f'Barbara{num}'
+		user = f'SafeTheo{num}'
 		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.randbytes(32)))
+		value = secrets.token_hex(32)
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -53,7 +57,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
+				f'{user} has been remembered with cookie:'
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

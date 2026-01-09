@@ -32,29 +32,29 @@ def init(app):
 		if not param:
 		    param = ""
 
-		string8943 = 'help'
-		string8943 += param
-		string8943 += 'snapes on a plane'
-		bar = string8943[4:-17]
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
-		import codecs
 		import helpers.utils
 
 		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-
+		except IOError as e:
 			RESPONSE += (
-				" And file already exists."
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

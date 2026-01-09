@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01038', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01038', methods=['GET'])
 	def BenchmarkTest01038_get():
 		return BenchmarkTest01038_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01038', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01038', methods=['POST'])
 	def BenchmarkTest01038_post():
 		RESPONSE = ""
 
@@ -33,25 +33,33 @@ def init(app):
 		if not param:
 			param = ""
 
-		string12212 = 'help'
-		string12212 += param
-		string12212 += 'snapes on a plane'
-		bar = string12212[4:-17]
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
-
-		if '\'' in bar:
-			RESPONSE += (
-				"Employee ID must not contain apostrophes"
-			)
-			return RESPONSE
+		import io
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			strIO = io.StringIO()
+			strIO.write('/Employees/Employee[@emplid=\'')
+			strIO.write(bar)
+			strIO.write('\']')
+			query = strIO.getvalue()
+
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

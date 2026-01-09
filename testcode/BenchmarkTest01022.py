@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01022', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest01022', methods=['GET'])
 	def BenchmarkTest01022_get():
 		return BenchmarkTest01022_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01022', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest01022', methods=['POST'])
 	def BenchmarkTest01022_post():
 		RESPONSE = ""
 
@@ -33,31 +33,30 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf45923 = configparser.ConfigParser()
-		conf45923.add_section('section45923')
-		conf45923.set('section45923', 'keyA-45923', 'a_Value')
-		conf45923.set('section45923', 'keyB-45923', param)
-		bar = conf45923.get('section45923', 'keyA-45923')
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
+		import elementpath
+		import xml.etree.ElementTree as ET
 		import helpers.utils
 
-		fileName = None
-		fd = None
-
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'rb') as fd:
-				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-				)
-		except IOError as e:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

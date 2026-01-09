@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00336', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00336', methods=['GET'])
 	def BenchmarkTest00336_get():
 		return BenchmarkTest00336_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00336', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00336', methods=['POST'])
 	def BenchmarkTest00336_post():
 		RESPONSE = ""
 
@@ -35,21 +35,32 @@ def init(app):
 		if not param:
 			param = ""
 
-		map30382 = {}
-		map30382['keyA-30382'] = 'a-Value'
-		map30382['keyB-30382'] = param
-		map30382['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map30382['keyB-30382']
-		bar = map30382['keyA-30382']
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
+		from flask import make_response
+		import io
+		import helpers.utils
+
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
 
 		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
 		)
 
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00336': bar}))
-		
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=False,
+			httponly=True)
 
 		return RESPONSE
 

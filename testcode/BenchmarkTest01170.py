@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01170', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01170', methods=['GET'])
 	def BenchmarkTest01170_get():
 		return BenchmarkTest01170_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01170', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01170', methods=['POST'])
 	def BenchmarkTest01170_post():
 		RESPONSE = ""
 
@@ -32,34 +32,45 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01170")
 
-		map25738 = {}
-		map25738['keyA-25738'] = 'a-Value'
-		map25738['keyB-25738'] = param
-		map25738['keyC'] = 'another-Value'
-		bar = map25738['keyB-25738']
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		import helpers.ldap
+		import ldap3
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
+		try:
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
-
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=True,
-			httponly=True)
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except:
+			RESPONSE += (
+				"Error processing LDAP query."
+			)
 
 		return RESPONSE
 

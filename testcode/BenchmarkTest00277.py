@@ -35,30 +35,26 @@ def init(app):
 		if not param:
 			param = ""
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		import pathlib
 		import helpers.utils
 
 		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / bar).resolve()
-
-			if not str(p).startswith(str(testfiles)):
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'wb') as fd:
 				RESPONSE += (
-					"Invalid Path."
+					f'Now ready to write to file: {escape_for_html(fileName)}'
 				)
-				return RESPONSE
-
+		except IOError as e:
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
 

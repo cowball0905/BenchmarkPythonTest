@@ -34,9 +34,18 @@ def init(app):
 				param = name
 				break
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import lxml.etree
 		import helpers.utils
@@ -44,8 +53,7 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
-
+			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
 			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:

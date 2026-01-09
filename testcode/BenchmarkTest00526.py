@@ -34,30 +34,26 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		string95384 = 'help'
-		string95384 += param
-		string95384 += 'snapes on a plane'
-		bar = string95384[4:-17]
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
+		import pathlib
 		import helpers.utils
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = testfiles / bar
 			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-		except IOError as e:
+		except OSError:
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'Problem reading from file \'{fileName}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

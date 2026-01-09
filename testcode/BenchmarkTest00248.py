@@ -33,9 +33,14 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 106
+		import configparser
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = 'safe!'
+		conf78480 = configparser.ConfigParser()
+		conf78480.add_section('section78480')
+		conf78480.set('section78480', 'keyA-78480', 'a_Value')
+		conf78480.set('section78480', 'keyB-78480', param)
+		bar = conf78480.get('section78480', 'keyA-78480')
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -52,7 +57,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha384')
+		hash = hashlib.md5()
 		hash.update(input)
 
 		result = hash.digest()

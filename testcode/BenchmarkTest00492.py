@@ -32,9 +32,8 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -51,7 +50,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.md5()
+		hash = hashlib.sha512()
 		hash.update(input)
 
 		result = hash.digest()

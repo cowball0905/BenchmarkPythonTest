@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00350', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00350', methods=['GET'])
 	def BenchmarkTest00350_get():
 		return BenchmarkTest00350_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00350', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00350', methods=['POST'])
 	def BenchmarkTest00350_post():
 		RESPONSE = ""
 
@@ -35,35 +35,34 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		map11630 = {}
+		map11630['keyA-11630'] = 'a-Value'
+		map11630['keyB-11630'] = param
+		map11630['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map11630['keyB-11630']
+		bar = map11630['keyA-11630']
 
-		import helpers.ldap
-		import ldap3
+		import platform
+		import subprocess
+		import helpers.utils
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
+		else:
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
+
 		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
+			RESPONSE += (
+				helpers.utils.commandOutput(proc)
+			)
 		except IOError:
 			RESPONSE += (
-				"Error processing LDAP query."
+				"Problem executing cmdi - subprocess.run(list) Test Case"
 			)
 
 		return RESPONSE

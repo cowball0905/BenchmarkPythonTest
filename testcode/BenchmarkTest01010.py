@@ -20,41 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01010', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01010', methods=['GET'])
 	def BenchmarkTest01010_get():
 		return BenchmarkTest01010_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01010', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01010', methods=['POST'])
 	def BenchmarkTest01010_post():
 		RESPONSE = ""
 
-		import urllib.parse
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
+
+		import configparser
 		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01010" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01010"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01010") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
+		bar = 'safe!'
+		conf4176 = configparser.ConfigParser()
+		conf4176.add_section('section4176')
+		conf4176.set('section4176', 'keyA-4176', 'a_Value')
+		conf4176.set('section4176', 'keyB-4176', param)
+		bar = conf4176.get('section4176', 'keyA-4176')
+
+		import pathlib
+		import helpers.utils
+
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = (testfiles / bar).resolve()
+
+		if not str(p).startswith(str(testfiles)):
+			RESPONSE += (
+				"Invalid Path."
+			)
+			return RESPONSE
 		
-		param = urllib.parse.unquote_plus(param)
-
-		bar = param + '_SafeStuff'
-
-		import yaml
-
-		try:
-			yobj = yaml.safe_load(bar)
-
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

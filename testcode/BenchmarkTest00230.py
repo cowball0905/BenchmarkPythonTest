@@ -33,26 +33,15 @@ def init(app):
 		if values:
 			param = values[0]
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = param + '_SafeStuff'
 
-		import random
+		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00230'[13:]
-		user = f'Randall{num}'
+		user = f'SafeRobbie{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.random())[2:]
+		value = str(secrets.randbelow(2**32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -61,7 +50,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
+				f'{user} has been remembered with cookie:'
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

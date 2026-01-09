@@ -33,8 +33,12 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -51,7 +55,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha384')
+		hash = hashlib.new('sha512')
 		hash.update(input)
 
 		result = hash.digest()

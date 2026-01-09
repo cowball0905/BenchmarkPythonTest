@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest01172', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01172', methods=['GET'])
 	def BenchmarkTest01172_get():
 		return BenchmarkTest01172_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest01172', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01172', methods=['POST'])
 	def BenchmarkTest01172_post():
 		RESPONSE = ""
 
@@ -32,18 +32,27 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01172")
 
-		import configparser
-		
-		bar = 'safe!'
-		conf94095 = configparser.ConfigParser()
-		conf94095.add_section('section94095')
-		conf94095.set('section94095', 'keyA-94095', 'a_Value')
-		conf94095.set('section94095', 'keyB-94095', param)
-		bar = conf94095.get('section94095', 'keyA-94095')
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import flask
+		import pickle
+		import base64
+		import helpers.utils
 
-		return flask.redirect(bar)
+		helpers.utils.sharedstr = "no pickles to be seen here"
+
+		try:
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
+		except:
+			RESPONSE += (
+				'Unpickling failed!'
+			)
+			return RESPONSE
+
+		RESPONSE += (
+			f'shared string is {helpers.utils.sharedstr}'
+		)
 
 		return RESPONSE
 

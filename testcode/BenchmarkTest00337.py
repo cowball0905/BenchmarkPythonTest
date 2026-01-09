@@ -35,11 +35,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		map66531 = {}
-		map66531['keyA-66531'] = 'a-Value'
-		map66531['keyB-66531'] = param
-		map66531['keyC'] = 'another-Value'
-		bar = map66531['keyB-66531']
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
 		from flask import make_response
 		import io
@@ -61,7 +59,7 @@ def init(app):
 		RESPONSE = make_response(RESPONSE)
 		RESPONSE.set_cookie(cookie, value,
 			path=request.path,
-			secure=False,
+			secure=True,
 			httponly=True)
 
 		return RESPONSE

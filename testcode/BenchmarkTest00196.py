@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00196', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00196', methods=['GET'])
 	def BenchmarkTest00196_get():
 		return BenchmarkTest00196_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00196', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00196', methods=['POST'])
 	def BenchmarkTest00196_post():
 		RESPONSE = ""
 
@@ -33,20 +33,38 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import helpers.db_sqlite
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		sql = f'SELECT username from USERS where password = ?'
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql, (bar,))
-		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
-		)
-		con.close()
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

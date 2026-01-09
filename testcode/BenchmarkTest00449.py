@@ -32,19 +32,21 @@ def init(app):
 		if not param:
 		    param = ""
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = param
 
-		import pathlib
 		import helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = testfiles / bar
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

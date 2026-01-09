@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00540', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00540', methods=['GET'])
 	def BenchmarkTest00540_get():
 		return BenchmarkTest00540_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00540', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00540', methods=['POST'])
 	def BenchmarkTest00540_post():
 		RESPONSE = ""
 
@@ -34,21 +34,45 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		import helpers.ThingFactory
+		possible = "ABC"
+		guess = possible[1]
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import helpers.db_sqlite
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		sql = f'SELECT username from USERS where password = ?'
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql, (bar,))
-		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
-		)
-		con.close()
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
+			RESPONSE += (
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
+			)
+		except:
+			RESPONSE += (
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+			)
 
 		return RESPONSE
 

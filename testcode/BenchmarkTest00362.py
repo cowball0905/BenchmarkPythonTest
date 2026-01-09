@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00362', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00362', methods=['GET'])
 	def BenchmarkTest00362_get():
 		return BenchmarkTest00362_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00362', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00362', methods=['POST'])
 	def BenchmarkTest00362_post():
 		RESPONSE = ""
 
@@ -34,41 +34,16 @@ def init(app):
 				param = name
 				break
 
-		possible = "ABC"
-		guess = possible[0]
+		import helpers.ThingFactory
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import pathlib
-		import helpers.utils
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / bar).resolve()
-
-			if not str(p).startswith(str(testfiles)):
-				RESPONSE += (
-					"Invalid Path."
-				)
-				return RESPONSE
-
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

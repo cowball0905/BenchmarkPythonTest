@@ -20,45 +20,31 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00436', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00436', methods=['GET'])
 	def BenchmarkTest00436_get():
 		return BenchmarkTest00436_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00436', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00436', methods=['POST'])
 	def BenchmarkTest00436_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00436" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("Referer")
+		if not param:
+		    param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import platform
-		import subprocess
-		import helpers.utils
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
-
-		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
-
-			RESPONSE += (
-				helpers.utils.commandOutput(proc)
-			)
-		except IOError:
-			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
-			)
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

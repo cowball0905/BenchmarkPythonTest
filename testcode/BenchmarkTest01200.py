@@ -20,39 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01200', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01200', methods=['GET'])
 	def BenchmarkTest01200_get():
 		return BenchmarkTest01200_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01200', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01200', methods=['POST'])
 	def BenchmarkTest01200_post():
 		RESPONSE = ""
 
 		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest01200" in request.form.getlist(name):
-				param = name
-				break
+		headers = request.headers.getlist("BenchmarkTest01200")
+		
+		if headers:
+			param = headers[0]
 
 
-		import random
-		import base64
-		from helpers.utils import mysession
+		import helpers.ldap
+		import ldap3
 
-		num = 'BenchmarkTest01200'[13:]
-		user = f'SafeBarbara{num}'
-		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(uid={param}))'
+		try:
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except IOError:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				"Error processing LDAP query."
 			)
 
 		return RESPONSE

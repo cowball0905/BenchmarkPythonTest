@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00433', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00433', methods=['GET'])
 	def BenchmarkTest00433_get():
 		return BenchmarkTest00433_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00433', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00433', methods=['POST'])
 	def BenchmarkTest00433_post():
 		RESPONSE = ""
 
@@ -34,40 +34,23 @@ def init(app):
 				param = name
 				break
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		map74329 = {}
+		map74329['keyA-74329'] = 'a-Value'
+		map74329['keyB-74329'] = param
+		map74329['keyC'] = 'another-Value'
+		bar = map74329['keyB-74329']
 
-		import helpers.ldap
-		import ldap3
+		import yaml
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
 		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+			yobj = yaml.load(bar, Loader=yaml.Loader)
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
 			RESPONSE += (
-				"Error processing LDAP query."
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

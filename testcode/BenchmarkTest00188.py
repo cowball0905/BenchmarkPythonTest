@@ -33,15 +33,15 @@ def init(app):
 		if values:
 			param = values[0]
 
-		string20259 = 'help'
-		string20259 += param
-		string20259 += 'snapes on a plane'
-		bar = string20259[4:-17]
+		superstring = f'20259{param}abcd'
+		bar = superstring[len('20259'):len(superstring)-5]
 
 
-		otherarg = "static text"
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
 		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
 		)
 
 		return RESPONSE

@@ -32,19 +32,21 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import configparser
+		
+		bar = 'safe!'
+		conf43475 = configparser.ConfigParser()
+		conf43475.add_section('section43475')
+		conf43475.set('section43475', 'keyA-43475', 'a-Value')
+		conf43475.set('section43475', 'keyB-43475', param)
+		bar = conf43475.get('section43475', 'keyB-43475')
 
 
-		otherarg = "static text"
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
 		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
 		)
 
 		return RESPONSE

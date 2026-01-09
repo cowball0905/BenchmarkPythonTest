@@ -20,38 +20,57 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00352', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00352', methods=['GET'])
 	def BenchmarkTest00352_get():
 		return BenchmarkTest00352_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00352', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00352', methods=['POST'])
 	def BenchmarkTest00352_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00352" in request.form.getlist(name):
+				param = name
+				break
+
+		num = 86
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00352")
-		if not param:
-			param = ""
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		string67093 = 'help'
-		string67093 += param
-		string67093 += 'snapes on a plane'
-		bar = string67093[4:-17]
+		import platform
+		import codecs
+		import helpers.utils
+		from urllib.parse import urlparse
+		from urllib.request import url2pathname
 
-		import yaml
+		startURIslashes = ""
+
+		if platform.system() == "Windows":
+			startURIslashes = "/"
+		else:
+			startURIslashes = "//"
 
 		try:
-			yobj = yaml.safe_load(bar)
+			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
 			RESPONSE += (
-				yobj['text']
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
-		except:
+
 			RESPONSE += (
-				"There was an error loading the configuration"
+				" And file already exists."
 			)
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
+			)
+		except IOError:
+			pass
 
 		return RESPONSE
 

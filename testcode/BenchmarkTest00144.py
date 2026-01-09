@@ -32,14 +32,14 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import configparser
+		
+		bar = 'safe!'
+		conf18029 = configparser.ConfigParser()
+		conf18029.add_section('section18029')
+		conf18029.set('section18029', 'keyA-18029', 'a-Value')
+		conf18029.set('section18029', 'keyB-18029', param)
+		bar = conf18029.get('section18029', 'keyB-18029')
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -56,7 +56,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.sha1()
+		hash = hashlib.sha384()
 		hash.update(input)
 
 		result = hash.digest()

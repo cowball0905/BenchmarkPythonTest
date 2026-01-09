@@ -32,22 +32,19 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01137")
 
-		import configparser
+		import helpers.ThingFactory
 		
-		bar = 'safe!'
-		conf63439 = configparser.ConfigParser()
-		conf63439.add_section('section63439')
-		conf63439.set('section63439', 'keyA-63439', 'a-Value')
-		conf63439.set('section63439', 'keyB-63439', param)
-		bar = conf63439.get('section63439', 'keyB-63439')
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import random
+		import base64
+		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest01137'[13:]
-		user = f'Randy{num}'
+		user = f'SafeToby{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.getrandbits(32))
+		value = base64.b64encode(secrets.token_bytes(32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -56,7 +53,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
+				f'{user} has been remembered with cookie:'
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

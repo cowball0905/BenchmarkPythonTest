@@ -20,44 +20,29 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00083', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00083', methods=['GET'])
 	def BenchmarkTest00083_get():
-		response = make_response(render_template('web/deserialization-00/BenchmarkTest00083.html'))
-		response.set_cookie('BenchmarkTest00083', 'name%3A+safe+data%0Atext%3A+act+like+this+is+conf+data',
-			max_age=60*3,
-			secure=True,
-			path=request.path,
-			domain='localhost')
-		return response
 		return BenchmarkTest00083_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00083', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00083', methods=['POST'])
 	def BenchmarkTest00083_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00083", "noCookieValueSupplied"))
+		param = request.form.get("BenchmarkTest00083")
+		if not param:
+			param = ""
 
-		string59443 = ''
-		data12 = ''
-		copy = string59443
-		string59443 = ''
-		string59443 += param
-		copy += 'SomeOKString'
-		bar = copy
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		import yaml
 
-		try:
-			yobj = yaml.safe_load(bar)
-
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

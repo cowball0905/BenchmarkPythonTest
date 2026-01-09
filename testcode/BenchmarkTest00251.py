@@ -33,10 +33,13 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		string58467 = ''
+		data12 = ''
+		copy = string58467
+		string58467 = ''
+		string58467 += param
+		copy += 'SomeOKString'
+		bar = copy
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -53,7 +56,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.md5()
+		hash = hashlib.sha1()
 		hash.update(input)
 
 		result = hash.digest()

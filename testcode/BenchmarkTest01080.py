@@ -57,7 +57,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('md5')
+		hash = hashlib.sha512()
 		hash.update(input)
 
 		result = hash.digest()

@@ -35,31 +35,35 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 86
+		possible = "ABC"
+		guess = possible[1]
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import codecs
+		import pathlib
 		import helpers.utils
 
-		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = (testfiles / bar).resolve()
 
+		if not str(p).startswith(str(testfiles)):
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				"Invalid Path."
 			)
-
-			RESPONSE += (
-				" And file already exists."
-			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
+			return RESPONSE
+		
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

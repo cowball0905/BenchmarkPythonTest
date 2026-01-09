@@ -35,44 +35,31 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[1]
+		import configparser
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = 'safe!'
+		conf17635 = configparser.ConfigParser()
+		conf17635.add_section('section17635')
+		conf17635.set('section17635', 'keyA-17635', 'a_Value')
+		conf17635.set('section17635', 'keyB-17635', param)
+		bar = conf17635.get('section17635', 'keyA-17635')
 
+		import pathlib
 		import helpers.utils
 
-		if '../' in bar:
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = (testfiles / bar).resolve()
+
+		if not str(p).startswith(str(testfiles)):
 			RESPONSE += (
-				'File name must not contain \'../\''
+				"Invalid Path."
 			)
 			return RESPONSE
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

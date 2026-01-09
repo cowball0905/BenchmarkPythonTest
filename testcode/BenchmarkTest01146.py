@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01146', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01146', methods=['GET'])
 	def BenchmarkTest01146_get():
 		return BenchmarkTest01146_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01146', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01146', methods=['POST'])
 	def BenchmarkTest01146_post():
 		RESPONSE = ""
 
@@ -32,27 +32,37 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01146")
 
-		bar = param + '_SafeStuff'
-
-		import base64
-		import secrets
-		from helpers.utils import mysession
-
-		num = 'BenchmarkTest01146'[13:]
-		user = f'SafeTheo{num}'
-		cookie = f'rememberMe{num}'
-		value = secrets.token_hex(32)
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
 		else:
-			mysession[cookie] = value
+			bar = param
+
+		import hashlib, base64
+		import io, helpers.utils
+
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
+
+		if len(input) == 0:
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+				'Cannot generate hash: Input was empty.'
 			)
+			return RESPONSE
+
+		hash = hashlib.new('sha1')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00999', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00999', methods=['GET'])
 	def BenchmarkTest00999_get():
 		return BenchmarkTest00999_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00999', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00999', methods=['POST'])
 	def BenchmarkTest00999_post():
 		RESPONSE = ""
 
@@ -41,20 +41,25 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		import configparser
-		
-		bar = 'safe!'
-		conf83950 = configparser.ConfigParser()
-		conf83950.add_section('section83950')
-		conf83950.set('section83950', 'keyA-83950', 'a-Value')
-		conf83950.set('section83950', 'keyB-83950', param)
-		bar = conf83950.get('section83950', 'keyB-83950')
+		string83950 = ''
+		data12 = ''
+		copy = string83950
+		string83950 = ''
+		string83950 += param
+		copy += 'SomeOKString'
+		bar = copy
+
+		import yaml
 
 		try:
-			exec(bar)
+			yobj = yaml.safe_load(bar)
+
+			RESPONSE += (
+				yobj['text']
+			)
 		except:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

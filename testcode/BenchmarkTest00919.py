@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00919', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00919', methods=['GET'])
 	def BenchmarkTest00919_get():
 		return BenchmarkTest00919_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00919', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00919', methods=['POST'])
 	def BenchmarkTest00919_post():
 		RESPONSE = ""
 
@@ -41,12 +41,27 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = param + '_SafeStuff'
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
+		import pathlib
+		import helpers.utils
 
-		RESPONSE += (
-			f'Parameter value: {bar}'
-		)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = (testfiles / bar).resolve()
+
+		if not str(p).startswith(str(testfiles)):
+			RESPONSE += (
+				"Invalid Path."
+			)
+			return RESPONSE
+		
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

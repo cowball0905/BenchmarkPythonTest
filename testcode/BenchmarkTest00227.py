@@ -33,21 +33,19 @@ def init(app):
 		if values:
 			param = values[0]
 
-		map56084 = {}
-		map56084['keyA-56084'] = 'a-Value'
-		map56084['keyB-56084'] = param
-		map56084['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map56084['keyB-56084']
-		bar = map56084['keyA-56084']
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00227'[13:]
-		user = f'Isaac{num}'
+		user = f'Randall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.randint(0, 2**32))
+		value = str(random.random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

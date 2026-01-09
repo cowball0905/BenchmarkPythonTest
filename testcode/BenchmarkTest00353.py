@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00353', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00353', methods=['GET'])
 	def BenchmarkTest00353_get():
 		return BenchmarkTest00353_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00353', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00353', methods=['POST'])
 	def BenchmarkTest00353_post():
 		RESPONSE = ""
 
@@ -34,19 +34,33 @@ def init(app):
 				param = name
 				break
 
-		import configparser
-		
-		bar = 'safe!'
-		conf28092 = configparser.ConfigParser()
-		conf28092.add_section('section28092')
-		conf28092.set('section28092', 'keyA-28092', 'a_Value')
-		conf28092.set('section28092', 'keyB-28092', param)
-		bar = conf28092.get('section28092', 'keyA-28092')
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
+		import helpers.utils
 
-		RESPONSE += (
-			f'Parameter value: {bar}'
-		)
+		fileName = None
+		fd = None
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

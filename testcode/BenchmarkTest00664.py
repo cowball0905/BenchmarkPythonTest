@@ -32,44 +32,37 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import configparser
+		
+		bar = 'safe!'
+		conf55264 = configparser.ConfigParser()
+		conf55264.add_section('section55264')
+		conf55264.set('section55264', 'keyA-55264', 'a_Value')
+		conf55264.set('section55264', 'keyB-55264', param)
+		bar = conf55264.get('section55264', 'keyA-55264')
 
+		import pathlib
 		import helpers.utils
 
-		fileName = None
-		fd = None
-
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not include \'../\''
-			)
-			return RESPONSE
-
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = (testfiles / bar).resolve()
+
+			if not str(p).startswith(str(testfiles)):
+				RESPONSE += (
+					"Invalid Path."
+				)
+				return RESPONSE
+
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-		except IOError as e:
+		except OSError:
 			RESPONSE += (
 				f'Problem reading from file \'{fileName}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

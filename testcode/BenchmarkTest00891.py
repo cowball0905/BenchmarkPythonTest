@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00891', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00891', methods=['GET'])
 	def BenchmarkTest00891_get():
 		return BenchmarkTest00891_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00891', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00891', methods=['POST'])
 	def BenchmarkTest00891_post():
 		RESPONSE = ""
 
@@ -35,18 +35,23 @@ def init(app):
 		if not param:
 			param = ""
 
-		import helpers.ThingFactory
+		import configparser
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		bar = 'safe!'
+		conf8968 = configparser.ConfigParser()
+		conf8968.add_section('section8968')
+		conf8968.set('section8968', 'keyA-8968', 'a-Value')
+		conf8968.set('section8968', 'keyB-8968', param)
+		bar = conf8968.get('section8968', 'keyB-8968')
 
-
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00891': bar}))
-		
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00604', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00604', methods=['GET'])
 	def BenchmarkTest00604_get():
 		return BenchmarkTest00604_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00604', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00604', methods=['POST'])
 	def BenchmarkTest00604_post():
 		RESPONSE = ""
 
@@ -34,22 +34,45 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		map92506 = {}
-		map92506['keyA-92506'] = 'a-Value'
-		map92506['keyB-92506'] = param
-		map92506['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map92506['keyB-92506']
-		bar = map92506['keyA-92506']
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import flask
+		import helpers.ldap
+		import ldap3
 
-		flask.session[bar] = '12345'
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
+		try:
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
 
-		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
-		)
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except:
+			RESPONSE += (
+				"Error processing LDAP query."
+			)
 
 		return RESPONSE
 

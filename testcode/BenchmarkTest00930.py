@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00930', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00930', methods=['GET'])
 	def BenchmarkTest00930_get():
 		return BenchmarkTest00930_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00930', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00930', methods=['POST'])
 	def BenchmarkTest00930_post():
 		RESPONSE = ""
 
@@ -41,14 +41,36 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		superstring = f'20875{param}abcd'
-		bar = superstring[len('20875'):len(superstring)-5]
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
-		)
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
+			RESPONSE += (
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
+			)
+		except:
+			RESPONSE += (
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+			)
 
 		return RESPONSE
 

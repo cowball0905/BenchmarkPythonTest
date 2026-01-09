@@ -20,41 +20,25 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01188', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01188', methods=['GET'])
 	def BenchmarkTest01188_get():
-		response = make_response(render_template('web/pathtraver-01/BenchmarkTest01188.html'))
-		response.set_cookie('BenchmarkTest01188', 'FileName',
-			max_age=60*3,
-			secure=True,
-			path=request.path,
-			domain='localhost')
-		return response
 		return BenchmarkTest01188_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01188', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01188', methods=['POST'])
 	def BenchmarkTest01188_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest01188", "noCookieValueSupplied"))
+		values = request.form.getlist("BenchmarkTest01188")
+		param = ""
+		if values:
+			param = values[0]
 
-
-		import helpers.utils
-
-		fileName = None
-		fd = None
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{param}'
-			with open(fileName, 'rb') as fd:
-				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-				)
-		except IOError as e:
+			exec(param)
+		except:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Error executing statement \'{escape_for_html(param)}\''
 			)
 
 		return RESPONSE

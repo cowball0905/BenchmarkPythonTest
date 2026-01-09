@@ -32,7 +32,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = param
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 
 		otherarg = "static text"

@@ -32,13 +32,14 @@ def init(app):
 		if not param:
 			param = ""
 
-		map82813 = {}
-		map82813['keyA-82813'] = 'a-Value'
-		map82813['keyB-82813'] = param
-		map82813['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map82813['keyB-82813']
-		bar = map82813['keyA-82813']
+		import configparser
+		
+		bar = 'safe!'
+		conf82813 = configparser.ConfigParser()
+		conf82813.add_section('section82813')
+		conf82813.set('section82813', 'keyA-82813', 'a-Value')
+		conf82813.set('section82813', 'keyB-82813', param)
+		bar = conf82813.get('section82813', 'keyB-82813')
 
 		import lxml.etree
 		import helpers.utils
@@ -46,9 +47,9 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
-
-			nodes = root.xpath(query)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			run_query = lxml.etree.XPath(query)
+			nodes = run_query(root)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

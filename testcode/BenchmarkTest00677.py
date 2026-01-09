@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00677', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00677', methods=['GET'])
 	def BenchmarkTest00677_get():
 		return BenchmarkTest00677_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00677', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00677', methods=['POST'])
 	def BenchmarkTest00677_post():
 		RESPONSE = ""
 
@@ -32,15 +32,30 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = param
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
-		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
-		)
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
+
 
 		return RESPONSE
 

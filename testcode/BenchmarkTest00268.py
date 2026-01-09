@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00268', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00268', methods=['GET'])
 	def BenchmarkTest00268_get():
 		return BenchmarkTest00268_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00268', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00268', methods=['POST'])
 	def BenchmarkTest00268_post():
 		RESPONSE = ""
 
@@ -33,36 +33,29 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = "This should never happen"
-		if 'should' in bar:
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
 			bar = param
 
-		import helpers.ldap
-		import ldap3
+		import os
+		import subprocess
+		import helpers.utils
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
-		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
+		else:
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {bar}")
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
-			RESPONSE += (
-				"Error processing LDAP query."
-			)
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
+		RESPONSE += (
+			helpers.utils.commandOutput(proc)
+		)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00153', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00153', methods=['GET'])
 	def BenchmarkTest00153_get():
 		return BenchmarkTest00153_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00153', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00153', methods=['POST'])
 	def BenchmarkTest00153_post():
 		RESPONSE = ""
 
@@ -32,36 +32,16 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = param + '_SafeStuff'
 
 		import flask
-		import urllib.parse
 
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
-			RESPONSE += (
-				'Error parsing URL.'
-			)
-			return RESPONSE
+		flask.session['userid'] = bar
 
-		return flask.redirect(bar)
+		RESPONSE += (
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
+		)
 
 		return RESPONSE
 

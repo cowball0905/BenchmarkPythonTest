@@ -34,34 +34,28 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
+		import pathlib
 		import helpers.utils
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = testfiles / bar
 			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-		except IOError as e:
+		except OSError:
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'Problem reading from file \'{fileName}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

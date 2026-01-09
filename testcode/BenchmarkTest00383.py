@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00383', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00383', methods=['GET'])
 	def BenchmarkTest00383_get():
 		return BenchmarkTest00383_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00383', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00383', methods=['POST'])
 	def BenchmarkTest00383_post():
 		RESPONSE = ""
 
@@ -34,35 +34,25 @@ def init(app):
 				param = name
 				break
 
-		string86691 = 'help'
-		string86691 += param
-		string86691 += 'snapes on a plane'
-		bar = string86691[4:-17]
+		bar = param + '_SafeStuff'
 
-		import lxml.etree
-		import helpers.utils
+		import random
+		from helpers.utils import mysession
 
-		try:
-			if '\'' in bar:
-				RESPONSE += (
-					"Employee ID must not contain apostrophes"
-				)
-				return RESPONSE
+		num = 'BenchmarkTest00383'[13:]
+		user = f'Randy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.getrandbits(32))
 
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

@@ -20,50 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00610', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00610', methods=['GET'])
 	def BenchmarkTest00610_get():
 		return BenchmarkTest00610_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00610', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00610', methods=['POST'])
 	def BenchmarkTest00610_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00610")
 		
-		if headers:
-			param = headers[0]
-
-		possible = "ABC"
-		guess = possible[0]
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+			if request.headers.get_all(name):
+				param = name
+				break
 
-		import pickle
-		import base64
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
+
+		import codecs
 		import helpers.utils
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
-
 		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
-			RESPONSE += (
-				'Unpickling failed!'
-			)
-			return RESPONSE
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+			RESPONSE += (
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+			)
+
+			RESPONSE += (
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
+			)
 
 		return RESPONSE
 

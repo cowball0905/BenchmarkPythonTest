@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00755', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00755', methods=['GET'])
 	def BenchmarkTest00755_get():
 		return BenchmarkTest00755_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00755', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00755', methods=['POST'])
 	def BenchmarkTest00755_post():
 		RESPONSE = ""
 
@@ -33,27 +33,20 @@ def init(app):
 		if values:
 			param = values[0]
 
-		map84170 = {}
-		map84170['keyA-84170'] = 'a-Value'
-		map84170['keyB-84170'] = param
-		map84170['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map84170['keyB-84170']
-		bar = map84170['keyA-84170']
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import helpers.utils
+		import helpers.db_sqlite
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'wb') as fd:
-				RESPONSE += (
-					f'Now ready to write to file: {escape_for_html(fileName)}'
-				)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (bar,))
+		RESPONSE += (
+			helpers.db_sqlite.results(cur, sql)
+		)
+		con.close()
 
 		return RESPONSE
 

@@ -33,21 +33,23 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
+		otherarg = "static text"
 		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
 		)
 
 		return RESPONSE

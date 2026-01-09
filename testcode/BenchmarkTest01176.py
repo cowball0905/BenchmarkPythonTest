@@ -20,28 +20,44 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01176', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01176', methods=['GET'])
 	def BenchmarkTest01176_get():
+		response = make_response(render_template('web/weakrand-03/BenchmarkTest01176.html'))
+		response.set_cookie('BenchmarkTest01176', 'whatever',
+			max_age=60*3,
+			secure=True,
+			path=request.path,
+			domain='localhost')
+		return response
 		return BenchmarkTest01176_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01176', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01176', methods=['POST'])
 	def BenchmarkTest01176_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01176")
+		import urllib.parse
+		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest01176", "noCookieValueSupplied"))
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
 
-		try:
-			exec(bar)
-		except:
+		import random
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest01176'[13:]
+		user = f'Nancy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.normalvariate())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE
+
 

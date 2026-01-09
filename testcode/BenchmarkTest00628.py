@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00628', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00628', methods=['GET'])
 	def BenchmarkTest00628_get():
 		return BenchmarkTest00628_post()
 
-	@app.route('/benchmark/weakrand-01/BenchmarkTest00628', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00628', methods=['POST'])
 	def BenchmarkTest00628_post():
 		RESPONSE = ""
 
@@ -39,17 +39,22 @@ def init(app):
 				param = name
 				break
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00628'[13:]
-		user = f'Randy{num}'
+		user = f'Randall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.getrandbits(32))
+		value = str(random.random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

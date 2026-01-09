@@ -20,36 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00534', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00534', methods=['GET'])
 	def BenchmarkTest00534_get():
 		return BenchmarkTest00534_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00534', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00534', methods=['POST'])
 	def BenchmarkTest00534_post():
 		RESPONSE = ""
 
 		param = ""
-		headers = request.headers.getlist("Referer")
+		headers = request.headers.getlist("BenchmarkTest00534")
 		
 		if headers:
 			param = headers[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf58886 = configparser.ConfigParser()
-		conf58886.add_section('section58886')
-		conf58886.set('section58886', 'keyA-58886', 'a-Value')
-		conf58886.set('section58886', 'keyB-58886', param)
-		bar = conf58886.get('section58886', 'keyB-58886')
+		map58886 = {}
+		map58886['keyA-58886'] = 'a-Value'
+		map58886['keyB-58886'] = param
+		map58886['keyC'] = 'another-Value'
+		bar = map58886['keyB-58886']
 
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
-		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
-		)
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

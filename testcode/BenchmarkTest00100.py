@@ -32,19 +32,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		map87 = {}
+		map87['keyA-87'] = 'a-Value'
+		map87['keyB-87'] = param
+		map87['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map87['keyB-87']
+		bar = map87['keyA-87']
 
 		import helpers.db_sqlite
 
-		sql = f'SELECT username from USERS where password = \'{bar}\''
+		sql = f'SELECT username from USERS where password = ?'
 		con = helpers.db_sqlite.get_connection()
 		cur = con.cursor()
-		cur.execute(sql)
+		cur.execute(sql, (bar,))
 		RESPONSE += (
 			helpers.db_sqlite.results(cur, sql)
 		)

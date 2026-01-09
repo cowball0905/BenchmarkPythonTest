@@ -20,36 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01189', methods=['GET'])
+	@app.route('/benchmark/weakrand-04/BenchmarkTest01189', methods=['GET'])
 	def BenchmarkTest01189_get():
-		response = make_response(render_template('web/codeinj-00/BenchmarkTest01189.html'))
-		response.set_cookie('BenchmarkTest01189', '%27RESPONSE+%2B%3D+%5C%27ECHOOO%5C%27%27',
-			max_age=60*3,
-			secure=True,
-			path=request.path,
-			domain='localhost')
-		return response
 		return BenchmarkTest01189_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01189', methods=['POST'])
+	@app.route('/benchmark/weakrand-04/BenchmarkTest01189', methods=['POST'])
 	def BenchmarkTest01189_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest01189", "noCookieValueSupplied"))
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_form_parameter("BenchmarkTest01189")
+		if not param:
+			param = ""
 
 
-		if not param.startswith('\'') or not param.endswith('\'') or '\'' in param[1:-1]:
+		import base64
+		import secrets
+		from helpers.utils import mysession
+
+		num = 'BenchmarkTest01189'[13:]
+		user = f'SafeToby{num}'
+		cookie = f'rememberMe{num}'
+		value = base64.b64encode(secrets.token_bytes(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				"Exec argument must be a plain string literal."
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		try:
-			exec(param)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(param)}\''
+				f'{user} has been remembered with cookie:'
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00849', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00849', methods=['GET'])
 	def BenchmarkTest00849_get():
 		return BenchmarkTest00849_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00849', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00849', methods=['POST'])
 	def BenchmarkTest00849_post():
 		RESPONSE = ""
 
@@ -35,16 +35,35 @@ def init(app):
 		if not param:
 			param = ""
 
-		import helpers.ThingFactory
+		num = 106
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
-		)
+		if '\'' in bar:
+			RESPONSE += (
+				"Employee ID must not contain apostrophes"
+			)
+			return RESPONSE
+
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

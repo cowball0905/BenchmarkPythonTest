@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00994', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00994', methods=['GET'])
 	def BenchmarkTest00994_get():
 		return BenchmarkTest00994_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00994', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00994', methods=['POST'])
 	def BenchmarkTest00994_post():
 		RESPONSE = ""
 
@@ -41,22 +41,24 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		string95803 = ''
-		data12 = ''
-		copy = string95803
-		string95803 = ''
-		string95803 += param
-		copy += 'SomeOKString'
-		bar = copy
+		map95803 = {}
+		map95803['keyA-95803'] = 'a-Value'
+		map95803['keyB-95803'] = param
+		map95803['keyC'] = 'another-Value'
+		bar = map95803['keyB-95803']
 
-		import flask
+		import yaml
 
-		flask.session[bar] = '12345'
+		try:
+			yobj = yaml.load(bar, Loader=yaml.Loader)
 
-		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
-		)
+			RESPONSE += (
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
+			)
 
 		return RESPONSE
 

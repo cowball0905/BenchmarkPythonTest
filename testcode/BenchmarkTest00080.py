@@ -38,15 +38,14 @@ def init(app):
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00080", "noCookieValueSupplied"))
 
-		string57157 = 'help'
-		string57157 += param
-		string57157 += 'snapes on a plane'
-		bar = string57157[4:-17]
+		import html
+		
+		bar = html.escape(param)
 
 		import yaml
 
 		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
+			yobj = yaml.safe_load(bar)
 
 			RESPONSE += (
 				yobj['text']

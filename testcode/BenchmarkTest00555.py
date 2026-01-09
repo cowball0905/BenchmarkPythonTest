@@ -34,19 +34,25 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		string48298 = 'help'
+		string48298 += param
+		string48298 += 'snapes on a plane'
+		bar = string48298[4:-17]
 
 		import lxml.etree
 		import helpers.utils
+		import io
 
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
-			run_query = lxml.etree.XPath(query)
-			nodes = run_query(root)
+			strIO = io.StringIO()
+			strIO.write('/Employees/Employee[@emplid=\'')
+			strIO.write(bar)
+			strIO.write('\']')
+			query = strIO.getvalue()
+
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

@@ -32,22 +32,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf94097 = configparser.ConfigParser()
-		conf94097.add_section('section94097')
-		conf94097.set('section94097', 'keyA-94097', 'a-Value')
-		conf94097.set('section94097', 'keyB-94097', param)
-		bar = conf94097.get('section94097', 'keyB-94097')
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
-		import random
+		import base64
+		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00697'[13:]
-		user = f'Randall{num}'
+		user = f'SafeTheo{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.random())[2:]
+		value = secrets.token_hex(32)
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -56,7 +52,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
+				f'{user} has been remembered with cookie:'
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

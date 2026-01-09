@@ -20,47 +20,59 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00910', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00910', methods=['GET'])
 	def BenchmarkTest00910_get():
 		return BenchmarkTest00910_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00910', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00910', methods=['POST'])
 	def BenchmarkTest00910_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00910")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00910" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00910"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00910") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import configparser
+		
+		bar = 'safe!'
+		conf1848 = configparser.ConfigParser()
+		conf1848.add_section('section1848')
+		conf1848.set('section1848', 'keyA-1848', 'a-Value')
+		conf1848.set('section1848', 'keyB-1848', param)
+		bar = conf1848.get('section1848', 'keyB-1848')
 
-		import pickle
-		import base64
 		import helpers.utils
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		fileName = None
+		fd = None
 
 		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				'Unpickling failed!'
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
-			return RESPONSE
-
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

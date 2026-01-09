@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01155', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01155', methods=['GET'])
 	def BenchmarkTest01155_get():
 		return BenchmarkTest01155_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01155', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01155', methods=['POST'])
 	def BenchmarkTest01155_post():
 		RESPONSE = ""
 
@@ -32,35 +32,22 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01155")
 
-		import markupsafe
+		import configparser
 		
-		bar = markupsafe.escape(param)
+		bar = 'safe!'
+		conf95902 = configparser.ConfigParser()
+		conf95902.add_section('section95902')
+		conf95902.set('section95902', 'keyA-95902', 'a_Value')
+		conf95902.set('section95902', 'keyB-95902', param)
+		bar = conf95902.get('section95902', 'keyA-95902')
 
-		import hashlib, base64
-		import io, helpers.utils
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.new('md5')
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			'The value of the bar parameter is now in a custom header.'
 		)
-		f.close()
+
+		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest01155': bar}))
+		
 
 		return RESPONSE
 

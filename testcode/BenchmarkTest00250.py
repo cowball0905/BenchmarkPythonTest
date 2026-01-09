@@ -33,9 +33,14 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import html
-		
-		bar = html.escape(param)
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -52,7 +57,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.md5()
+		hash = hashlib.sha1()
 		hash.update(input)
 
 		result = hash.digest()

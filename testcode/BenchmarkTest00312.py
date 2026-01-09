@@ -35,23 +35,17 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
 		import base64
 		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00312'[13:]
-		user = f'SafeToby{num}'
+		user = f'SafeTruman{num}'
 		cookie = f'rememberMe{num}'
-		value = base64.b64encode(secrets.token_bytes(32))
+		value = secrets.token_urlsafe(32)
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

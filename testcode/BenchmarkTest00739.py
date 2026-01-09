@@ -20,48 +20,53 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00739', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00739', methods=['GET'])
 	def BenchmarkTest00739_get():
 		return BenchmarkTest00739_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00739', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00739', methods=['POST'])
 	def BenchmarkTest00739_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00739")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00739")
+		param = ""
+		if values:
+			param = values[0]
 
-		possible = "ABC"
-		guess = possible[1]
+		num = 106
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import os
-		import subprocess
+		import platform
+		import codecs
 		import helpers.utils
+		from urllib.parse import urlparse
+		from urllib.request import url2pathname
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
+		startURIslashes = ""
+
+		if platform.system() == "Windows":
+			startURIslashes = "/"
 		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
+			startURIslashes = "//"
 
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
-		RESPONSE += (
-			helpers.utils.commandOutput(proc)
-		)
+		try:
+			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+
+			RESPONSE += (
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+			)
+
+			RESPONSE += (
+				" And file already exists."
+			)
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
+			)
+		except IOError:
+			pass
 
 		return RESPONSE
 

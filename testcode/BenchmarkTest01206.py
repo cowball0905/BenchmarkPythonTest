@@ -28,9 +28,9 @@ def init(app):
 	def BenchmarkTest01206_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest01206")
+		param = request.args.get("BenchmarkTest01206")
 		if not param:
-		    param = ""
+			param = ""
 
 
 		import hashlib, base64
@@ -48,7 +48,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha512')
+		hash = hashlib.sha384()
 		hash.update(input)
 
 		result = hash.digest()

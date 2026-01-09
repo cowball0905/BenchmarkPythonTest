@@ -33,27 +33,18 @@ def init(app):
 		if values:
 			param = values[0]
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
 		import base64
 		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00235'[13:]
-		user = f'SafeTheo{num}'
+		user = f'SafeTruman{num}'
 		cookie = f'rememberMe{num}'
-		value = secrets.token_hex(32)
+		value = secrets.token_urlsafe(32)
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

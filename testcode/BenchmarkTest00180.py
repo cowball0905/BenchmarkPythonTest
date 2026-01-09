@@ -33,23 +33,20 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf84140 = configparser.ConfigParser()
-		conf84140.add_section('section84140')
-		conf84140.set('section84140', 'keyA-84140', 'a_Value')
-		conf84140.set('section84140', 'keyB-84140', param)
-		bar = conf84140.get('section84140', 'keyA-84140')
+		string84140 = 'help'
+		string84140 += param
+		string84140 += 'snapes on a plane'
+		bar = string84140[4:-17]
 
-		import os
+		import pathlib
 		import helpers.utils
 
-		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-		if os.path.exists(fileName):
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
 		else:
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

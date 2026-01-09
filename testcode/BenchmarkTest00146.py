@@ -32,13 +32,7 @@ def init(app):
 		if not param:
 			param = ""
 
-		map94707 = {}
-		map94707['keyA-94707'] = 'a-Value'
-		map94707['keyB-94707'] = param
-		map94707['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map94707['keyB-94707']
-		bar = map94707['keyA-94707']
+		bar = param + '_SafeStuff'
 
 		import hashlib, base64
 		import io, helpers.utils

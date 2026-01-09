@@ -35,10 +35,11 @@ def init(app):
 		if not param:
 			param = ""
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		map51742 = {}
+		map51742['keyA-51742'] = 'a-Value'
+		map51742['keyB-51742'] = param
+		map51742['keyC'] = 'another-Value'
+		bar = map51742['keyB-51742']
 
 		import lxml.etree
 		import helpers.utils
@@ -46,7 +47,8 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
+
 			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:

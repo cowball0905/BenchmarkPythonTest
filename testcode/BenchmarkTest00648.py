@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00648', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00648', methods=['GET'])
 	def BenchmarkTest00648_get():
 		return BenchmarkTest00648_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00648', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00648', methods=['POST'])
 	def BenchmarkTest00648_post():
 		RESPONSE = ""
 
@@ -39,13 +39,9 @@ def init(app):
 				param = name
 				break
 
-		map77996 = {}
-		map77996['keyA-77996'] = 'a-Value'
-		map77996['keyB-77996'] = param
-		map77996['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map77996['keyB-77996']
-		bar = map77996['keyA-77996']
+		import html
+		
+		bar = html.escape(param)
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -62,7 +58,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha384')
+		hash = hashlib.sha384()
 		hash.update(input)
 
 		result = hash.digest()

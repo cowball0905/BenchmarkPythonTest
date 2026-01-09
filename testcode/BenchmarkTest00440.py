@@ -20,24 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00440', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00440', methods=['GET'])
 	def BenchmarkTest00440_get():
 		return BenchmarkTest00440_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00440', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00440', methods=['POST'])
 	def BenchmarkTest00440_post():
 		RESPONSE = ""
 
-		param = request.headers.get("Referer")
+		param = request.headers.get("BenchmarkTest00440")
 		if not param:
 		    param = ""
 
-		bar = param + '_SafeStuff'
+		string70083 = 'help'
+		string70083 += param
+		string70083 += 'snapes on a plane'
+		bar = string70083[4:-17]
 
+		import helpers.utils
 
-		RESPONSE += (
-			f'Parameter value: {bar}'
-		)
+		fileName = None
+		fd = None
+
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not include \'../\''
+			)
+			return RESPONSE
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

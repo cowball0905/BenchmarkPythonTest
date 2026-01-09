@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00624', methods=['GET'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00624', methods=['GET'])
 	def BenchmarkTest00624_get():
 		return BenchmarkTest00624_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00624', methods=['POST'])
+	@app.route('/benchmark/weakrand-01/BenchmarkTest00624', methods=['POST'])
 	def BenchmarkTest00624_post():
 		RESPONSE = ""
 
@@ -39,28 +39,32 @@ def init(app):
 				param = name
 				break
 
-		map72992 = {}
-		map72992['keyA-72992'] = 'a-Value'
-		map72992['keyB-72992'] = param
-		map72992['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map72992['keyB-72992']
-		bar = map72992['keyA-72992']
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		import pathlib
-		import helpers.utils
+		import random
+		from helpers.utils import mysession
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = testfiles / bar
+		num = 'BenchmarkTest00624'[13:]
+		user = f'Nancy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.normalvariate())[2:]
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
+				f'Welcome back: {user}<br/>'
 			)
-		except OSError:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

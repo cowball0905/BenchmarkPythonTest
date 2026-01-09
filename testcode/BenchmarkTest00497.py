@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00497', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00497', methods=['GET'])
 	def BenchmarkTest00497_get():
 		return BenchmarkTest00497_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00497', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00497', methods=['POST'])
 	def BenchmarkTest00497_post():
 		RESPONSE = ""
 
@@ -32,33 +32,20 @@ def init(app):
 		if not param:
 		    param = ""
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		map36357 = {}
+		map36357['keyA-36357'] = 'a-Value'
+		map36357['keyB-36357'] = param
+		map36357['keyC'] = 'another-Value'
+		bar = map36357['keyB-36357']
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		import flask
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
+		flask.session['userid'] = bar
 
 		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
 		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=False,
-			httponly=True)
 
 		return RESPONSE
 

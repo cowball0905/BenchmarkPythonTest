@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00339', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00339', methods=['GET'])
 	def BenchmarkTest00339_get():
 		return BenchmarkTest00339_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00339', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00339', methods=['POST'])
 	def BenchmarkTest00339_post():
 		RESPONSE = ""
 
@@ -35,18 +35,21 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
+		num = 86
 		
-		bar = 'safe!'
-		conf44628 = configparser.ConfigParser()
-		conf44628.add_section('section44628')
-		conf44628.set('section44628', 'keyA-44628', 'a-Value')
-		conf44628.set('section44628', 'keyB-44628', param)
-		bar = conf44628.get('section44628', 'keyB-44628')
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
 		import flask
 
-		return flask.redirect(bar)
+		flask.session['userid'] = bar
+
+		RESPONSE += (
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
+		)
 
 		return RESPONSE
 

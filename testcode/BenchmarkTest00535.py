@@ -20,31 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00535', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00535', methods=['GET'])
 	def BenchmarkTest00535_get():
 		return BenchmarkTest00535_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00535', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00535', methods=['POST'])
 	def BenchmarkTest00535_post():
 		RESPONSE = ""
 
 		param = ""
-		headers = request.headers.getlist("Referer")
+		headers = request.headers.getlist("BenchmarkTest00535")
 		
 		if headers:
 			param = headers[0]
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
-		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
-		)
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

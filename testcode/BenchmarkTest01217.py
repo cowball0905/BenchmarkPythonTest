@@ -20,44 +20,53 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01217', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01217', methods=['GET'])
 	def BenchmarkTest01217_get():
 		return BenchmarkTest01217_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01217', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01217', methods=['POST'])
 	def BenchmarkTest01217_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest01217")
-		if not param:
-			param = ""
+		import urllib.parse
+		
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest01217" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01217"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest01217") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
 
-		import hashlib, base64
-		import io, helpers.utils
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		input = ''
-		if isinstance(param, str):
-			input = param.encode('utf-8')
-		elif isinstance(param, io.IOBase):
-			input = param.read(1000)
-
-		if len(input) == 0:
+		if '\'' in param:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				"Employee ID must not contain apostrophes"
 			)
 			return RESPONSE
 
-		hash = hashlib.new('md5')
-		hash.update(input)
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{param}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

@@ -35,10 +35,12 @@ def init(app):
 		if not param:
 			param = ""
 
-		import helpers.ThingFactory
+		num = 86
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -55,7 +57,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha512')
+		hash = hashlib.sha1()
 		hash.update(input)
 
 		result = hash.digest()

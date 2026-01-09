@@ -32,9 +32,8 @@ def init(app):
 		if not param:
 			param = ""
 
-		import html
-		
-		bar = html.escape(param)
+		superstring = f'94919{param}abcd'
+		bar = superstring[len('94919'):len(superstring)-5]
 
 		import base64
 		import secrets

@@ -32,13 +32,14 @@ def init(app):
 		if not param:
 			param = ""
 
-		string63619 = ''
-		data12 = ''
-		copy = string63619
-		string63619 = ''
-		string63619 += param
-		copy += 'SomeOKString'
-		bar = copy
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -55,7 +56,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('md5')
+		hash = hashlib.sha1()
 		hash.update(input)
 
 		result = hash.digest()

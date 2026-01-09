@@ -20,37 +20,39 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00351', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00351', methods=['GET'])
 	def BenchmarkTest00351_get():
 		return BenchmarkTest00351_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00351', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00351', methods=['POST'])
 	def BenchmarkTest00351_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_form_parameter("BenchmarkTest00351")
-		if not param:
-			param = ""
+		param = ""
+		for name in request.form.keys():
+			if "BenchmarkTest00351" in request.form.getlist(name):
+				param = name
+				break
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		bar = param
 
-		import yaml
+		import codecs
+		import helpers.utils
 
 		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
 			RESPONSE += (
-				yobj['text']
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
 			)
-		except:
+
 			RESPONSE += (
-				"There was an error loading the configuration"
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
 			)
 
 		return RESPONSE

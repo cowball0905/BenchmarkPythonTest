@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01024', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest01024', methods=['GET'])
 	def BenchmarkTest01024_get():
 		return BenchmarkTest01024_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01024', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest01024', methods=['POST'])
 	def BenchmarkTest01024_post():
 		RESPONSE = ""
 
@@ -33,15 +33,39 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		map64422 = {}
+		map64422['keyA-64422'] = 'a-Value'
+		map64422['keyB-64422'] = param
+		map64422['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map64422['keyB-64422']
+		bar = map64422['keyA-64422']
 
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		otherarg = "static text"
-		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
-		)
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
+			RESPONSE += (
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
+			)
+		except:
+			RESPONSE += (
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+			)
 
 		return RESPONSE
 

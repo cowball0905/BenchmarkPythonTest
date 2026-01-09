@@ -33,9 +33,10 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import markupsafe
-		
-		bar = markupsafe.escape(param)
+		string24421 = 'help'
+		string24421 += param
+		string24421 += 'snapes on a plane'
+		bar = string24421[4:-17]
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -52,7 +53,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha1')
+		hash = hashlib.new('sha384')
 		hash.update(input)
 
 		result = hash.digest()

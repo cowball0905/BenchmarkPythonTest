@@ -20,35 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01201', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01201', methods=['GET'])
 	def BenchmarkTest01201_get():
 		return BenchmarkTest01201_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01201', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01201', methods=['POST'])
 	def BenchmarkTest01201_post():
 		RESPONSE = ""
 
-		param = request.stream
+		import helpers.utils
+		param = ""
+		
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
+		
+			if request.headers.get_all(name):
+				param = name
+				break
 
 
-		import random
-		from helpers.utils import mysession
+		import hashlib, base64
+		import io, helpers.utils
 
-		num = 'BenchmarkTest01201'[13:]
-		user = f'SafeNancy{num}'
-		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
+		input = ''
+		if isinstance(param, str):
+			input = param.encode('utf-8')
+		elif isinstance(param, io.IOBase):
+			input = param.read(1000)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		if len(input) == 0:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				'Cannot generate hash: Input was empty.'
 			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie: '
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			return RESPONSE
+
+		hash = hashlib.sha384()
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

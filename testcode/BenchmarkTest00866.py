@@ -35,16 +35,19 @@ def init(app):
 		if not param:
 			param = ""
 
-		superstring = f'67935{param}abcd'
-		bar = superstring[len('67935'):len(superstring)-5]
+		string67935 = 'help'
+		string67935 += param
+		string67935 += 'snapes on a plane'
+		bar = string67935[4:-17]
 
-		import random
+		import base64
+		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00866'[13:]
-		user = f'Nancy{num}'
+		user = f'SafeToby{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.normalvariate())[2:]
+		value = base64.b64encode(secrets.token_bytes(32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -53,7 +56,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
+				f'{user} has been remembered with cookie:'
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

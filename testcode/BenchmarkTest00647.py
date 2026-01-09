@@ -39,8 +39,9 @@ def init(app):
 				param = name
 				break
 
-		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -57,7 +58,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('md5')
+		hash = hashlib.md5()
 		hash.update(input)
 
 		result = hash.digest()

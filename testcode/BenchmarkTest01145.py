@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01145', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01145', methods=['GET'])
 	def BenchmarkTest01145_get():
 		return BenchmarkTest01145_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01145', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest01145', methods=['POST'])
 	def BenchmarkTest01145_post():
 		RESPONSE = ""
 
@@ -32,30 +32,34 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01145")
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
+		import hashlib, base64
+		import io, helpers.utils
 
-		num = 'BenchmarkTest01145'[13:]
-		user = f'SafeToby{num}'
-		cookie = f'rememberMe{num}'
-		value = base64.b64encode(secrets.token_bytes(32))
+		input = ''
+		if isinstance(bar, str):
+			input = bar.encode('utf-8')
+		elif isinstance(bar, io.IOBase):
+			input = bar.read(1000)
 
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
+		if len(input) == 0:
 			RESPONSE += (
-				f'Welcome back: {user}<br/>'
+				'Cannot generate hash: Input was empty.'
 			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+			return RESPONSE
+
+		hash = hashlib.new('md5')
+		hash.update(input)
+
+		result = hash.digest()
+		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
+		f.write(f'hash_value={base64.b64encode(result)}\n')
+		RESPONSE += (
+			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+		)
+		f.close()
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00764', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00764', methods=['GET'])
 	def BenchmarkTest00764_get():
 		return BenchmarkTest00764_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00764', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00764', methods=['POST'])
 	def BenchmarkTest00764_post():
 		RESPONSE = ""
 
@@ -33,35 +33,38 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		map34260 = {}
+		map34260['keyA-34260'] = 'a-Value'
+		map34260['keyB-34260'] = param
+		map34260['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map34260['keyB-34260']
+		bar = map34260['keyA-34260']
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		import lxml.etree
+		import helpers.utils
+		import io
 
 		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
-			parser.setFeature(xml.sax.handler.feature_external_ges, True)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			strIO = io.StringIO()
+			strIO.write('/Employees/Employee[@emplid=\'')
+			strIO.write(bar)
+			strIO.write('\']')
+			query = strIO.getvalue()
 
-			doc = xml.dom.minidom.parseString(bar, parser)
-
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
 			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
 		except:
 			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

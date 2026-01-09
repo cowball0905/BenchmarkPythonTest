@@ -32,21 +32,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		string45438 = ''
-		data12 = ''
-		copy = string45438
-		string45438 = ''
-		string45438 += param
-		copy += 'SomeOKString'
-		bar = copy
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00138'[13:]
-		user = f'SafeIsaac{num}'
+		user = f'SafeRandall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().randint(0, 2**32))
+		value = str(random.SystemRandom().random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

@@ -20,43 +20,25 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01210', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01210', methods=['GET'])
 	def BenchmarkTest01210_get():
 		return BenchmarkTest01210_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01210', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01210', methods=['POST'])
 	def BenchmarkTest01210_post():
 		RESPONSE = ""
 
+		values = request.args.getlist("BenchmarkTest01210")
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest01210")
-		
-		if headers:
-			param = headers[0]
+		if values:
+			param = values[0]
 
 
-		import pathlib
-		import helpers.utils
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / param).resolve()
-
-			if not str(p).startswith(str(testfiles)):
-				RESPONSE += (
-					"Invalid Path."
-				)
-				return RESPONSE
-
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			f'param is \'{param}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

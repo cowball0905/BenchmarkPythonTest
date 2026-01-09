@@ -32,13 +32,14 @@ def init(app):
 		if not param:
 		    param = ""
 
-		map24944 = {}
-		map24944['keyA-24944'] = 'a-Value'
-		map24944['keyB-24944'] = param
-		map24944['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map24944['keyB-24944']
-		bar = map24944['keyA-24944']
+		import configparser
+		
+		bar = 'safe!'
+		conf24944 = configparser.ConfigParser()
+		conf24944.add_section('section24944')
+		conf24944.set('section24944', 'keyA-24944', 'a_Value')
+		conf24944.set('section24944', 'keyB-24944', param)
+		bar = conf24944.get('section24944', 'keyA-24944')
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -55,7 +56,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha512')
+		hash = hashlib.sha384()
 		hash.update(input)
 
 		result = hash.digest()

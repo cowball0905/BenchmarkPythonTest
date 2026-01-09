@@ -33,19 +33,20 @@ def init(app):
 		if values:
 			param = values[0]
 
-		map51206 = {}
-		map51206['keyA-51206'] = 'a-Value'
-		map51206['keyB-51206'] = param
-		map51206['keyC'] = 'another-Value'
-		bar = map51206['keyB-51206']
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		import secrets
+		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00788'[13:]
-		user = f'SafeRicky{num}'
+		user = f'SafeNancy{num}'
 		cookie = f'rememberMe{num}'
-		value = str(secrets.randbits(32))
+		value = str(random.SystemRandom().normalvariate())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -54,7 +55,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
+				f'{user} has been remembered with cookie: '
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

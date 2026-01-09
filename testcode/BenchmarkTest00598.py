@@ -20,31 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00598', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00598', methods=['GET'])
 	def BenchmarkTest00598_get():
 		return BenchmarkTest00598_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00598', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00598', methods=['POST'])
 	def BenchmarkTest00598_post():
 		RESPONSE = ""
 
 		param = ""
-		headers = request.headers.getlist("Referer")
+		headers = request.headers.getlist("BenchmarkTest00598")
 		
 		if headers:
 			param = headers[0]
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
-
-
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00598': bar}))
+		import helpers.ThingFactory
 		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
+
+		import flask
+		import urllib.parse
+
+		try:
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
+		except:
+			RESPONSE += (
+				'Error parsing URL.'
+			)
+			return RESPONSE
+
+		return flask.redirect(bar)
 
 		return RESPONSE
 

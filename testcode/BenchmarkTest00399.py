@@ -34,22 +34,17 @@ def init(app):
 				param = name
 				break
 
-		map92803 = {}
-		map92803['keyA-92803'] = 'a-Value'
-		map92803['keyB-92803'] = param
-		map92803['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map92803['keyB-92803']
-		bar = map92803['keyA-92803']
+		import markupsafe
+		
+		bar = markupsafe.escape(param)
 
-		import base64
-		import secrets
+		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00399'[13:]
-		user = f'SafeTruman{num}'
+		user = f'SafeNancy{num}'
 		cookie = f'rememberMe{num}'
-		value = secrets.token_urlsafe(32)
+		value = str(random.SystemRandom().normalvariate())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -58,7 +53,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
+				f'{user} has been remembered with cookie: '
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

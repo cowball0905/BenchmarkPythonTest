@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00926', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00926', methods=['GET'])
 	def BenchmarkTest00926_get():
 		return BenchmarkTest00926_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00926', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00926', methods=['POST'])
 	def BenchmarkTest00926_post():
 		RESPONSE = ""
 
@@ -41,25 +41,19 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		string60830 = ''
+		data12 = ''
+		copy = string60830
+		string60830 = ''
+		string60830 += param
+		copy += 'SomeOKString'
+		bar = copy
 
-		import pathlib
-		import helpers.utils
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = testfiles / bar
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+		)
 
 		return RESPONSE
 

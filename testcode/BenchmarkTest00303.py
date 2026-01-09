@@ -35,14 +35,14 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf85622 = configparser.ConfigParser()
-		conf85622.add_section('section85622')
-		conf85622.set('section85622', 'keyA-85622', 'a-Value')
-		conf85622.set('section85622', 'keyB-85622', param)
-		bar = conf85622.get('section85622', 'keyB-85622')
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
 		import lxml.etree
 		import helpers.utils
@@ -50,8 +50,8 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
-			nodes = root.xpath(query)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

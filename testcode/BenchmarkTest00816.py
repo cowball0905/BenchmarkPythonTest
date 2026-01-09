@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00816', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00816', methods=['GET'])
 	def BenchmarkTest00816_get():
 		return BenchmarkTest00816_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00816', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00816', methods=['POST'])
 	def BenchmarkTest00816_post():
 		RESPONSE = ""
 
@@ -33,35 +33,36 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 106
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import hashlib, base64
-		import io, helpers.utils
+		import flask
+		import urllib.parse
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
+		try:
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
+		except:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				'Error parsing URL.'
 			)
 			return RESPONSE
 
-		hash = hashlib.sha384()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		return flask.redirect(bar)
 
 		return RESPONSE
 

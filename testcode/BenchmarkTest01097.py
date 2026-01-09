@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest01097', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest01097', methods=['GET'])
 	def BenchmarkTest01097_get():
 		return BenchmarkTest01097_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest01097', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest01097', methods=['POST'])
 	def BenchmarkTest01097_post():
 		RESPONSE = ""
 
@@ -33,19 +33,34 @@ def init(app):
 		if not param:
 			param = ""
 
-		string48882 = 'help'
-		string48882 += param
-		string48882 += 'snapes on a plane'
-		bar = string48882[4:-17]
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		import flask
+		import platform
+		import subprocess
+		import helpers.utils
 
-		flask.session['userid'] = bar
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
+		else:
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
 
-		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
-		)
+		try:
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+
+			RESPONSE += (
+				helpers.utils.commandOutput(proc)
+			)
+		except IOError:
+			RESPONSE += (
+				"Problem executing cmdi - subprocess.run(list) Test Case"
+			)
 
 		return RESPONSE
 

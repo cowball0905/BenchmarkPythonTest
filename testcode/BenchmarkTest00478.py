@@ -32,22 +32,16 @@ def init(app):
 		if not param:
 		    param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf38915 = configparser.ConfigParser()
-		conf38915.add_section('section38915')
-		conf38915.set('section38915', 'keyA-38915', 'a-Value')
-		conf38915.set('section38915', 'keyB-38915', param)
-		bar = conf38915.get('section38915', 'keyB-38915')
+		bar = param
 
+		import base64
 		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00478'[13:]
-		user = f'SafeRicky{num}'
+		user = f'SafeTruman{num}'
 		cookie = f'rememberMe{num}'
-		value = str(secrets.randbits(32))
+		value = secrets.token_urlsafe(32)
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

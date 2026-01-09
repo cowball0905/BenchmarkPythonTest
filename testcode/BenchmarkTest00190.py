@@ -33,21 +33,14 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
+		import html
 		
-		bar = 'safe!'
-		conf48255 = configparser.ConfigParser()
-		conf48255.add_section('section48255')
-		conf48255.set('section48255', 'keyA-48255', 'a_Value')
-		conf48255.set('section48255', 'keyB-48255', param)
-		bar = conf48255.get('section48255', 'keyA-48255')
+		bar = html.escape(param)
 
 
-		dict = {}
-		dict['bar'] = bar
-		dict['otherarg'] = 'this is it'
+		otherarg = "static text"
 		RESPONSE += (
-			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
 		)
 
 		return RESPONSE

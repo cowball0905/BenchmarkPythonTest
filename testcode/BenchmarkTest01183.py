@@ -20,33 +20,38 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01183', methods=['GET'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01183', methods=['GET'])
 	def BenchmarkTest01183_get():
 		return BenchmarkTest01183_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01183', methods=['POST'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01183', methods=['POST'])
 	def BenchmarkTest01183_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01183")
+		values = request.form.getlist("BenchmarkTest01183")
+		param = ""
+		if values:
+			param = values[0]
+
 
 		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
 
-		import yaml
+		fileName = None
+		fd = None
 
 		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{param}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE
+
 

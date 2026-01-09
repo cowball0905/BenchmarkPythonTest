@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00345', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00345', methods=['GET'])
 	def BenchmarkTest00345_get():
 		return BenchmarkTest00345_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00345', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00345', methods=['POST'])
 	def BenchmarkTest00345_post():
 		RESPONSE = ""
 
@@ -35,27 +35,28 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		map7018 = {}
+		map7018['keyA-7018'] = 'a-Value'
+		map7018['keyB-7018'] = param
+		map7018['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map7018['keyB-7018']
+		bar = map7018['keyA-7018']
 
-		import flask
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Eval argument must be a plain string literal."
+			)
+			return RESPONSE		
 
-		flask.session['userid'] = bar
-
-		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
-		)
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

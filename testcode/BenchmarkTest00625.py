@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00625', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00625', methods=['GET'])
 	def BenchmarkTest00625_get():
 		return BenchmarkTest00625_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00625', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00625', methods=['POST'])
 	def BenchmarkTest00625_post():
 		RESPONSE = ""
 
@@ -39,31 +39,26 @@ def init(app):
 				param = name
 				break
 
-		import configparser
-		
-		bar = 'safe!'
-		conf88021 = configparser.ConfigParser()
-		conf88021.add_section('section88021')
-		conf88021.set('section88021', 'keyA-88021', 'a_Value')
-		conf88021.set('section88021', 'keyB-88021', param)
-		bar = conf88021.get('section88021', 'keyA-88021')
+		bar = param + '_SafeStuff'
 
-		import helpers.utils
+		import random
+		import base64
+		from helpers.utils import mysession
 
-		fileName = None
-		fd = None
+		num = 'BenchmarkTest00625'[13:]
+		user = f'Barbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.randbytes(32)))
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'rb') as fd:
-				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-				)
-		except IOError as e:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
+				f'Welcome back: {user}<br/>'
+			)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

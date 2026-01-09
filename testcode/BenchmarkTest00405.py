@@ -34,17 +34,19 @@ def init(app):
 				param = name
 				break
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
 		import random
+		import base64
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00405'[13:]
-		user = f'SafeRandy{num}'
+		user = f'SafeBarbara{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().getrandbits(32))
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00364', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00364', methods=['GET'])
 	def BenchmarkTest00364_get():
 		return BenchmarkTest00364_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00364', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00364', methods=['POST'])
 	def BenchmarkTest00364_post():
 		RESPONSE = ""
 
@@ -34,23 +34,16 @@ def init(app):
 				param = name
 				break
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
-
 		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'wb') as fd:
-				RESPONSE += (
-					f'Now ready to write to file: {escape_for_html(fileName)}'
-				)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
+		RESPONSE += (
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+		)
 
 		return RESPONSE
 

@@ -20,34 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00833', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00833', methods=['GET'])
 	def BenchmarkTest00833_get():
 		return BenchmarkTest00833_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00833', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00833', methods=['POST'])
 	def BenchmarkTest00833_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00833")
-		param = ""
-		if values:
-			param = values[0]
+		import helpers.separate_request
+		
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00833")
+		if not param:
+			param = ""
+
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
 		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
 
-		import yaml
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not contain \'../\''
+			)
+			return RESPONSE
 
 		try:
-			yobj = yaml.safe_load(bar)
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				yobj['text']
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-		except:
+		except IOError as e:
 			RESPONSE += (
-				"There was an error loading the configuration"
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

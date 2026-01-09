@@ -20,46 +20,49 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00663', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00663', methods=['GET'])
 	def BenchmarkTest00663_get():
 		return BenchmarkTest00663_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00663', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00663', methods=['POST'])
 	def BenchmarkTest00663_post():
 		RESPONSE = ""
 
+		param = request.args.get("BenchmarkTest00663")
+		if not param:
+			param = ""
+
+		bar = param
+
 		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		fileName = None
+		fd = None
 
-		import yaml
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not include \'../\''
+			)
+			return RESPONSE
 
 		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				yobj['text']
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
-		except:
+		except IOError as e:
 			RESPONSE += (
-				"There was an error loading the configuration"
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

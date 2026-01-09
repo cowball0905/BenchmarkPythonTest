@@ -20,55 +20,53 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00906', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00906', methods=['GET'])
 	def BenchmarkTest00906_get():
 		return BenchmarkTest00906_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00906', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00906', methods=['POST'])
 	def BenchmarkTest00906_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00906")
-		if not param:
-			param = ""
-
-		import configparser
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00906" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00906"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00906") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = 'safe!'
-		conf37053 = configparser.ConfigParser()
-		conf37053.add_section('section37053')
-		conf37053.set('section37053', 'keyA-37053', 'a-Value')
-		conf37053.set('section37053', 'keyB-37053', param)
-		bar = conf37053.get('section37053', 'keyB-37053')
+		param = urllib.parse.unquote_plus(param)
 
-		import helpers.ldap
-		import ldap3
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
+		import codecs
+		import helpers.utils
+
 		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
 			RESPONSE += (
-				"Error processing LDAP query."
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+			)
+
+			RESPONSE += (
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
 			)
 
 		return RESPONSE

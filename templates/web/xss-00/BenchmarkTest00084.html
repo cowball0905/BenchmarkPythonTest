@@ -10,14 +10,14 @@
 </head>
 <body>
 <form action="/benchmark/xss-00/BenchmarkTest00084" method="POST" id="FormBenchmarkTest00084" autocomplete="off">
- <div><label>Select your habits and edit the parameter [name,value]:</label></div><br>
-	<div><input type="checkbox" name="BenchmarkTest00084" value="SafeText" checked >Reading. [BenchmarkTest00084, SafeText]</div>
-	<div><input type="checkbox" name="BenchmarkTest00084" value="Movies" >Movies. [BenchmarkTest00084, Movies]</div>
-	<div><input type="checkbox" name="BenchmarkTest00084" value="Writing" >Writing. [BenchmarkTest00084, Writing]</div>
-	<div><input type="checkbox" name="BenchmarkTest00084" value="Singing" >Singing. [BenchmarkTest00084, Singing]</div>
-	<div><label>Parameter foo, value:</label><input type="text" id="foo" name="foo" value="bar" ></div><br>
-	<div><input type="submit" value="Submit" ></div>
- </form>
- 
+    <p>Please make your car selection, and edit the value to be sent [value]:</p>
+	<select name="BenchmarkTest00084" multiple>
+	    <option value="SafeText" selected>Audi. [SafeText]</option>
+	    <option value="Ford">Ford. [Ford]</option>
+	    <option value="Opel">Opel. [Opel]</option>
+        <option value="Subaru">Subaru. [Subaru]</option>
+	</select><br><br>
+    <input type="submit" value="Submit" >
+</form>
 </body>
 </html>

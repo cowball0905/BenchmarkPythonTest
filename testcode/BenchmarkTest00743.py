@@ -33,33 +33,24 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf96277 = configparser.ConfigParser()
-		conf96277.add_section('section96277')
-		conf96277.set('section96277', 'keyA-96277', 'a_Value')
-		conf96277.set('section96277', 'keyB-96277', param)
-		bar = conf96277.get('section96277', 'keyA-96277')
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import codecs
+		import pathlib
 		import helpers.utils
 
-		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
-			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
-			)
-
-			RESPONSE += (
-				" And file already exists."
-			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

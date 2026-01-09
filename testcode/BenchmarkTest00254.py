@@ -33,14 +33,18 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -57,7 +61,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.sha384()
+		hash = hashlib.sha512()
 		hash.update(input)
 
 		result = hash.digest()

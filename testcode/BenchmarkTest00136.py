@@ -32,8 +32,13 @@ def init(app):
 		if not param:
 			param = ""
 
-		import helpers.utils
-		bar = helpers.utils.escape_for_html(param)
+		string14469 = ''
+		data12 = ''
+		copy = string14469
+		string14469 = ''
+		string14469 += param
+		copy += 'SomeOKString'
+		bar = copy
 
 		import random
 		import base64

@@ -20,37 +20,29 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00533', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00533', methods=['GET'])
 	def BenchmarkTest00533_get():
 		return BenchmarkTest00533_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00533', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00533', methods=['POST'])
 	def BenchmarkTest00533_post():
 		RESPONSE = ""
 
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00533")
+		headers = request.headers.getlist("Referer")
 		
 		if headers:
 			param = headers[0]
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'wb') as fd:
-				RESPONSE += (
-					f'Now ready to write to file: {escape_for_html(fileName)}'
-				)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+		)
 
 		return RESPONSE
 

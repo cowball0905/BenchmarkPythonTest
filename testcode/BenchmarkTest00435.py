@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00435', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00435', methods=['GET'])
 	def BenchmarkTest00435_get():
 		return BenchmarkTest00435_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00435', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00435', methods=['POST'])
 	def BenchmarkTest00435_post():
 		RESPONSE = ""
 
@@ -34,27 +34,22 @@ def init(app):
 				param = name
 				break
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
-		import os
-		import subprocess
-		import helpers.utils
+		import yaml
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
-		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
+		try:
+			yobj = yaml.safe_load(bar)
 
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
-		RESPONSE += (
-			helpers.utils.commandOutput(proc)
-		)
+			RESPONSE += (
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
+			)
 
 		return RESPONSE
 

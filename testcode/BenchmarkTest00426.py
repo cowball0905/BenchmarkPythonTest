@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00426', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00426', methods=['GET'])
 	def BenchmarkTest00426_get():
 		return BenchmarkTest00426_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00426', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00426', methods=['POST'])
 	def BenchmarkTest00426_post():
 		RESPONSE = ""
 
@@ -34,19 +34,31 @@ def init(app):
 				param = name
 				break
 
-		import helpers.ThingFactory
+		possible = "ABC"
+		guess = possible[0]
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import flask
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
 
-		flask.session[bar] = '12345'
-
-		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
-		)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

@@ -34,17 +34,18 @@ def init(app):
 				param = name
 				break
 
-		num = 106
+		import html
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		bar = html.escape(param)
 
+		import base64
 		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00392'[13:]
-		user = f'SafeRobbie{num}'
+		user = f'SafeTheo{num}'
 		cookie = f'rememberMe{num}'
-		value = str(secrets.randbelow(2**32))
+		value = secrets.token_hex(32)
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

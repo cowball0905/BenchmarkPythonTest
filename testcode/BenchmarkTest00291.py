@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00291', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00291', methods=['GET'])
 	def BenchmarkTest00291_get():
 		return BenchmarkTest00291_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00291', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00291', methods=['POST'])
 	def BenchmarkTest00291_post():
 		RESPONSE = ""
 
@@ -35,37 +35,39 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[1]
+		import configparser
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = 'safe!'
+		conf53832 = configparser.ConfigParser()
+		conf53832.add_section('section53832')
+		conf53832.set('section53832', 'keyA-53832', 'a_Value')
+		conf53832.set('section53832', 'keyB-53832', param)
+		bar = conf53832.get('section53832', 'keyA-53832')
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
+		import xml.dom.minidom
+		import xml.sax.handler
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
 
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
 			)
 
 		return RESPONSE

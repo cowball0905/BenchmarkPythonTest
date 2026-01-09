@@ -34,23 +34,26 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		import configparser
+		possible = "ABC"
+		guess = possible[1]
 		
-		bar = 'safe!'
-		conf72842 = configparser.ConfigParser()
-		conf72842.add_section('section72842')
-		conf72842.set('section72842', 'keyA-72842', 'a_Value')
-		conf72842.set('section72842', 'keyB-72842', param)
-		bar = conf72842.get('section72842', 'keyA-72842')
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import random
-		import base64
+		import secrets
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00566'[13:]
-		user = f'Barbara{num}'
+		user = f'SafeRobbie{num}'
 		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.randbytes(32)))
+		value = str(secrets.randbelow(2**32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -59,7 +62,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie: '
+				f'{user} has been remembered with cookie:'
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

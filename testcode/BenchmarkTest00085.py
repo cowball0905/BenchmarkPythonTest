@@ -32,36 +32,23 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
 		import helpers.utils
 
-		fileName = None
-		fd = None
-
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not include \'../\''
-			)
-			return RESPONSE
-
 		try:
 			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
 		except IOError as e:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
 		finally:

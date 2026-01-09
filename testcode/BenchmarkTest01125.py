@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01125', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01125', methods=['GET'])
 	def BenchmarkTest01125_get():
 		return BenchmarkTest01125_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest01125', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01125', methods=['POST'])
 	def BenchmarkTest01125_post():
 		RESPONSE = ""
 
@@ -32,21 +32,23 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01125")
 
-		num = 86
+		import configparser
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = 'safe!'
+		conf98409 = configparser.ConfigParser()
+		conf98409.add_section('section98409')
+		conf98409.set('section98409', 'keyA-98409', 'a_Value')
+		conf98409.set('section98409', 'keyB-98409', param)
+		bar = conf98409.get('section98409', 'keyA-98409')
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

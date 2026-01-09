@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00887', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00887', methods=['GET'])
 	def BenchmarkTest00887_get():
 		return BenchmarkTest00887_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00887', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00887', methods=['POST'])
 	def BenchmarkTest00887_post():
 		RESPONSE = ""
 
@@ -35,44 +35,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import hashlib, base64
-		import io, helpers.utils
+		import flask
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		flask.session['userid'] = bar
 
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.sha384()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
 		)
-		f.close()
 
 		return RESPONSE
 

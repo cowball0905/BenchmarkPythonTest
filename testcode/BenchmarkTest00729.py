@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00729', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00729', methods=['GET'])
 	def BenchmarkTest00729_get():
 		return BenchmarkTest00729_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00729', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00729', methods=['POST'])
 	def BenchmarkTest00729_post():
 		RESPONSE = ""
 
@@ -32,13 +32,17 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		string88367 = 'help'
+		string88367 += param
+		string88367 += 'snapes on a plane'
+		bar = string88367[4:-17]
 
-		import flask
-
-		return flask.redirect(bar)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

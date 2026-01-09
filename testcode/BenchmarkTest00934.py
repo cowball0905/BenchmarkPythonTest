@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00934', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00934', methods=['GET'])
 	def BenchmarkTest00934_get():
 		return BenchmarkTest00934_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00934', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00934', methods=['POST'])
 	def BenchmarkTest00934_post():
 		RESPONSE = ""
 
@@ -41,25 +41,35 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = ""
+		bar = "alsosafe"
 		if param:
 			lst = []
 			lst.append('safe')
 			lst.append(param)
 			lst.append('moresafe')
 			lst.pop(0)
-			bar = lst[0]
+			bar = lst[1]
 
-		import helpers.db_sqlite
+		import lxml.etree
+		import helpers.utils
 
-		sql = f'SELECT username from USERS where password = \'{bar}\''
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql)
-		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
-		)
-		con.close()
+		try:
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			run_query = lxml.etree.XPath(query)
+			nodes = run_query(root)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

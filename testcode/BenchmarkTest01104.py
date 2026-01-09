@@ -20,32 +20,27 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01104', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01104', methods=['GET'])
 	def BenchmarkTest01104_get():
 		return BenchmarkTest01104_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01104', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01104', methods=['POST'])
 	def BenchmarkTest01104_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01104")
 
-		num = 86
+		import helpers.ThingFactory
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		try:
-			exec(bar)
-		except:
-			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
-			)
+
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

@@ -20,35 +20,34 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00834', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00834', methods=['GET'])
 	def BenchmarkTest00834_get():
 		return BenchmarkTest00834_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00834', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00834', methods=['POST'])
 	def BenchmarkTest00834_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest00834")
-		param = ""
-		if values:
-			param = values[0]
-
-		num = 106
+		import helpers.separate_request
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest00834")
+		if not param:
+			param = ""
 
-		import yaml
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		try:
-			yobj = yaml.safe_load(bar)
+		import os
+		import helpers.utils
 
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
 

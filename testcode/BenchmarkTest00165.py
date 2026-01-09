@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00165', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00165', methods=['GET'])
 	def BenchmarkTest00165_get():
 		return BenchmarkTest00165_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00165', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00165', methods=['POST'])
 	def BenchmarkTest00165_post():
 		RESPONSE = ""
 
@@ -32,30 +32,31 @@ def init(app):
 		if not param:
 			param = ""
 
-		map26348 = {}
-		map26348['keyA-26348'] = 'a-Value'
-		map26348['keyB-26348'] = param
-		map26348['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map26348['keyB-26348']
-		bar = map26348['keyA-26348']
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		import pickle
-		import base64
+		import os
+		import subprocess
 		import helpers.utils
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		argList = []
+		if "Windows" in os.name:
+			argList.append("cmd.exe")
+			argList.append("-c")
+		else:
+			argList.append("sh")
+			argList.append("-c")
+		argList.append(f"echo {bar}")
 
-		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
-			RESPONSE += (
-				'Unpickling failed!'
-			)
-			return RESPONSE
-
+		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
 		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
+			helpers.utils.commandOutput(proc)
 		)
 
 		return RESPONSE

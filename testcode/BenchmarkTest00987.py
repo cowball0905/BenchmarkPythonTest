@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest00987', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00987', methods=['GET'])
 	def BenchmarkTest00987_get():
 		return BenchmarkTest00987_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest00987', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00987', methods=['POST'])
 	def BenchmarkTest00987_post():
 		RESPONSE = ""
 
@@ -41,21 +41,29 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		string35919 = ''
-		data12 = ''
-		copy = string35919
-		string35919 = ''
-		string35919 += param
-		copy += 'SomeOKString'
-		bar = copy
-
-
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00987': bar}))
+		import configparser
 		
+		bar = 'safe!'
+		conf35919 = configparser.ConfigParser()
+		conf35919.add_section('section35919')
+		conf35919.set('section35919', 'keyA-35919', 'a_Value')
+		conf35919.set('section35919', 'keyB-35919', param)
+		bar = conf35919.get('section35919', 'keyA-35919')
+
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Eval argument must be a plain string literal."
+			)
+			return RESPONSE		
+
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

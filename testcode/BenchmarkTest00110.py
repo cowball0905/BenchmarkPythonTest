@@ -32,17 +32,32 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
+		possible = "ABC"
+		guess = possible[1]
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import lxml.etree
 		import helpers.utils
 
 		try:
+			if '\'' in bar:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
+
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
 			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:

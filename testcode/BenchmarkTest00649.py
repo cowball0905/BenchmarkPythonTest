@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00649', methods=['GET'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00649', methods=['GET'])
 	def BenchmarkTest00649_get():
 		return BenchmarkTest00649_post()
 
-	@app.route('/benchmark/hash-00/BenchmarkTest00649', methods=['POST'])
+	@app.route('/benchmark/hash-01/BenchmarkTest00649', methods=['POST'])
 	def BenchmarkTest00649_post():
 		RESPONSE = ""
 
@@ -39,12 +39,14 @@ def init(app):
 				param = name
 				break
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -61,7 +63,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha384')
+		hash = hashlib.sha384()
 		hash.update(input)
 
 		result = hash.digest()

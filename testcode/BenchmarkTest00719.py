@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00719', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00719', methods=['GET'])
 	def BenchmarkTest00719_get():
 		return BenchmarkTest00719_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00719', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00719', methods=['POST'])
 	def BenchmarkTest00719_post():
 		RESPONSE = ""
 
@@ -32,17 +32,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		import configparser
+		
+		bar = 'safe!'
+		conf49960 = configparser.ConfigParser()
+		conf49960.add_section('section49960')
+		conf49960.set('section49960', 'keyA-49960', 'a_Value')
+		conf49960.set('section49960', 'keyB-49960', param)
+		bar = conf49960.get('section49960', 'keyA-49960')
 
-		import hashlib, base64
-		import io, helpers.utils
+		from flask import make_response
+		import io
+		import helpers.utils
 
 		input = ''
 		if isinstance(bar, str):
@@ -50,22 +51,18 @@ def init(app):
 		elif isinstance(bar, io.IOBase):
 			input = bar.read(1000)
 
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
 
-		hash = hashlib.md5()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
 		)
-		f.close()
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=False,
+			httponly=True)
 
 		return RESPONSE
 

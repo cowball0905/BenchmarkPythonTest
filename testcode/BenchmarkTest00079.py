@@ -38,17 +38,12 @@ def init(app):
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00079", "noCookieValueSupplied"))
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = param
 
 		import yaml
 
 		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
+			yobj = yaml.safe_load(bar)
 
 			RESPONSE += (
 				yobj['text']

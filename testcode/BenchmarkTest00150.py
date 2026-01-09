@@ -32,11 +32,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		map15497 = {}
-		map15497['keyA-15497'] = 'a-Value'
-		map15497['keyB-15497'] = param
-		map15497['keyC'] = 'another-Value'
-		bar = map15497['keyB-15497']
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
 
 		RESPONSE += (

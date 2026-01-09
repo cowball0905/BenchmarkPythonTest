@@ -35,21 +35,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		string46340 = ''
-		data12 = ''
-		copy = string46340
-		string46340 = ''
-		string46340 += param
-		copy += 'SomeOKString'
-		bar = copy
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
-		import secrets
+		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00869'[13:]
-		user = f'SafeRobbie{num}'
+		user = f'SafeNancy{num}'
 		cookie = f'rememberMe{num}'
-		value = str(secrets.randbelow(2**32))
+		value = str(random.SystemRandom().normalvariate())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -58,7 +55,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
+				f'{user} has been remembered with cookie: '
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

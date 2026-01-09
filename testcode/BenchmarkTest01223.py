@@ -20,39 +20,25 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01223', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01223', methods=['GET'])
 	def BenchmarkTest01223_get():
 		return BenchmarkTest01223_post()
 
-	@app.route('/benchmark/weakrand-03/BenchmarkTest01223', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01223', methods=['POST'])
 	def BenchmarkTest01223_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest01223")
-		param = ""
-		if values:
-			param = values[0]
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
 
-		import base64
-		import secrets
-		from helpers.utils import mysession
 
-		num = 'BenchmarkTest01223'[13:]
-		user = f'SafeToby{num}'
-		cookie = f'rememberMe{num}'
-		value = base64.b64encode(secrets.token_bytes(32))
-
-		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
-			RESPONSE += (
-				f'Welcome back: {user}<br/>'
-			)
-		else:
-			mysession[cookie] = value
-			RESPONSE += (
-				f'{user} has been remembered with cookie:'
-				f'{cookie} whose value is: {mysession[cookie]}<br/>'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			f'param is \'{param}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

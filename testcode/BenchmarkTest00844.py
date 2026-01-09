@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00844', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00844', methods=['GET'])
 	def BenchmarkTest00844_get():
 		return BenchmarkTest00844_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00844', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00844', methods=['POST'])
 	def BenchmarkTest00844_post():
 		RESPONSE = ""
 
@@ -35,20 +35,30 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
+		import helpers.ThingFactory
 		
-		bar = 'safe!'
-		conf1036 = configparser.ConfigParser()
-		conf1036.add_section('section1036')
-		conf1036.set('section1036', 'keyA-1036', 'a_Value')
-		conf1036.set('section1036', 'keyB-1036', param)
-		bar = conf1036.get('section1036', 'keyA-1036')
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		otherarg = "static text"
-		RESPONSE += (
-			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
-		)
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

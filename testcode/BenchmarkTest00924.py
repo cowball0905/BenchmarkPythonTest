@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00924', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00924', methods=['GET'])
 	def BenchmarkTest00924_get():
 		return BenchmarkTest00924_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00924', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00924', methods=['POST'])
 	def BenchmarkTest00924_post():
 		RESPONSE = ""
 
@@ -41,35 +41,13 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		bar = param + '_SafeStuff'
 
-		import helpers.utils
 
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not contain \'../\''
-			)
-			return RESPONSE
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

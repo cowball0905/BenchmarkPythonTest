@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00425', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00425', methods=['GET'])
 	def BenchmarkTest00425_get():
 		return BenchmarkTest00425_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00425', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00425', methods=['POST'])
 	def BenchmarkTest00425_post():
 		RESPONSE = ""
 
@@ -34,23 +34,17 @@ def init(app):
 				param = name
 				break
 
-		import configparser
-		
-		bar = 'safe!'
-		conf54686 = configparser.ConfigParser()
-		conf54686.add_section('section54686')
-		conf54686.set('section54686', 'keyA-54686', 'a-Value')
-		conf54686.set('section54686', 'keyB-54686', param)
-		bar = conf54686.get('section54686', 'keyB-54686')
+		string54686 = 'help'
+		string54686 += param
+		string54686 += 'snapes on a plane'
+		bar = string54686[4:-17]
 
-		import flask
-
-		flask.session[bar] = '12345'
-
-		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
-		)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

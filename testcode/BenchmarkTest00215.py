@@ -33,12 +33,14 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 86
+		import configparser
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = 'safe!'
+		conf11795 = configparser.ConfigParser()
+		conf11795.add_section('section11795')
+		conf11795.set('section11795', 'keyA-11795', 'a-Value')
+		conf11795.set('section11795', 'keyB-11795', param)
+		bar = conf11795.get('section11795', 'keyB-11795')
 
 		import lxml.etree
 		import helpers.utils
@@ -46,8 +48,8 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
-			nodes = root.xpath(query)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

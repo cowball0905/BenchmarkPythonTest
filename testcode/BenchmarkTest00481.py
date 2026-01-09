@@ -32,17 +32,18 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00481'[13:]
-		user = f'SafeNancy{num}'
+		user = f'SafeRandall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
+		value = str(random.SystemRandom().random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

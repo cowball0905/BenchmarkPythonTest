@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00512', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00512', methods=['GET'])
 	def BenchmarkTest00512_get():
 		return BenchmarkTest00512_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00512', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00512', methods=['POST'])
 	def BenchmarkTest00512_post():
 		RESPONSE = ""
 
@@ -32,30 +32,35 @@ def init(app):
 		if not param:
 		    param = ""
 
-		possible = "ABC"
-		guess = possible[0]
+		import configparser
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = 'safe!'
+		conf41882 = configparser.ConfigParser()
+		conf41882.add_section('section41882')
+		conf41882.set('section41882', 'keyA-41882', 'a_Value')
+		conf41882.set('section41882', 'keyB-41882', param)
+		bar = conf41882.get('section41882', 'keyA-41882')
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Exec argument must be a plain string literal."
-			)
-			return RESPONSE
+		import platform
+		import subprocess
+		import helpers.utils
+
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
+		else:
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
 
 		try:
-			exec(bar)
-		except:
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				helpers.utils.commandOutput(proc)
+			)
+		except IOError:
+			RESPONSE += (
+				"Problem executing cmdi - subprocess.run(list) Test Case"
 			)
 
 		return RESPONSE

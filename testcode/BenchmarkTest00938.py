@@ -46,18 +46,18 @@ def init(app):
 		bar = 'safe!'
 		conf39662 = configparser.ConfigParser()
 		conf39662.add_section('section39662')
-		conf39662.set('section39662', 'keyA-39662', 'a-Value')
+		conf39662.set('section39662', 'keyA-39662', 'a_Value')
 		conf39662.set('section39662', 'keyB-39662', param)
-		bar = conf39662.get('section39662', 'keyB-39662')
+		bar = conf39662.get('section39662', 'keyA-39662')
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

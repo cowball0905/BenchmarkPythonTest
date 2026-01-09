@@ -46,6 +46,20 @@ def init(app):
 				bar = 'bob\'s your uncle'
 
 		import flask
+		import urllib.parse
+
+		try:
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
+		except:
+			RESPONSE += (
+				'Error parsing URL.'
+			)
+			return RESPONSE
 
 		return flask.redirect(bar)
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00424', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00424', methods=['GET'])
 	def BenchmarkTest00424_get():
 		return BenchmarkTest00424_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00424', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00424', methods=['POST'])
 	def BenchmarkTest00424_post():
 		RESPONSE = ""
 
@@ -34,18 +34,21 @@ def init(app):
 				param = name
 				break
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import flask
-
-		flask.session['userid'] = bar
-
-		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
-		)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

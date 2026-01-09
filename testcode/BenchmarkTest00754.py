@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00754', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00754', methods=['GET'])
 	def BenchmarkTest00754_get():
 		return BenchmarkTest00754_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00754', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00754', methods=['POST'])
 	def BenchmarkTest00754_post():
 		RESPONSE = ""
 
@@ -33,28 +33,17 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
-		import pathlib
-		import helpers.utils
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = testfiles / bar
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
+		RESPONSE += (
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+		)
 
 		return RESPONSE
 

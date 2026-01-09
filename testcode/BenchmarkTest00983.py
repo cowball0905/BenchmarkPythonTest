@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00983', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00983', methods=['GET'])
 	def BenchmarkTest00983_get():
 		return BenchmarkTest00983_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00983', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00983', methods=['POST'])
 	def BenchmarkTest00983_post():
 		RESPONSE = ""
 
@@ -41,40 +41,29 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		map15322 = {}
+		map15322['keyA-15322'] = 'a-Value'
+		map15322['keyB-15322'] = param
+		map15322['keyC'] = 'another-Value'
+		bar = map15322['keyB-15322']
 
-		import hashlib, base64
-		import io, helpers.utils
+		import flask
+		import urllib.parse
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
+		try:
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
+		except:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				'Error parsing URL.'
 			)
 			return RESPONSE
 
-		hash = hashlib.sha1()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		return flask.redirect(bar)
 
 		return RESPONSE
 

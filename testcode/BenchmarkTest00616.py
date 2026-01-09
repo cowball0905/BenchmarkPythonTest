@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00616', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00616', methods=['GET'])
 	def BenchmarkTest00616_get():
 		return BenchmarkTest00616_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00616', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00616', methods=['POST'])
 	def BenchmarkTest00616_post():
 		RESPONSE = ""
 
@@ -39,29 +39,37 @@ def init(app):
 				param = name
 				break
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		import configparser
+		
+		bar = 'safe!'
+		conf41016 = configparser.ConfigParser()
+		conf41016.add_section('section41016')
+		conf41016.set('section41016', 'keyA-41016', 'a_Value')
+		conf41016.set('section41016', 'keyB-41016', param)
+		bar = conf41016.get('section41016', 'keyA-41016')
 
+		import pathlib
 		import helpers.utils
 
 		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = (testfiles / bar).resolve()
+
+			if not str(p).startswith(str(testfiles)):
+				RESPONSE += (
+					"Invalid Path."
+				)
+				return RESPONSE
+
 			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-		except IOError as e:
+		except OSError:
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'Problem reading from file \'{fileName}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

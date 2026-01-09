@@ -32,40 +32,28 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01114")
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import platform
-		import codecs
 		import helpers.utils
-		from urllib.parse import urlparse
-		from urllib.request import url2pathname
-
-		startURIslashes = ""
-
-		if platform.system() == "Windows":
-			startURIslashes = "/"
-		else:
-			startURIslashes = "//"
 
 		try:
-			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'wb') as fd:
+				RESPONSE += (
+					f'Now ready to write to file: {escape_for_html(fileName)}'
+				)
+		except IOError as e:
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
-
-			RESPONSE += (
-				" And file already exists."
-			)
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
-		except IOError:
-			pass
 
 		return RESPONSE
 

@@ -32,18 +32,13 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		map71621 = {}
+		map71621['keyA-71621'] = 'a-Value'
+		map71621['keyB-71621'] = param
+		map71621['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map71621['keyB-71621']
+		bar = map71621['keyA-71621']
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -60,7 +55,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.md5()
+		hash = hashlib.sha1()
 		hash.update(input)
 
 		result = hash.digest()

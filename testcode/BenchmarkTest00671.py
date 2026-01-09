@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00671', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00671', methods=['GET'])
 	def BenchmarkTest00671_get():
 		return BenchmarkTest00671_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest00671', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00671', methods=['POST'])
 	def BenchmarkTest00671_post():
 		RESPONSE = ""
 
@@ -32,33 +32,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		string39424 = 'help'
-		string39424 += param
-		string39424 += 'snapes on a plane'
-		bar = string39424[4:-17]
+		import configparser
+		
+		bar = 'safe!'
+		conf39424 = configparser.ConfigParser()
+		conf39424.add_section('section39424')
+		conf39424.set('section39424', 'keyA-39424', 'a_Value')
+		conf39424.set('section39424', 'keyB-39424', param)
+		bar = conf39424.get('section39424', 'keyA-39424')
 
-		import pathlib
-		import helpers.utils
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / bar).resolve()
-
-			if not str(p).startswith(str(testfiles)):
-				RESPONSE += (
-					"Invalid Path."
-				)
-				return RESPONSE
-
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		otherarg = "static text"
+		RESPONSE += (
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+		)
 
 		return RESPONSE
 

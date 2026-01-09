@@ -20,40 +20,39 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00905', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00905', methods=['GET'])
 	def BenchmarkTest00905_get():
 		return BenchmarkTest00905_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00905', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00905', methods=['POST'])
 	def BenchmarkTest00905_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00905")
-		if not param:
-			param = ""
-
-		num = 86
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00905" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00905"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00905") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		param = urllib.parse.unquote_plus(param)
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Exec argument must be a plain string literal."
-			)
-			return RESPONSE
+		map90522 = {}
+		map90522['keyA-90522'] = 'a-Value'
+		map90522['keyB-90522'] = param
+		map90522['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map90522['keyB-90522']
+		bar = map90522['keyA-90522']
 
-		try:
-			exec(bar)
-		except:
-			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
-			)
+
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

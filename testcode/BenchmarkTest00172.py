@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00172', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00172', methods=['GET'])
 	def BenchmarkTest00172_get():
 		return BenchmarkTest00172_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00172', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00172', methods=['POST'])
 	def BenchmarkTest00172_post():
 		RESPONSE = ""
 
@@ -33,17 +33,29 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		string13080 = 'help'
+		string13080 += param
+		string13080 += 'snapes on a plane'
+		bar = string13080[4:-17]
 
+		import codecs
+		import helpers.utils
 
-		RESPONSE += (
-			f'Parameter value: {bar}'
-		)
+		try:
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+
+			RESPONSE += (
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+			)
+
+			RESPONSE += (
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
+			)
 
 		return RESPONSE
 

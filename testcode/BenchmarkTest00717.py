@@ -32,18 +32,8 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -60,7 +50,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha1')
+		hash = hashlib.sha384()
 		hash.update(input)
 
 		result = hash.digest()

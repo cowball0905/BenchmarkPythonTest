@@ -10,14 +10,14 @@
 </head>
 <body>
 <form action="/benchmark/xpathi-00/BenchmarkTest00104" method="POST" id="FormBenchmarkTest00104" autocomplete="off">
- <div><label>Select your habits and edit the parameter [name,value]:</label></div><br>
-	<div><input type="checkbox" name="BenchmarkTest00104" value="2222" checked >Reading. [BenchmarkTest00104, 2222]</div>
-	<div><input type="checkbox" name="BenchmarkTest00104" value="Movies" >Movies. [BenchmarkTest00104, Movies]</div>
-	<div><input type="checkbox" name="BenchmarkTest00104" value="Writing" >Writing. [BenchmarkTest00104, Writing]</div>
-	<div><input type="checkbox" name="BenchmarkTest00104" value="Singing" >Singing. [BenchmarkTest00104, Singing]</div>
-	<div><label>Parameter foo, value:</label><input type="text" id="foo" name="foo" value="bar" ></div><br>
-	<div><input type="submit" value="Submit" ></div>
- </form>
- 
+    <p>Please make your car selection, and edit the value to be sent [value]:</p>
+	<select name="BenchmarkTest00104" multiple>
+	    <option value="2222" selected>Audi. [2222]</option>
+	    <option value="Ford">Ford. [Ford]</option>
+	    <option value="Opel">Opel. [Opel]</option>
+        <option value="Subaru">Subaru. [Subaru]</option>
+	</select><br><br>
+    <input type="submit" value="Submit" >
+</form>
 </body>
 </html>

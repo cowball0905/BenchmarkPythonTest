@@ -38,9 +38,7 @@ def init(app):
 		map30881['keyA-30881'] = 'a-Value'
 		map30881['keyB-30881'] = param
 		map30881['keyC'] = 'another-Value'
-		bar = "safe!"
 		bar = map30881['keyB-30881']
-		bar = map30881['keyA-30881']
 
 		import lxml.etree
 		import helpers.utils
@@ -48,9 +46,8 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
-
-			nodes = root.xpath(query)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

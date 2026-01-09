@@ -32,21 +32,24 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = param
-
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
+		possible = "ABC"
+		guess = possible[0]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		try:
-			RESPONSE += (
-				eval(bar)
-			)
+			exec(bar)
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				f'Error executing statement \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

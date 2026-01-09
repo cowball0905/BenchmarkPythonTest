@@ -20,40 +20,31 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01228', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01228', methods=['GET'])
 	def BenchmarkTest01228_get():
 		return BenchmarkTest01228_post()
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01228', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01228', methods=['POST'])
 	def BenchmarkTest01228_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest01228")
+		parts = request.path.split("/")
+		param = parts[1]
 		if not param:
 			param = ""
 
 
-		import lxml.etree
-		import helpers.utils
+		import yaml
 
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{param}\']'
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			yobj = yaml.safe_load(param)
 
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				yobj['text']
 			)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

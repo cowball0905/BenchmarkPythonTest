@@ -41,27 +41,29 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		import configparser
+		
+		bar = 'safe!'
+		conf73877 = configparser.ConfigParser()
+		conf73877.add_section('section73877')
+		conf73877.set('section73877', 'keyA-73877', 'a-Value')
+		conf73877.set('section73877', 'keyB-73877', param)
+		bar = conf73877.get('section73877', 'keyB-73877')
 
-		import codecs
+		import pathlib
 		import helpers.utils
 
 		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = testfiles / bar
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
 			)
-
+		except OSError:
 			RESPONSE += (
-				" And file already exists."
-			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
 
 		return RESPONSE

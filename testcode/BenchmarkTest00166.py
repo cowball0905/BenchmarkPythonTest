@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00166', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00166', methods=['GET'])
 	def BenchmarkTest00166_get():
 		return BenchmarkTest00166_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00166', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00166', methods=['POST'])
 	def BenchmarkTest00166_post():
 		RESPONSE = ""
 
@@ -32,28 +32,33 @@ def init(app):
 		if not param:
 			param = ""
 
-		string29039 = 'help'
-		string29039 += param
-		string29039 += 'snapes on a plane'
-		bar = string29039[4:-17]
+		map29039 = {}
+		map29039['keyA-29039'] = 'a-Value'
+		map29039['keyB-29039'] = param
+		map29039['keyC'] = 'another-Value'
+		bar = map29039['keyB-29039']
 
-		import pickle
-		import base64
+		import platform
+		import subprocess
 		import helpers.utils
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
+		else:
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
 
 		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
-			RESPONSE += (
-				'Unpickling failed!'
-			)
-			return RESPONSE
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
 
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+			RESPONSE += (
+				helpers.utils.commandOutput(proc)
+			)
+		except IOError:
+			RESPONSE += (
+				"Problem executing cmdi - subprocess.run(list) Test Case"
+			)
 
 		return RESPONSE
 

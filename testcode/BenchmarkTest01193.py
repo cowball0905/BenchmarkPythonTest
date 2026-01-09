@@ -20,38 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01193', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01193', methods=['GET'])
 	def BenchmarkTest01193_get():
 		return BenchmarkTest01193_post()
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01193', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01193', methods=['POST'])
 	def BenchmarkTest01193_post():
 		RESPONSE = ""
 
-		values = request.form.getlist("BenchmarkTest01193")
 		param = ""
-		if values:
-			param = values[0]
+		for name in request.form.keys():
+			if "BenchmarkTest01193" in request.form.getlist(name):
+				param = name
+				break
 
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
+		import helpers.ldap
+		import ldap3
 
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(uid={param}))'
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{param}\']"
-			nodes = elementpath.select(root, query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
 
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except IOError:
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
-		except:
-			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				"Error processing LDAP query."
 			)
 
 		return RESPONSE

@@ -32,14 +32,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
+		num = 106
 		
-		bar = 'safe!'
-		conf67327 = configparser.ConfigParser()
-		conf67327.add_section('section67327')
-		conf67327.set('section67327', 'keyA-67327', 'a-Value')
-		conf67327.set('section67327', 'keyB-67327', param)
-		bar = conf67327.get('section67327', 'keyB-67327')
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
 		import pathlib
 		import helpers.utils

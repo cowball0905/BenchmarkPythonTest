@@ -20,45 +20,29 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00532', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00532', methods=['GET'])
 	def BenchmarkTest00532_get():
 		return BenchmarkTest00532_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00532', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00532', methods=['POST'])
 	def BenchmarkTest00532_post():
 		RESPONSE = ""
 
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00532")
+		headers = request.headers.getlist("Referer")
 		
 		if headers:
 			param = headers[0]
 
-		bar = ""
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[0]
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import pathlib
-		import helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
-
-		if not str(p).startswith(str(testfiles)):
-			RESPONSE += (
-				"Invalid Path."
-			)
-			return RESPONSE
-		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

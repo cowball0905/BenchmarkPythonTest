@@ -34,9 +34,12 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		num = 106
+		num = 86
 		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -53,7 +56,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha1')
+		hash = hashlib.sha1()
 		hash.update(input)
 
 		result = hash.digest()

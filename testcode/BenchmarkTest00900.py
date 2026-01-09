@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00900', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00900', methods=['GET'])
 	def BenchmarkTest00900_get():
 		return BenchmarkTest00900_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00900', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00900', methods=['POST'])
 	def BenchmarkTest00900_post():
 		RESPONSE = ""
 
@@ -35,19 +35,36 @@ def init(app):
 		if not param:
 			param = ""
 
-		import helpers.ThingFactory
+		import configparser
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		bar = 'safe!'
+		conf10363 = configparser.ConfigParser()
+		conf10363.add_section('section10363')
+		conf10363.set('section10363', 'keyA-10363', 'a_Value')
+		conf10363.set('section10363', 'keyB-10363', param)
+		bar = conf10363.get('section10363', 'keyA-10363')
 
-		import flask
+		import platform
+		import subprocess
+		import helpers.utils
 
-		flask.session[bar] = '12345'
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
+		else:
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
 
-		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
-		)
+		try:
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+
+			RESPONSE += (
+				helpers.utils.commandOutput(proc)
+			)
+		except IOError:
+			RESPONSE += (
+				"Problem executing cmdi - subprocess.run(list) Test Case"
+			)
 
 		return RESPONSE
 

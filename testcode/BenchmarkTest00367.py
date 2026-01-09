@@ -34,23 +34,14 @@ def init(app):
 				param = name
 				break
 
-		possible = "ABC"
-		guess = possible[1]
+		num = 106
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
 
 		otherarg = "static text"
 		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
 		)
 
 		return RESPONSE

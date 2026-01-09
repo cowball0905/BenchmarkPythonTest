@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00271', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00271', methods=['GET'])
 	def BenchmarkTest00271_get():
 		return BenchmarkTest00271_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00271', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00271', methods=['POST'])
 	def BenchmarkTest00271_post():
 		RESPONSE = ""
 
@@ -33,31 +33,30 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import helpers.ThingFactory
+		possible = "ABC"
+		guess = possible[0]
 		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import platform
-		import subprocess
-		import helpers.utils
-
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
+		import yaml
 
 		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+			yobj = yaml.safe_load(bar)
 
 			RESPONSE += (
-				helpers.utils.commandOutput(proc)
+				yobj['text']
 			)
-		except IOError:
+		except:
 			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

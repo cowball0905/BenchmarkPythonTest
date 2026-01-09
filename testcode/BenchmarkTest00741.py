@@ -20,38 +20,42 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00741', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00741', methods=['GET'])
 	def BenchmarkTest00741_get():
 		return BenchmarkTest00741_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00741', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00741', methods=['POST'])
 	def BenchmarkTest00741_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00741")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00741")
+		param = ""
+		if values:
+			param = values[0]
 
-		map19474 = {}
-		map19474['keyA-19474'] = 'a-Value'
-		map19474['keyB-19474'] = param
-		map19474['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map19474['keyB-19474']
-		bar = map19474['keyA-19474']
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import yaml
+		import helpers.utils
 
 		try:
-			yobj = yaml.safe_load(bar)
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				yobj['text']
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-		except:
+		except IOError as e:
 			RESPONSE += (
-				"There was an error loading the configuration"
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

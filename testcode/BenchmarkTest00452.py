@@ -20,40 +20,29 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00452', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00452', methods=['GET'])
 	def BenchmarkTest00452_get():
 		return BenchmarkTest00452_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00452', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00452', methods=['POST'])
 	def BenchmarkTest00452_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00452")
+		param = request.headers.get("Referer")
 		if not param:
 		    param = ""
 
-		import configparser
+		import html
 		
-		bar = 'safe!'
-		conf75795 = configparser.ConfigParser()
-		conf75795.add_section('section75795')
-		conf75795.set('section75795', 'keyA-75795', 'a-Value')
-		conf75795.set('section75795', 'keyB-75795', param)
-		bar = conf75795.get('section75795', 'keyB-75795')
+		bar = html.escape(param)
 
-		import helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'wb') as fd:
-				RESPONSE += (
-					f'Now ready to write to file: {escape_for_html(fileName)}'
-				)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
+		RESPONSE += (
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+		)
 
 		return RESPONSE
 

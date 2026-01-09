@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00860', methods=['GET'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00860', methods=['GET'])
 	def BenchmarkTest00860_get():
 		return BenchmarkTest00860_post()
 
-	@app.route('/benchmark/xpathi-01/BenchmarkTest00860', methods=['POST'])
+	@app.route('/benchmark/weakrand-02/BenchmarkTest00860', methods=['POST'])
 	def BenchmarkTest00860_post():
 		RESPONSE = ""
 
@@ -35,33 +35,26 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf81294 = configparser.ConfigParser()
-		conf81294.add_section('section81294')
-		conf81294.set('section81294', 'keyA-81294', 'a-Value')
-		conf81294.set('section81294', 'keyB-81294', param)
-		bar = conf81294.get('section81294', 'keyB-81294')
-
-		import lxml.etree
 		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
-		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
-			nodes = root.xpath(query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+		import random
+		from helpers.utils import mysession
 
+		num = 'BenchmarkTest00860'[13:]
+		user = f'Randy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.getrandbits(32))
+
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE

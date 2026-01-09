@@ -35,14 +35,8 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -59,7 +53,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.sha1()
+		hash = hashlib.sha512()
 		hash.update(input)
 
 		result = hash.digest()

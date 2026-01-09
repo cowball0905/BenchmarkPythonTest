@@ -32,11 +32,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		map60038 = {}
-		map60038['keyA-60038'] = 'a-Value'
-		map60038['keyB-60038'] = param
-		map60038['keyC'] = 'another-Value'
-		bar = map60038['keyB-60038']
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
 		import hashlib, base64
 		import io, helpers.utils

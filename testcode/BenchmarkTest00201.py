@@ -33,14 +33,10 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
+		import helpers.ThingFactory
 		
-		bar = 'safe!'
-		conf2705 = configparser.ConfigParser()
-		conf2705.add_section('section2705')
-		conf2705.set('section2705', 'keyA-2705', 'a-Value')
-		conf2705.set('section2705', 'keyB-2705', param)
-		bar = conf2705.get('section2705', 'keyB-2705')
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
 		import elementpath
 		import xml.etree.ElementTree as ET
@@ -48,8 +44,7 @@ def init(app):
 
 		try:
 			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))
@@ -61,6 +56,7 @@ def init(app):
 			RESPONSE += (
 				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
+
 
 		return RESPONSE
 

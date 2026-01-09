@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01021', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest01021', methods=['GET'])
 	def BenchmarkTest01021_get():
 		return BenchmarkTest01021_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01021', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest01021', methods=['POST'])
 	def BenchmarkTest01021_post():
 		RESPONSE = ""
 
@@ -33,32 +33,25 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import pathlib
-		import helpers.utils
+		import helpers.db_sqlite
 
-		try:
-			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-			p = (testfiles / bar).resolve()
-
-			if not str(p).startswith(str(testfiles)):
-				RESPONSE += (
-					"Invalid Path."
-				)
-				return RESPONSE
-
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
-				f'{escape_for_html(p.read_text()[:1000])}'
-			)
-		except OSError:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (bar,))
+		RESPONSE += (
+			helpers.db_sqlite.results(cur, sql)
+		)
+		con.close()
 
 		return RESPONSE
 

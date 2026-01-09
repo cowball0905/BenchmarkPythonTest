@@ -34,27 +34,23 @@ def init(app):
 				param = name
 				break
 
-		bar = param
+		map77851 = {}
+		map77851['keyA-77851'] = 'a-Value'
+		map77851['keyB-77851'] = param
+		map77851['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map77851['keyB-77851']
+		bar = map77851['keyA-77851']
 
+		import pathlib
 		import helpers.utils
 
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

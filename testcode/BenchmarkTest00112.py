@@ -32,18 +32,26 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		map62688 = {}
+		map62688['keyA-62688'] = 'a-Value'
+		map62688['keyB-62688'] = param
+		map62688['keyC'] = 'another-Value'
+		bar = map62688['keyB-62688']
 
 		import lxml.etree
 		import helpers.utils
+		import io
 
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=$name]'
-			nodes = root.xpath(query, name=bar)
+			strIO = io.StringIO()
+			strIO.write('/Employees/Employee[@emplid=\'')
+			strIO.write(bar)
+			strIO.write('\']')
+			query = strIO.getvalue()
+
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

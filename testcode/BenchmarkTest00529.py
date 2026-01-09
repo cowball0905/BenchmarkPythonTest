@@ -38,18 +38,25 @@ def init(app):
 		map5707['keyA-5707'] = 'a-Value'
 		map5707['keyB-5707'] = param
 		map5707['keyC'] = 'another-Value'
-		bar = "safe!"
 		bar = map5707['keyB-5707']
-		bar = map5707['keyA-5707']
 
-		import os
 		import helpers.utils
 
-		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-		if os.path.exists(fileName):
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
+		fileName = None
+		fd = None
+
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

@@ -32,13 +32,12 @@ def init(app):
 		if not param:
 			param = ""
 
-		string4905 = ''
-		data12 = ''
-		copy = string4905
-		string4905 = ''
-		string4905 += param
-		copy += 'SomeOKString'
-		bar = copy
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -55,7 +54,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha512')
+		hash = hashlib.md5()
 		hash.update(input)
 
 		result = hash.digest()

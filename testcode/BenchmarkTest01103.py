@@ -20,38 +20,28 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01103', methods=['GET'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01103', methods=['GET'])
 	def BenchmarkTest01103_get():
 		return BenchmarkTest01103_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01103', methods=['POST'])
+	@app.route('/benchmark/xss-01/BenchmarkTest01103', methods=['POST'])
 	def BenchmarkTest01103_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01103")
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		map63777 = {}
+		map63777['keyA-63777'] = 'a-Value'
+		map63777['keyB-63777'] = param
+		map63777['keyC'] = 'another-Value'
+		bar = map63777['keyB-63777']
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Eval argument must be a plain string literal."
-			)
-			return RESPONSE		
 
-		try:
-			RESPONSE += (
-				eval(bar)
-			)
-		except:
-			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
-			)
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

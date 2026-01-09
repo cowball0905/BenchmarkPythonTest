@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00726', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00726', methods=['GET'])
 	def BenchmarkTest00726_get():
 		return BenchmarkTest00726_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00726', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00726', methods=['POST'])
 	def BenchmarkTest00726_post():
 		RESPONSE = ""
 
@@ -32,18 +32,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		string20491 = 'help'
-		string20491 += param
-		string20491 += 'snapes on a plane'
-		bar = string20491[4:-17]
+		num = 106
+		
+		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
 
+		import flask
+
+		flask.session['userid'] = bar
 
 		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
 		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00726': bar}))
-		
 
 		return RESPONSE
 

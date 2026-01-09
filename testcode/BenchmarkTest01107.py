@@ -20,43 +20,60 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01107', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01107', methods=['GET'])
 	def BenchmarkTest01107_get():
 		return BenchmarkTest01107_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01107', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01107', methods=['POST'])
 	def BenchmarkTest01107_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01107")
 
-		num = 86
+		possible = "ABC"
+		guess = possible[0]
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		import pickle
-		import base64
 		import helpers.utils
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		fileName = None
+		fd = None
 
-		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
+		if '../' in bar:
 			RESPONSE += (
-				'Unpickling failed!'
+				'File name must not include \'../\''
 			)
 			return RESPONSE
 
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+		try:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+			)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

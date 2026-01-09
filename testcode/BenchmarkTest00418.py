@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00418', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00418', methods=['GET'])
 	def BenchmarkTest00418_get():
 		return BenchmarkTest00418_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00418', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00418', methods=['POST'])
 	def BenchmarkTest00418_post():
 		RESPONSE = ""
 
@@ -34,17 +34,15 @@ def init(app):
 				param = name
 				break
 
-		num = 106
-		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
+		import flask
 
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00418': bar}))
-		
+		return flask.redirect(bar)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00898', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00898', methods=['GET'])
 	def BenchmarkTest00898_get():
 		return BenchmarkTest00898_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00898', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00898', methods=['POST'])
 	def BenchmarkTest00898_post():
 		RESPONSE = ""
 
@@ -35,19 +35,26 @@ def init(app):
 		if not param:
 			param = ""
 
-		map10271 = {}
-		map10271['keyA-10271'] = 'a-Value'
-		map10271['keyB-10271'] = param
-		map10271['keyC'] = 'another-Value'
-		bar = map10271['keyB-10271']
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import flask
+		import pickle
+		import base64
+		import helpers.utils
 
-		flask.session['userid'] = bar
+		helpers.utils.sharedstr = "no pickles to be seen here"
+
+		try:
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
+		except:
+			RESPONSE += (
+				'Unpickling failed!'
+			)
+			return RESPONSE
 
 		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
+			f'shared string is {helpers.utils.sharedstr}'
 		)
 
 		return RESPONSE

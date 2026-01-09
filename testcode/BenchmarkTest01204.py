@@ -28,9 +28,9 @@ def init(app):
 	def BenchmarkTest01204_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest01204")
+		param = request.args.get("BenchmarkTest01204")
 		if not param:
-		    param = ""
+			param = ""
 
 
 		import lxml.etree
@@ -39,9 +39,8 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = '/Employees/Employee[@emplid=\'' + param + '\']'
-
-			nodes = root.xpath(query)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=param)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

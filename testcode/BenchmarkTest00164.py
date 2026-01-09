@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00164', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00164', methods=['GET'])
 	def BenchmarkTest00164_get():
 		return BenchmarkTest00164_post()
 
-	@app.route('/benchmark/ldapi-00/BenchmarkTest00164', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00164', methods=['POST'])
 	def BenchmarkTest00164_post():
 		RESPONSE = ""
 
@@ -32,36 +32,28 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		string6880 = 'help'
+		string6880 += param
+		string6880 += 'snapes on a plane'
+		bar = string6880[4:-17]
 
-		import helpers.ldap
-		import ldap3
+		import pickle
+		import base64
+		import helpers.utils
 
-		base = 'ou=users,ou=system'
-		filter = f'(&(objectclass=person)(uid={bar}))'
+		helpers.utils.sharedstr = "no pickles to be seen here"
+
 		try:
-			conn = helpers.ldap.get_connection()
-			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
-			found = False
-			for e in conn.entries:
-				RESPONSE += (
-					f'LDAP query results:<br>'
-					f'Record found with name {e['uid']}<br>'
-					f'Address: {e['street']}<br>'
-				)
-				found = True
-			conn.unbind()
-
-			if not found:
-				RESPONSE += (
-					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
-				)
-		except IOError:
+			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
+		except:
 			RESPONSE += (
-				"Error processing LDAP query."
+				'Unpickling failed!'
 			)
+			return RESPONSE
+
+		RESPONSE += (
+			f'shared string is {helpers.utils.sharedstr}'
+		)
 
 		return RESPONSE
 

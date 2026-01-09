@@ -20,43 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01186', methods=['GET'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01186', methods=['GET'])
 	def BenchmarkTest01186_get():
 		return BenchmarkTest01186_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01186', methods=['POST'])
+	@app.route('/benchmark/weakrand-03/BenchmarkTest01186', methods=['POST'])
 	def BenchmarkTest01186_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01186")
+		values = request.form.getlist("BenchmarkTest01186")
+		param = ""
+		if values:
+			param = values[0]
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
 
-		import yaml
+		import random
+		import base64
+		from helpers.utils import mysession
 
-		try:
-			yobj = yaml.safe_load(bar)
+		num = 'BenchmarkTest01186'[13:]
+		user = f'SafeBarbara{num}'
+		cookie = f'rememberMe{num}'
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
 
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				yobj['text']
+				f'Welcome back: {user}<br/>'
 			)
-		except:
+		else:
+			mysession[cookie] = value
 			RESPONSE += (
-				"There was an error loading the configuration"
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 
 		return RESPONSE
+
 

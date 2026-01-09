@@ -33,10 +33,11 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
 		import lxml.etree
 		import helpers.utils
@@ -44,7 +45,7 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
+			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
 
 			nodes = root.xpath(query)
 			node_strings = []

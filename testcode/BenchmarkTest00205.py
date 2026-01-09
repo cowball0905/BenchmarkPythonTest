@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00205', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00205', methods=['GET'])
 	def BenchmarkTest00205_get():
 		return BenchmarkTest00205_post()
 
-	@app.route('/benchmark/xpathi-00/BenchmarkTest00205', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00205', methods=['POST'])
 	def BenchmarkTest00205_post():
 		RESPONSE = ""
 
@@ -33,37 +33,40 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 86
+		import configparser
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = 'safe!'
+		conf60568 = configparser.ConfigParser()
+		conf60568.add_section('section60568')
+		conf60568.set('section60568', 'keyA-60568', 'a-Value')
+		conf60568.set('section60568', 'keyB-60568', param)
+		bar = conf60568.get('section60568', 'keyB-60568')
 
-		import elementpath
-		import xml.etree.ElementTree as ET
-		import helpers.utils
-
-		if '\'' in bar:
-			RESPONSE += (
-				"Employee ID must not contain apostrophes"
-			)
-			return RESPONSE
+		import xml.dom.minidom
+		import xml.sax.handler
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+			parser.setFeature(xml.sax.handler.feature_external_ges, True)
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
 
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
 			)
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
 			)
 
 		return RESPONSE

@@ -35,12 +35,11 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 86
-		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		map14888 = {}
+		map14888['keyA-14888'] = 'a-Value'
+		map14888['keyB-14888'] = param
+		map14888['keyC'] = 'another-Value'
+		bar = map14888['keyB-14888']
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -57,7 +56,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.md5()
+		hash = hashlib.sha384()
 		hash.update(input)
 
 		result = hash.digest()

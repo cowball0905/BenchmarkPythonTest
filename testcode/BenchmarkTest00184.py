@@ -33,25 +33,30 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import helpers.utils
 
-		fileName = None
-		fd = None
-
 		try:
 			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'rb') as fd:
+			with open(fileName, 'wb') as fd:
 				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+					f'Now ready to write to file: {escape_for_html(fileName)}'
 				)
 		except IOError as e:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
 

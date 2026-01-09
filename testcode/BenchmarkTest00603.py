@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00603', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00603', methods=['GET'])
 	def BenchmarkTest00603_get():
 		return BenchmarkTest00603_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00603', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00603', methods=['POST'])
 	def BenchmarkTest00603_post():
 		RESPONSE = ""
 
@@ -34,23 +34,27 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		bar = ""
+		bar = "alsosafe"
 		if param:
 			lst = []
 			lst.append('safe')
 			lst.append(param)
 			lst.append('moresafe')
 			lst.pop(0)
-			bar = lst[0]
+			bar = lst[1]
 
-		import flask
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
 
-		flask.session['userid'] = bar
-
-		RESPONSE += (
-			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
-			'\'saved in session.'
-		)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

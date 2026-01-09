@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00420', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00420', methods=['GET'])
 	def BenchmarkTest00420_get():
 		return BenchmarkTest00420_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest00420', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00420', methods=['POST'])
 	def BenchmarkTest00420_post():
 		RESPONSE = ""
 
@@ -34,31 +34,36 @@ def init(app):
 				param = name
 				break
 
-		superstring = f'72236{param}abcd'
-		bar = superstring[len('72236'):len(superstring)-5]
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		import flask
+		import urllib.parse
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		try:
+			url = urllib.parse.urlparse(bar)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
+		except:
+			RESPONSE += (
+				'Error parsing URL.'
+			)
+			return RESPONSE
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
-
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=False,
-			httponly=True)
+		return flask.redirect(bar)
 
 		return RESPONSE
 

@@ -20,47 +20,36 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01230', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01230', methods=['GET'])
 	def BenchmarkTest01230_get():
 		return BenchmarkTest01230_post()
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01230', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01230', methods=['POST'])
 	def BenchmarkTest01230_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01230" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01230"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01230") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01230")
 
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import pickle
+		import base64
 		import helpers.utils
 
-		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{param.replace('\'', '&apos;')}\']")
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
+		helpers.utils.sharedstr = "no pickles to be seen here"
 
-			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
-			)
+		try:
+			unpickled = pickle.loads(base64.urlsafe_b64decode(param))
 		except:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				'Unpickling failed!'
 			)
+			return RESPONSE
 
+		RESPONSE += (
+			f'shared string is {helpers.utils.sharedstr}'
+		)
 
 		return RESPONSE
 

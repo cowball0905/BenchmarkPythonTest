@@ -34,41 +34,23 @@ def init(app):
 				param = name
 				break
 
-		map28537 = {}
-		map28537['keyA-28537'] = 'a-Value'
-		map28537['keyB-28537'] = param
-		map28537['keyC'] = 'another-Value'
-		bar = map28537['keyB-28537']
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
+		import os
 		import helpers.utils
 
-		fileName = None
-		fd = None
-
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not include \'../\''
-			)
-			return RESPONSE
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
-			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-			)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
+		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+		if os.path.exists(fileName):
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
 
 		return RESPONSE
 

@@ -32,14 +32,10 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
+		import helpers.ThingFactory
 		
-		bar = 'safe!'
-		conf33014 = configparser.ConfigParser()
-		conf33014.add_section('section33014')
-		conf33014.set('section33014', 'keyA-33014', 'a-Value')
-		conf33014.set('section33014', 'keyB-33014', param)
-		bar = conf33014.get('section33014', 'keyB-33014')
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
 		import random
 		import base64

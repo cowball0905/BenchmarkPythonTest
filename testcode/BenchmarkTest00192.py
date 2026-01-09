@@ -33,16 +33,25 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		possible = "ABC"
+		guess = possible[1]
+		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
 		import helpers.db_sqlite
 
-		sql = f'SELECT username from USERS where password = \'{bar}\''
+		sql = f'SELECT username from USERS where password = ?'
 		con = helpers.db_sqlite.get_connection()
 		cur = con.cursor()
-		cur.execute(sql)
+		cur.execute(sql, (bar,))
 		RESPONSE += (
 			helpers.db_sqlite.results(cur, sql)
 		)

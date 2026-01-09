@@ -34,14 +34,11 @@ def init(app):
 				param = name
 				break
 
-		import configparser
-		
-		bar = 'safe!'
-		conf70670 = configparser.ConfigParser()
-		conf70670.add_section('section70670')
-		conf70670.set('section70670', 'keyA-70670', 'a-Value')
-		conf70670.set('section70670', 'keyB-70670', param)
-		bar = conf70670.get('section70670', 'keyB-70670')
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
 		import lxml.etree
 		import helpers.utils
@@ -49,8 +46,7 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
-
+			query = f'/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']'
 			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:

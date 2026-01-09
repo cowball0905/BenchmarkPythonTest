@@ -33,14 +33,10 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
+		import helpers.ThingFactory
 		
-		bar = 'safe!'
-		conf3000 = configparser.ConfigParser()
-		conf3000.add_section('section3000')
-		conf3000.set('section3000', 'keyA-3000', 'a-Value')
-		conf3000.set('section3000', 'keyB-3000', param)
-		bar = conf3000.get('section3000', 'keyB-3000')
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
 		import lxml.etree
 		import helpers.utils
@@ -48,7 +44,8 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
+
 			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:

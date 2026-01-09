@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00270', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00270', methods=['GET'])
 	def BenchmarkTest00270_get():
 		return BenchmarkTest00270_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00270', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest00270', methods=['POST'])
 	def BenchmarkTest00270_post():
 		RESPONSE = ""
 
@@ -33,36 +33,20 @@ def init(app):
 		if values:
 			param = values[0]
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = param + '_SafeStuff'
 
-		import os
-		import subprocess
-		import helpers.utils
+		import yaml
 
-		argList = []
-		if "Windows" in os.name:
-			argList.append("cmd.exe")
-			argList.append("-c")
-		else:
-			argList.append("sh")
-			argList.append("-c")
-		argList.append(f"echo {bar}")
+		try:
+			yobj = yaml.load(bar, Loader=yaml.Loader)
 
-		proc = subprocess.run(argList, capture_output=True, encoding="utf-8")
-		RESPONSE += (
-			helpers.utils.commandOutput(proc)
-		)
+			RESPONSE += (
+				yobj['text']
+			)
+		except:
+			RESPONSE += (
+				"There was an error loading the configuration"
+			)
 
 		return RESPONSE
 

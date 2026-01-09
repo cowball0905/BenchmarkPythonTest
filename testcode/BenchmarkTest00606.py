@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00606', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00606', methods=['GET'])
 	def BenchmarkTest00606_get():
 		return BenchmarkTest00606_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00606', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest00606', methods=['POST'])
 	def BenchmarkTest00606_post():
 		RESPONSE = ""
 
@@ -34,24 +34,28 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = param
+
+		import platform
+		import subprocess
+		import helpers.utils
+
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
+		else:
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
 
 		try:
-			exec(bar)
-		except:
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
+
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				helpers.utils.commandOutput(proc)
+			)
+		except IOError:
+			RESPONSE += (
+				"Problem executing cmdi - subprocess.run(list) Test Case"
 			)
 
 		return RESPONSE

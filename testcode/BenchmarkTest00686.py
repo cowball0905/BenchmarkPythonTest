@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00686', methods=['GET'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00686', methods=['GET'])
 	def BenchmarkTest00686_get():
 		return BenchmarkTest00686_post()
 
-	@app.route('/benchmark/xxe-00/BenchmarkTest00686', methods=['POST'])
+	@app.route('/benchmark/xpathi-01/BenchmarkTest00686', methods=['POST'])
 	def BenchmarkTest00686_post():
 		RESPONSE = ""
 
@@ -32,44 +32,32 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[1]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		map98877 = {}
+		map98877['keyA-98877'] = 'a-Value'
+		map98877['keyB-98877'] = param
+		map98877['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map98877['keyB-98877']
+		bar = map98877['keyA-98877']
 
-		import xml.dom.minidom
-		import xml.sax.handler
+		import lxml.etree
+		import helpers.utils
 
 		try:
-			parser = xml.sax.make_parser()
-			# all features are disabled by default
-			parser.setFeature(xml.sax.handler.feature_external_ges, True)
-
-			doc = xml.dom.minidom.parseString(bar, parser)
-
-			out = ''
-			processing = [doc.documentElement]
-			while processing:
-				e = processing.pop(0)
-				if e.nodeType == xml.dom.Node.TEXT_NODE:
-					out += e.data
-				else:
-					processing[:0] = e.childNodes
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
 
 			RESPONSE += (
-				f'Your XML doc results are: <br>{escape_for_html(out)}'
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
 			)
 		except:
 			RESPONSE += (
-				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE

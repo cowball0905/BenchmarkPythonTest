@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00287', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00287', methods=['GET'])
 	def BenchmarkTest00287_get():
 		return BenchmarkTest00287_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00287', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00287', methods=['POST'])
 	def BenchmarkTest00287_post():
 		RESPONSE = ""
 
@@ -35,18 +35,29 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 86
+		possible = "ABC"
+		guess = possible[0]
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
+		import helpers.db_sqlite
 
-		otherarg = "static text"
+		sql = f'SELECT username from USERS where password = ?'
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql, (bar,))
 		RESPONSE += (
-			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+			helpers.db_sqlite.results(cur, sql)
 		)
+		con.close()
 
 		return RESPONSE
 

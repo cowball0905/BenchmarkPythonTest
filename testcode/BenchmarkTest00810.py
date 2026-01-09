@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00810', methods=['GET'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00810', methods=['GET'])
 	def BenchmarkTest00810_get():
 		return BenchmarkTest00810_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00810', methods=['POST'])
+	@app.route('/benchmark/securecookie-00/BenchmarkTest00810', methods=['POST'])
 	def BenchmarkTest00810_post():
 		RESPONSE = ""
 
@@ -33,17 +33,15 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
-		
-		bar = 'safe!'
-		conf10301 = configparser.ConfigParser()
-		conf10301.add_section('section10301')
-		conf10301.set('section10301', 'keyA-10301', 'a_Value')
-		conf10301.set('section10301', 'keyB-10301', param)
-		bar = conf10301.get('section10301', 'keyA-10301')
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
-		import hashlib, base64
-		import io, helpers.utils
+		from flask import make_response
+		import io
+		import helpers.utils
 
 		input = ''
 		if isinstance(bar, str):
@@ -51,22 +49,18 @@ def init(app):
 		elif isinstance(bar, io.IOBase):
 			input = bar.read(1000)
 
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
+		cookie = 'SomeCookie'
+		value = input.decode('utf-8')
 
-		hash = hashlib.sha1()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
 		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
+			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
 		)
-		f.close()
+
+		RESPONSE = make_response(RESPONSE)
+		RESPONSE.set_cookie(cookie, value,
+			path=request.path,
+			secure=True,
+			httponly=True)
 
 		return RESPONSE
 

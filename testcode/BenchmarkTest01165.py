@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01165', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01165', methods=['GET'])
 	def BenchmarkTest01165_get():
 		return BenchmarkTest01165_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest01165', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01165', methods=['POST'])
 	def BenchmarkTest01165_post():
 		RESPONSE = ""
 
@@ -32,17 +32,33 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01165")
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
-
-
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest01165': bar}))
+		possible = "ABC"
+		guess = possible[1]
 		
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
+
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Eval argument must be a plain string literal."
+			)
+			return RESPONSE		
+
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

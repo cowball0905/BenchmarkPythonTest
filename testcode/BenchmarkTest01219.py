@@ -20,36 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01219', methods=['GET'])
+	@app.route('/benchmark/weakrand-04/BenchmarkTest01219', methods=['GET'])
 	def BenchmarkTest01219_get():
 		return BenchmarkTest01219_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01219', methods=['POST'])
+	@app.route('/benchmark/weakrand-04/BenchmarkTest01219', methods=['POST'])
 	def BenchmarkTest01219_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest01219")
-		if not param:
-			param = ""
+		import urllib.parse
+		
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest01219" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01219"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest01219") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
 
-		import pickle
-		import base64
-		import helpers.utils
+		import random
+		from helpers.utils import mysession
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		num = 'BenchmarkTest01219'[13:]
+		user = f'SafeRandy{num}'
+		cookie = f'rememberMe{num}'
+		value = str(random.SystemRandom().getrandbits(32))
 
-		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(param))
-		except:
+		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
-				'Unpickling failed!'
+				f'Welcome back: {user}<br/>'
 			)
-			return RESPONSE
-
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+		else:
+			mysession[cookie] = value
+			RESPONSE += (
+				f'{user} has been remembered with cookie: '
+				f'{cookie} whose value is: {mysession[cookie]}<br/>'
+			)
 
 		return RESPONSE
 

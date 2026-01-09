@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00618', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00618', methods=['GET'])
 	def BenchmarkTest00618_get():
 		return BenchmarkTest00618_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00618', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00618', methods=['POST'])
 	def BenchmarkTest00618_post():
 		RESPONSE = ""
 
@@ -39,35 +39,32 @@ def init(app):
 				param = name
 				break
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		import configparser
+		
+		bar = 'safe!'
+		conf42704 = configparser.ConfigParser()
+		conf42704.add_section('section42704')
+		conf42704.set('section42704', 'keyA-42704', 'a-Value')
+		conf42704.set('section42704', 'keyB-42704', param)
+		bar = conf42704.get('section42704', 'keyB-42704')
 
 		import helpers.utils
 
-		if '../' in bar:
-			RESPONSE += (
-				'File name must not contain \'../\''
-			)
-			return RESPONSE
+		fileName = None
+		fd = None
 
 		try:
 			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'wb')
-			RESPONSE += (
-				f'Now ready to write to file: {escape_for_html(fileName)}'
-			)
+			with open(fileName, 'rb') as fd:
+				RESPONSE += (
+					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				)
 		except IOError as e:
 			RESPONSE += (
-				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'Problem reading from file \'{fileName}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
-		finally:
-			try:
-				if fd is not None:
-					fd.close()
-			except IOError:
-				pass # "// we tried..."
 
 		return RESPONSE
 

@@ -33,11 +33,9 @@ def init(app):
 		if values:
 			param = values[0]
 
-		map34857 = {}
-		map34857['keyA-34857'] = 'a-Value'
-		map34857['keyB-34857'] = param
-		map34857['keyC'] = 'another-Value'
-		bar = map34857['keyB-34857']
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
 		import elementpath
 		import xml.etree.ElementTree as ET
@@ -45,8 +43,7 @@ def init(app):
 
 		try:
 			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))
@@ -58,6 +55,7 @@ def init(app):
 			RESPONSE += (
 				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
+
 
 		return RESPONSE
 

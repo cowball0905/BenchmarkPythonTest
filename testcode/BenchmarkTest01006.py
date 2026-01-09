@@ -20,52 +20,51 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01006', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01006', methods=['GET'])
 	def BenchmarkTest01006_get():
 		return BenchmarkTest01006_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01006', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01006', methods=['POST'])
 	def BenchmarkTest01006_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01006" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01006"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01006") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		map56505 = {}
-		map56505['keyA-56505'] = 'a-Value'
-		map56505['keyB-56505'] = param
-		map56505['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map56505['keyB-56505']
-		bar = map56505['keyA-56505']
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		import pickle
-		import base64
 		import helpers.utils
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		fileName = None
+		fd = None
 
 		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				'Unpickling failed!'
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
-			return RESPONSE
-
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

@@ -20,37 +20,48 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01202', methods=['GET'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01202', methods=['GET'])
 	def BenchmarkTest01202_get():
 		return BenchmarkTest01202_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01202', methods=['POST'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01202', methods=['POST'])
 	def BenchmarkTest01202_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest01202")
+		param = request.args.get("BenchmarkTest01202")
 		if not param:
-		    param = ""
+			param = ""
 
 
-		import codecs
 		import helpers.utils
 
+		fileName = None
+		fd = None
+
+		if '../' in param:
+			RESPONSE += (
+				'File name must not include \'../\''
+			)
+			return RESPONSE
+
 		try:
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{param}','r','utf-8')
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{param}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
-
+		except IOError as e:
 			RESPONSE += (
-				" And file already exists."
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
-
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

@@ -32,20 +32,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
+		num = 86
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
 		import helpers.utils
+
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not contain \'../\''
+			)
+			return RESPONSE
 
 		try:
 			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'

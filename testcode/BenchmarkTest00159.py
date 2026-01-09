@@ -32,17 +32,20 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
 		try:
-			RESPONSE += (
-				eval(bar)
-			)
+			exec(bar)
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				f'Error executing statement \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

@@ -20,33 +20,31 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01111', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01111', methods=['GET'])
 	def BenchmarkTest01111_get():
 		return BenchmarkTest01111_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01111', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01111', methods=['POST'])
 	def BenchmarkTest01111_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01111")
 
-		bar = param
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import yaml
+		import pathlib
+		import helpers.utils
 
-		try:
-			yobj = yaml.safe_load(bar)
-
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01164', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01164', methods=['GET'])
 	def BenchmarkTest01164_get():
 		return BenchmarkTest01164_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest01164', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest01164', methods=['POST'])
 	def BenchmarkTest01164_post():
 		RESPONSE = ""
 
@@ -32,40 +32,20 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01164")
 
-		import configparser
-		
-		bar = 'safe!'
-		conf85325 = configparser.ConfigParser()
-		conf85325.add_section('section85325')
-		conf85325.set('section85325', 'keyA-85325', 'a_Value')
-		conf85325.set('section85325', 'keyB-85325', param)
-		bar = conf85325.get('section85325', 'keyA-85325')
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
-		import hashlib, base64
-		import io, helpers.utils
-
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
+		try:
 			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
+				eval(bar)
 			)
-			return RESPONSE
-
-		hash = hashlib.sha512()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

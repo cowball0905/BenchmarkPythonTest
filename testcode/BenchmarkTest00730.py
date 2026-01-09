@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00730', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00730', methods=['GET'])
 	def BenchmarkTest00730_get():
 		return BenchmarkTest00730_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00730', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00730', methods=['POST'])
 	def BenchmarkTest00730_post():
 		RESPONSE = ""
 
@@ -32,29 +32,24 @@ def init(app):
 		if not param:
 			param = ""
 
-		map45448 = {}
-		map45448['keyA-45448'] = 'a-Value'
-		map45448['keyB-45448'] = param
-		map45448['keyC'] = 'another-Value'
-		bar = map45448['keyB-45448']
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
-		import flask
-		import urllib.parse
-
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
 			RESPONSE += (
-				'Error parsing URL.'
+				"Exec argument must be a plain string literal."
 			)
 			return RESPONSE
 
-		return flask.redirect(bar)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

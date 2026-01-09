@@ -20,46 +20,47 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00662', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00662', methods=['GET'])
 	def BenchmarkTest00662_get():
 		return BenchmarkTest00662_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00662', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00662', methods=['POST'])
 	def BenchmarkTest00662_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		param = request.args.get("BenchmarkTest00662")
+		if not param:
+			param = ""
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		map17035 = {}
+		map17035['keyA-17035'] = 'a-Value'
+		map17035['keyB-17035'] = param
+		map17035['keyC'] = 'another-Value'
+		bar = map17035['keyB-17035']
 
-		import pickle
-		import base64
 		import helpers.utils
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		fileName = None
+		fd = None
 
 		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				'Unpickling failed!'
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
-			return RESPONSE
-
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

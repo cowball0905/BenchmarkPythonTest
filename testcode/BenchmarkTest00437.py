@@ -20,48 +20,26 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00437', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00437', methods=['GET'])
 	def BenchmarkTest00437_get():
 		return BenchmarkTest00437_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00437', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00437', methods=['POST'])
 	def BenchmarkTest00437_post():
 		RESPONSE = ""
 
-		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest00437" in request.form.getlist(name):
-				param = name
-				break
+		param = request.headers.get("Referer")
+		if not param:
+		    param = ""
 
-		num = 86
+		import markupsafe
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = markupsafe.escape(param)
 
-		import platform
-		import subprocess
-		import helpers.utils
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
-
-		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
-
-			RESPONSE += (
-				helpers.utils.commandOutput(proc)
-			)
-		except IOError:
-			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
-			)
+		RESPONSE += (
+			f'Parameter value: {bar}'
+		)
 
 		return RESPONSE
 

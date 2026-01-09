@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01169', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01169', methods=['GET'])
 	def BenchmarkTest01169_get():
 		return BenchmarkTest01169_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01169', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest01169', methods=['POST'])
 	def BenchmarkTest01169_post():
 		RESPONSE = ""
 
@@ -32,37 +32,41 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01169")
 
-		import configparser
-		
-		bar = 'safe!'
-		conf43529 = configparser.ConfigParser()
-		conf43529.add_section('section43529')
-		conf43529.set('section43529', 'keyA-43529', 'a-Value')
-		conf43529.set('section43529', 'keyB-43529', param)
-		bar = conf43529.get('section43529', 'keyB-43529')
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		import helpers.ldap
+		import ldap3
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
+		try:
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
-
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=True,
-			httponly=True)
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
+		except:
+			RESPONSE += (
+				"Error processing LDAP query."
+			)
 
 		return RESPONSE
 

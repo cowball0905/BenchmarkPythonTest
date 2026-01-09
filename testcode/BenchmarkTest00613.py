@@ -20,50 +20,57 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00613', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00613', methods=['GET'])
 	def BenchmarkTest00613_get():
 		return BenchmarkTest00613_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00613', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00613', methods=['POST'])
 	def BenchmarkTest00613_post():
 		RESPONSE = ""
 
+		import helpers.utils
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00613")
 		
-		if headers:
-			param = headers[0]
+		for name in request.headers.keys():
+			if name.lower() in helpers.utils.commonHeaderNames:
+				continue
+		
+			if request.headers.get_all(name):
+				param = name
+				break
 
 		import configparser
 		
 		bar = 'safe!'
 		conf66153 = configparser.ConfigParser()
 		conf66153.add_section('section66153')
-		conf66153.set('section66153', 'keyA-66153', 'a_Value')
+		conf66153.set('section66153', 'keyA-66153', 'a-Value')
 		conf66153.set('section66153', 'keyB-66153', param)
-		bar = conf66153.get('section66153', 'keyA-66153')
+		bar = conf66153.get('section66153', 'keyB-66153')
 
-		import platform
-		import subprocess
 		import helpers.utils
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
+		fileName = None
+		fd = None
 
 		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				helpers.utils.commandOutput(proc)
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
-		except IOError:
+		except IOError as e:
 			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

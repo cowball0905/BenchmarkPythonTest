@@ -50,9 +50,9 @@ def init(app):
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest01064'[13:]
-		user = f'Randall{num}'
+		user = f'SafeNancy{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.random())[2:]
+		value = str(random.SystemRandom().normalvariate())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

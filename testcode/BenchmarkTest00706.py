@@ -32,21 +32,16 @@ def init(app):
 		if not param:
 			param = ""
 
-		map92794 = {}
-		map92794['keyA-92794'] = 'a-Value'
-		map92794['keyB-92794'] = param
-		map92794['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map92794['keyB-92794']
-		bar = map92794['keyA-92794']
+		superstring = f'92794{param}abcd'
+		bar = superstring[len('92794'):len(superstring)-5]
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00706'[13:]
-		user = f'SafeRandy{num}'
+		user = f'SafeRandall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().getrandbits(32))
+		value = str(random.SystemRandom().random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

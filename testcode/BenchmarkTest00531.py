@@ -20,16 +20,16 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00531', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00531', methods=['GET'])
 	def BenchmarkTest00531_get():
 		return BenchmarkTest00531_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00531', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00531', methods=['POST'])
 	def BenchmarkTest00531_post():
 		RESPONSE = ""
 
 		param = ""
-		headers = request.headers.getlist("BenchmarkTest00531")
+		headers = request.headers.getlist("Referer")
 		
 		if headers:
 			param = headers[0]
@@ -39,26 +39,15 @@ def init(app):
 		bar = 'safe!'
 		conf18258 = configparser.ConfigParser()
 		conf18258.add_section('section18258')
-		conf18258.set('section18258', 'keyA-18258', 'a_Value')
+		conf18258.set('section18258', 'keyA-18258', 'a-Value')
 		conf18258.set('section18258', 'keyB-18258', param)
-		bar = conf18258.get('section18258', 'keyA-18258')
+		bar = conf18258.get('section18258', 'keyB-18258')
 
-		import pathlib
-		import helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = (testfiles / bar).resolve()
-
-		if not str(p).startswith(str(testfiles)):
-			RESPONSE += (
-				"Invalid Path."
-			)
-			return RESPONSE
-		
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		otherarg = "static text"
+		RESPONSE += (
+			f'bar is \'{bar}\' and otherarg is \'{otherarg}\''
+		)
 
 		return RESPONSE
 

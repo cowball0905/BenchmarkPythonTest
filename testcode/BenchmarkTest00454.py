@@ -20,32 +20,32 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00454', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00454', methods=['GET'])
 	def BenchmarkTest00454_get():
 		return BenchmarkTest00454_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00454', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00454', methods=['POST'])
 	def BenchmarkTest00454_post():
 		RESPONSE = ""
 
-		param = request.headers.get("Referer")
+		param = request.headers.get("BenchmarkTest00454")
 		if not param:
 		    param = ""
 
-		import configparser
-		
-		bar = 'safe!'
-		conf5528 = configparser.ConfigParser()
-		conf5528.add_section('section5528')
-		conf5528.set('section5528', 'keyA-5528', 'a_Value')
-		conf5528.set('section5528', 'keyB-5528', param)
-		bar = conf5528.get('section5528', 'keyA-5528')
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
+		import helpers.db_sqlite
 
-		otherarg = "static text"
+		sql = f'SELECT username from USERS where password = \'{bar}\''
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql)
 		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+			helpers.db_sqlite.results(cur, sql)
 		)
+		con.close()
 
 		return RESPONSE
 

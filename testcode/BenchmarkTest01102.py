@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01102', methods=['GET'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01102', methods=['GET'])
 	def BenchmarkTest01102_get():
 		return BenchmarkTest01102_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01102', methods=['POST'])
+	@app.route('/benchmark/deserialization-00/BenchmarkTest01102', methods=['POST'])
 	def BenchmarkTest01102_post():
 		RESPONSE = ""
 
@@ -33,18 +33,26 @@ def init(app):
 		if not param:
 			param = ""
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
+
+		import yaml
 
 		try:
+			yobj = yaml.safe_load(bar)
+
 			RESPONSE += (
-				eval(bar)
+				yobj['text']
 			)
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				"There was an error loading the configuration"
 			)
 
 		return RESPONSE

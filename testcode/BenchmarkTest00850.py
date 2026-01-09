@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00850', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00850', methods=['GET'])
 	def BenchmarkTest00850_get():
 		return BenchmarkTest00850_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00850', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00850', methods=['POST'])
 	def BenchmarkTest00850_post():
 		RESPONSE = ""
 
@@ -35,19 +35,40 @@ def init(app):
 		if not param:
 			param = ""
 
-		string21609 = ''
-		data12 = ''
-		copy = string21609
-		string21609 = ''
-		string21609 += param
-		copy += 'SomeOKString'
-		bar = copy
+		import configparser
+		
+		bar = 'safe!'
+		conf21609 = configparser.ConfigParser()
+		conf21609.add_section('section21609')
+		conf21609.set('section21609', 'keyA-21609', 'a_Value')
+		conf21609.set('section21609', 'keyB-21609', param)
+		bar = conf21609.get('section21609', 'keyA-21609')
 
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
-		)
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
+			RESPONSE += (
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
+			)
+		except:
+			RESPONSE += (
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+			)
 
 		return RESPONSE
 

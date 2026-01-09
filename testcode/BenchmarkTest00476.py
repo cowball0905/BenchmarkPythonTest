@@ -32,17 +32,16 @@ def init(app):
 		if not param:
 		    param = ""
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00476'[13:]
-		user = f'Nancy{num}'
+		user = f'Randall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.normalvariate())[2:]
+		value = str(random.random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

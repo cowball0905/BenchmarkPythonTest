@@ -20,45 +20,50 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00661', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00661', methods=['GET'])
 	def BenchmarkTest00661_get():
 		return BenchmarkTest00661_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00661', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00661', methods=['POST'])
 	def BenchmarkTest00661_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
-		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		param = request.args.get("BenchmarkTest00661")
+		if not param:
+			param = ""
 
-		superstring = f'85641{param}abcd'
-		bar = superstring[len('85641'):len(superstring)-5]
+		import configparser
+		
+		bar = 'safe!'
+		conf85641 = configparser.ConfigParser()
+		conf85641.add_section('section85641')
+		conf85641.set('section85641', 'keyA-85641', 'a_Value')
+		conf85641.set('section85641', 'keyB-85641', param)
+		bar = conf85641.get('section85641', 'keyA-85641')
 
-		import pickle
-		import base64
 		import helpers.utils
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		fileName = None
+		fd = None
 
 		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				'Unpickling failed!'
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
-			return RESPONSE
-
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+		except IOError as e:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

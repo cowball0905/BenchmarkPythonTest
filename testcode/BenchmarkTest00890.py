@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00890', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00890', methods=['GET'])
 	def BenchmarkTest00890_get():
 		return BenchmarkTest00890_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00890', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00890', methods=['POST'])
 	def BenchmarkTest00890_post():
 		RESPONSE = ""
 
@@ -35,26 +35,16 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = param
 
-
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00890': bar}))
-		
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

@@ -35,18 +35,14 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
+		import configparser
 		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		bar = 'safe!'
+		conf10061 = configparser.ConfigParser()
+		conf10061.add_section('section10061')
+		conf10061.set('section10061', 'keyA-10061', 'a-Value')
+		conf10061.set('section10061', 'keyB-10061', param)
+		bar = conf10061.get('section10061', 'keyB-10061')
 
 		import lxml.etree
 		import helpers.utils
@@ -54,7 +50,8 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			query = '/Employees/Employee[@emplid=\'' + bar + '\']'
+
 			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:

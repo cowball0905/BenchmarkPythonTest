@@ -32,16 +32,22 @@ def init(app):
 		if not param:
 			param = ""
 
-		superstring = f'21353{param}abcd'
-		bar = superstring[len('21353'):len(superstring)-5]
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00139'[13:]
-		user = f'SafeIsaac{num}'
+		user = f'SafeRandall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().randint(0, 2**32))
+		value = str(random.SystemRandom().random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00266', methods=['GET'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00266', methods=['GET'])
 	def BenchmarkTest00266_get():
 		return BenchmarkTest00266_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest00266', methods=['POST'])
+	@app.route('/benchmark/ldapi-00/BenchmarkTest00266', methods=['POST'])
 	def BenchmarkTest00266_post():
 		RESPONSE = ""
 
@@ -33,20 +33,44 @@ def init(app):
 		if values:
 			param = values[0]
 
-		import configparser
+		possible = "ABC"
+		guess = possible[0]
 		
-		bar = 'safe!'
-		conf30925 = configparser.ConfigParser()
-		conf30925.add_section('section30925')
-		conf30925.set('section30925', 'keyA-30925', 'a_Value')
-		conf30925.set('section30925', 'keyB-30925', param)
-		bar = conf30925.get('section30925', 'keyA-30925')
+		match guess:
+			case 'A':
+				bar = param
+			case 'B':
+				bar = 'bob'
+			case 'C' | 'D':
+				bar = param
+			case _:
+				bar = 'bob\'s your uncle'
 
+		import helpers.ldap
+		import ldap3
+
+		base = 'ou=users,ou=system'
+		filter = f'(&(objectclass=person)(|(uid={bar})(street=The streetz 4 Ms bar)))'
 		try:
-			exec(bar)
+			conn = helpers.ldap.get_connection()
+			conn.search(base, filter, attributes=ldap3.ALL_ATTRIBUTES)
+			found = False
+			for e in conn.entries:
+				RESPONSE += (
+					f'LDAP query results:<br>'
+					f'Record found with name {e['uid']}<br>'
+					f'Address: {e['street']}<br>'
+				)
+				found = True
+			conn.unbind()
+
+			if not found:
+				RESPONSE += (
+					f'LDAP query results: nothing found for query: {helpers.utils.escape_for_html(filter)}'
+				)
 		except:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				"Error processing LDAP query."
 			)
 
 		return RESPONSE

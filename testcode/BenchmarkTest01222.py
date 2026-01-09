@@ -20,39 +20,39 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01222', methods=['GET'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01222', methods=['GET'])
 	def BenchmarkTest01222_get():
 		return BenchmarkTest01222_post()
 
-	@app.route('/benchmark/xpathi-02/BenchmarkTest01222', methods=['POST'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01222', methods=['POST'])
 	def BenchmarkTest01222_post():
 		RESPONSE = ""
 
-		values = request.args.getlist("BenchmarkTest01222")
-		param = ""
-		if values:
-			param = values[0]
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
 
-		import lxml.etree
 		import helpers.utils
 
 		try:
-			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
-			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=$name]'
-			nodes = root.xpath(query, name=param)
-			node_strings = []
-			for node in nodes:
-				node_strings.append(' '.join([e.text for e in node]))
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{param}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-		except:
+		except IOError as e:
 			RESPONSE += (
-				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

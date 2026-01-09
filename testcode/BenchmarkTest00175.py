@@ -33,28 +33,26 @@ def init(app):
 		if values:
 			param = values[0]
 
-		num = 86
+		import configparser
 		
-		if 7 * 42 - num > 200:
-			bar = 'This_should_always_happen'
-		else:
-			bar = param
+		bar = 'safe!'
+		conf15913 = configparser.ConfigParser()
+		conf15913.add_section('section15913')
+		conf15913.set('section15913', 'keyA-15913', 'a-Value')
+		conf15913.set('section15913', 'keyB-15913', param)
+		bar = conf15913.get('section15913', 'keyB-15913')
 
 		import helpers.utils
 
-		fileName = None
-		fd = None
-
 		try:
 			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			fd = open(fileName, 'rb')
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
 		except IOError as e:
 			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
 				f'{escape_for_html(e.strerror)}'
 			)
 		finally:

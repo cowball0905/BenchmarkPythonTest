@@ -32,10 +32,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		string51673 = 'help'
-		string51673 += param
-		string51673 += 'snapes on a plane'
-		bar = string51673[4:-17]
+		import html
+		
+		bar = html.escape(param)
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -52,7 +51,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.md5()
+		hash = hashlib.sha1()
 		hash.update(input)
 
 		result = hash.digest()

@@ -34,9 +34,10 @@ def init(app):
 				param = name
 				break
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		import helpers.ThingFactory
+		
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -53,7 +54,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.md5()
+		hash = hashlib.sha384()
 		hash.update(input)
 
 		result = hash.digest()

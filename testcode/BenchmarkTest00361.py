@@ -34,16 +34,29 @@ def init(app):
 				param = name
 				break
 
-		bar = param
+		map27963 = {}
+		map27963['keyA-27963'] = 'a-Value'
+		map27963['keyB-27963'] = param
+		map27963['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map27963['keyB-27963']
+		bar = map27963['keyA-27963']
 
-		import os
+		import pathlib
 		import helpers.utils
 
-		fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-		if os.path.exists(fileName):
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
+		try:
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = testfiles / bar
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
+			)
+		except OSError:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

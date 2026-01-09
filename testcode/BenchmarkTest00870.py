@@ -35,17 +35,22 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		map42836 = {}
+		map42836['keyA-42836'] = 'a-Value'
+		map42836['keyB-42836'] = param
+		map42836['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map42836['keyB-42836']
+		bar = map42836['keyA-42836']
 
-		import secrets
+		import random
+		import base64
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00870'[13:]
-		user = f'SafeRicky{num}'
+		user = f'SafeBarbara{num}'
 		cookie = f'rememberMe{num}'
-		value = str(secrets.randbits(32))
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (
@@ -54,7 +59,7 @@ def init(app):
 		else:
 			mysession[cookie] = value
 			RESPONSE += (
-				f'{user} has been remembered with cookie:'
+				f'{user} has been remembered with cookie: '
 				f'{cookie} whose value is: {mysession[cookie]}<br/>'
 			)
 

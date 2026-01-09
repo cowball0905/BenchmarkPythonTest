@@ -32,44 +32,37 @@ def init(app):
 		if not param:
 		    param = ""
 
-		map88735 = {}
-		map88735['keyA-88735'] = 'a-Value'
-		map88735['keyB-88735'] = param
-		map88735['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map88735['keyB-88735']
-		bar = map88735['keyA-88735']
-
-		import platform
-		import codecs
-		import helpers.utils
-		from urllib.parse import urlparse
-		from urllib.request import url2pathname
-
-		startURIslashes = ""
-
-		if platform.system() == "Windows":
-			startURIslashes = "/"
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
 		else:
-			startURIslashes = "//"
+			bar = param
+
+		import helpers.utils
+
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not contain \'../\''
+			)
+			return RESPONSE
 
 		try:
-			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
-			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-
+		except IOError as e:
 			RESPONSE += (
-				" And file already exists."
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
-		except FileNotFoundError:
-			RESPONSE += (
-				" But file doesn't exist yet."
-			)
-		except IOError:
-			pass
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

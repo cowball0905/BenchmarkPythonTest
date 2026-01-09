@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest01173', methods=['GET'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest01173', methods=['GET'])
 	def BenchmarkTest01173_get():
 		return BenchmarkTest01173_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest01173', methods=['POST'])
+	@app.route('/benchmark/cmdi-00/BenchmarkTest01173', methods=['POST'])
 	def BenchmarkTest01173_post():
 		RESPONSE = ""
 
@@ -32,31 +32,31 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01173")
 
-		string20496 = ''
-		data12 = ''
-		copy = string20496
-		string20496 = ''
-		string20496 += param
-		copy += 'SomeOKString'
-		bar = copy
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import flask
-		import urllib.parse
+		import platform
+		import subprocess
+		import helpers.utils
+
+		argStr = ""
+		if platform.system() == "Windows":
+			argStr = "cmd.exe /c "
+		else:
+			argStr = "sh -c "
+		argStr += f"echo {bar}"
 
 		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
-			RESPONSE += (
-				'Error parsing URL.'
-			)
-			return RESPONSE
+			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
 
-		return flask.redirect(bar)
+			RESPONSE += (
+				helpers.utils.commandOutput(proc)
+			)
+		except IOError:
+			RESPONSE += (
+				"Problem executing cmdi - subprocess.run(list) Test Case"
+			)
 
 		return RESPONSE
 

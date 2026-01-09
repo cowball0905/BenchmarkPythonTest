@@ -20,43 +20,40 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01004', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01004', methods=['GET'])
 	def BenchmarkTest01004_get():
 		return BenchmarkTest01004_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01004', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01004', methods=['POST'])
 	def BenchmarkTest01004_post():
 		RESPONSE = ""
 
-		import urllib.parse
-		
-		query_string = request.query_string.decode('utf-8')
-		paramLoc = query_string.find("BenchmarkTest01004" + '=')
-		if paramLoc == -1:
-			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest01004"}\'."
-		param = query_string[paramLoc + len("BenchmarkTest01004") + 1:]
-		ampLoc = param.find('&')
-		if ampLoc != -1:
-			param = param[:ampLoc]
-		
-		param = urllib.parse.unquote_plus(param)
+		parts = request.path.split("/")
+		param = parts[1]
+		if not param:
+			param = ""
 
-		string98691 = 'help'
-		string98691 += param
-		string98691 += 'snapes on a plane'
-		bar = string98691[4:-17]
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
-			RESPONSE += (
-				"Exec argument must be a plain string literal."
-			)
-			return RESPONSE
+		import codecs
+		import helpers.utils
 
 		try:
-			exec(bar)
-		except:
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
+
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+			)
+
+			RESPONSE += (
+				" And file already exists."
+			)
+
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
 			)
 
 		return RESPONSE

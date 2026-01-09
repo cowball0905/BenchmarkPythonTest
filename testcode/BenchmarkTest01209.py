@@ -20,41 +20,36 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01209', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest01209', methods=['GET'])
 	def BenchmarkTest01209_get():
 		return BenchmarkTest01209_post()
 
-	@app.route('/benchmark/securecookie-00/BenchmarkTest01209', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest01209', methods=['POST'])
 	def BenchmarkTest01209_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest01209")
+		param = request.args.get("BenchmarkTest01209")
 		if not param:
-		    param = ""
+			param = ""
 
 
-		from flask import make_response
-		import io
-		import helpers.utils
+		import flask
+		import urllib.parse
 
-		input = ''
-		if isinstance(param, str):
-			input = param.encode('utf-8')
-		elif isinstance(param, io.IOBase):
-			input = param.read(1000)
+		try:
+			url = urllib.parse.urlparse(param)
+			if url.netloc not in ['google.com'] or url.scheme != 'https':
+				RESPONSE += (
+					'Invalid URL.'
+				)
+				return RESPONSE
+		except:
+			RESPONSE += (
+				'Error parsing URL.'
+			)
+			return RESPONSE
 
-		cookie = 'SomeCookie'
-		value = input.decode('utf-8')
-
-		RESPONSE += (
-			f'Created cookie: \'{cookie}\' with value \'{helpers.utils.escape_for_html(value)}\' and secure flag set to false.'
-		)
-
-		RESPONSE = make_response(RESPONSE)
-		RESPONSE.set_cookie(cookie, value,
-			path=request.path,
-			secure=False,
-			httponly=True)
+		return flask.redirect(param)
 
 		return RESPONSE
 

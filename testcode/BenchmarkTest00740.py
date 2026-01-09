@@ -20,43 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00740', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00740', methods=['GET'])
 	def BenchmarkTest00740_get():
 		return BenchmarkTest00740_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00740', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00740', methods=['POST'])
 	def BenchmarkTest00740_post():
 		RESPONSE = ""
 
-		param = request.args.get("BenchmarkTest00740")
-		if not param:
-			param = ""
+		values = request.args.getlist("BenchmarkTest00740")
+		param = ""
+		if values:
+			param = values[0]
 
-		num = 106
-		
-		bar = "This should never happen" if (7*42) - num > 200 else param
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import platform
-		import subprocess
 		import helpers.utils
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
+		fileName = None
+		fd = None
+
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not include \'../\''
+			)
+			return RESPONSE
 
 		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				helpers.utils.commandOutput(proc)
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
-		except IOError:
+		except IOError as e:
 			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

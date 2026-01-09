@@ -35,9 +35,8 @@ def init(app):
 		if not param:
 			param = ""
 
-		import base64
-		tmp = base64.b64encode(param.encode('utf-8'))
-		bar = base64.b64decode(tmp).decode('utf-8')
+		superstring = f'84217{param}abcd'
+		bar = superstring[len('84217'):len(superstring)-5]
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -54,7 +53,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha1')
+		hash = hashlib.sha384()
 		hash.update(input)
 
 		result = hash.digest()

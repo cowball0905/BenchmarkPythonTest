@@ -20,33 +20,45 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01175', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01175', methods=['GET'])
 	def BenchmarkTest01175_get():
+		response = make_response(render_template('web/xpathi-02/BenchmarkTest01175.html'))
+		response.set_cookie('BenchmarkTest01175', '2222',
+			max_age=60*3,
+			secure=True,
+			path=request.path,
+			domain='localhost')
+		return response
 		return BenchmarkTest01175_post()
 
-	@app.route('/benchmark/codeinj-00/BenchmarkTest01175', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01175', methods=['POST'])
 	def BenchmarkTest01175_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
-		scr = helpers.separate_request.request_wrapper(request)
-		param = scr.get_safe_value("BenchmarkTest01175")
+		import urllib.parse
+		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest01175", "noCookieValueSupplied"))
 
-		import configparser
-		
-		bar = 'safe!'
-		conf39213 = configparser.ConfigParser()
-		conf39213.add_section('section39213')
-		conf39213.set('section39213', 'keyA-39213', 'a-Value')
-		conf39213.set('section39213', 'keyB-39213', param)
-		bar = conf39213.get('section39213', 'keyB-39213')
+
+		import lxml.etree
+		import helpers.utils
 
 		try:
-			exec(bar)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{param.replace('\'', '&apos;')}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
 		except:
 			RESPONSE += (
-				f'Error executing statement \'{escape_for_html(bar)}\''
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
 
 		return RESPONSE
+
 

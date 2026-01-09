@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00342', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00342', methods=['GET'])
 	def BenchmarkTest00342_get():
 		return BenchmarkTest00342_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00342', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00342', methods=['POST'])
 	def BenchmarkTest00342_post():
 		RESPONSE = ""
 
@@ -35,27 +35,23 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
-
-		import flask
-		import urllib.parse
+		import configparser
+		
+		bar = 'safe!'
+		conf31504 = configparser.ConfigParser()
+		conf31504.add_section('section31504')
+		conf31504.set('section31504', 'keyA-31504', 'a-Value')
+		conf31504.set('section31504', 'keyB-31504', param)
+		bar = conf31504.get('section31504', 'keyB-31504')
 
 		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
+			RESPONSE += (
+				eval(bar)
+			)
 		except:
 			RESPONSE += (
-				'Error parsing URL.'
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
 			)
-			return RESPONSE
-
-		return flask.redirect(bar)
 
 		return RESPONSE
 

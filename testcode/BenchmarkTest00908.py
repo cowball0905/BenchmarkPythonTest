@@ -20,47 +20,66 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00908', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00908', methods=['GET'])
 	def BenchmarkTest00908_get():
 		return BenchmarkTest00908_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00908', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00908', methods=['POST'])
 	def BenchmarkTest00908_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00908")
-		if not param:
-			param = ""
-
-		import configparser
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00908" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00908"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00908") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
 		
-		bar = 'safe!'
-		conf19964 = configparser.ConfigParser()
-		conf19964.add_section('section19964')
-		conf19964.set('section19964', 'keyA-19964', 'a_Value')
-		conf19964.set('section19964', 'keyB-19964', param)
-		bar = conf19964.get('section19964', 'keyA-19964')
+		param = urllib.parse.unquote_plus(param)
 
-		import pickle
-		import base64
+		bar = "alsosafe"
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
+
+		import platform
+		import codecs
 		import helpers.utils
+		from urllib.parse import urlparse
+		from urllib.request import url2pathname
 
-		helpers.utils.sharedstr = "no pickles to be seen here"
+		startURIslashes = ""
+
+		if platform.system() == "Windows":
+			startURIslashes = "/"
+		else:
+			startURIslashes = "//"
 
 		try:
-			unpickled = pickle.loads(base64.urlsafe_b64decode(bar))
-		except:
-			RESPONSE += (
-				'Unpickling failed!'
-			)
-			return RESPONSE
+			fileURI = urlparse("file:" + startURIslashes + helpers.utils.TESTFILES_DIR.replace('\\', '/').replace(' ', '_') + bar)
+			fileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')
 
-		RESPONSE += (
-			f'shared string is {helpers.utils.sharedstr}'
-		)
+			RESPONSE += (
+				f"Access to file: \'{escape_for_html(fileTarget.name)}\' created."
+			)
+
+			RESPONSE += (
+				" And file already exists."
+			)
+		except FileNotFoundError:
+			RESPONSE += (
+				" But file doesn't exist yet."
+			)
+		except IOError:
+			pass
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00822', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00822', methods=['GET'])
 	def BenchmarkTest00822_get():
 		return BenchmarkTest00822_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00822', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00822', methods=['POST'])
 	def BenchmarkTest00822_post():
 		RESPONSE = ""
 
@@ -37,9 +37,18 @@ def init(app):
 		
 		bar = "This should never happen" if (7*42) - num > 200 else param
 
-		import flask
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
 
-		return flask.redirect(bar)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

@@ -32,14 +32,16 @@ def init(app):
 		if not param:
 			param = ""
 
-		import configparser
+		import helpers.ThingFactory
 		
-		bar = 'safe!'
-		conf57505 = configparser.ConfigParser()
-		conf57505.add_section('section57505')
-		conf57505.set('section57505', 'keyA-57505', 'a-Value')
-		conf57505.set('section57505', 'keyB-57505', param)
-		bar = conf57505.get('section57505', 'keyB-57505')
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
+
+		if not bar.startswith('\'') or not bar.endswith('\'') or '\'' in bar[1:-1]:
+			RESPONSE += (
+				"Exec argument must be a plain string literal."
+			)
+			return RESPONSE
 
 		try:
 			exec(bar)

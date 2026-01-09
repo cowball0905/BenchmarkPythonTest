@@ -33,15 +33,18 @@ def init(app):
 		if values:
 			param = values[0]
 
-		bar = param
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
 		try:
-			RESPONSE += (
-				eval(bar)
-			)
+			exec(bar)
 		except:
 			RESPONSE += (
-				f'Error evaluating expression \'{escape_for_html(bar)}\''
+				f'Error executing statement \'{escape_for_html(bar)}\''
 			)
 
 		return RESPONSE

@@ -32,9 +32,13 @@ def init(app):
 		if not param:
 		    param = ""
 
-		import html
-		
-		bar = html.escape(param)
+		map51084 = {}
+		map51084['keyA-51084'] = 'a-Value'
+		map51084['keyB-51084'] = param
+		map51084['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map51084['keyB-51084']
+		bar = map51084['keyA-51084']
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -51,7 +55,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.md5()
+		hash = hashlib.sha512()
 		hash.update(input)
 
 		result = hash.digest()

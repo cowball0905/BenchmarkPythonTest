@@ -41,29 +41,23 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = ""
+		bar = "alsosafe"
 		if param:
 			lst = []
 			lst.append('safe')
 			lst.append(param)
 			lst.append('moresafe')
 			lst.pop(0)
-			bar = lst[0]
+			bar = lst[1]
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
-		if '\'' in bar:
-			RESPONSE += (
-				"Employee ID must not contain apostrophes"
-			)
-			return RESPONSE
-
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			query = f"/Employees/Employee[@emplid=\'{bar}\']"
-			nodes = elementpath.select(root, query)
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=$name]'
+			nodes = root.xpath(query, name=bar)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))

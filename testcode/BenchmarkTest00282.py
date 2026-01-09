@@ -35,14 +35,14 @@ def init(app):
 		if not param:
 			param = ""
 
-		import markupsafe
+		import html
 		
-		bar = markupsafe.escape(param)
+		bar = html.escape(param)
 
 
 		otherarg = "static text"
 		RESPONSE += (
-			'bar is \'{0}\' and otherarg is \'{1}\''.format(bar, otherarg)
+			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
 		)
 
 		return RESPONSE

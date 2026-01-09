@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00538', methods=['GET'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00538', methods=['GET'])
 	def BenchmarkTest00538_get():
 		return BenchmarkTest00538_post()
 
-	@app.route('/benchmark/sqli-00/BenchmarkTest00538', methods=['POST'])
+	@app.route('/benchmark/xxe-00/BenchmarkTest00538', methods=['POST'])
 	def BenchmarkTest00538_post():
 		RESPONSE = ""
 
@@ -34,20 +34,39 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		map79019 = {}
+		map79019['keyA-79019'] = 'a-Value'
+		map79019['keyB-79019'] = param
+		map79019['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map79019['keyB-79019']
+		bar = map79019['keyA-79019']
 
-		import helpers.db_sqlite
+		import xml.dom.minidom
+		import xml.sax.handler
 
-		sql = f'SELECT username from USERS where password = \'{bar}\''
-		con = helpers.db_sqlite.get_connection()
-		cur = con.cursor()
-		cur.execute(sql)
-		RESPONSE += (
-			helpers.db_sqlite.results(cur, sql)
-		)
-		con.close()
+		try:
+			parser = xml.sax.make_parser()
+			# all features are disabled by default
+
+			doc = xml.dom.minidom.parseString(bar, parser)
+
+			out = ''
+			processing = [doc.documentElement]
+			while processing:
+				e = processing.pop(0)
+				if e.nodeType == xml.dom.Node.TEXT_NODE:
+					out += e.data
+				else:
+					processing[:0] = e.childNodes
+
+			RESPONSE += (
+				f'Your XML doc results are: <br>{escape_for_html(out)}'
+			)
+		except:
+			RESPONSE += (
+				f'There was an error reading your XML doc:<br>{escape_for_html(bar)}'
+			)
 
 		return RESPONSE
 

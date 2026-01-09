@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00346', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00346', methods=['GET'])
 	def BenchmarkTest00346_get():
 		return BenchmarkTest00346_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00346', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00346', methods=['POST'])
 	def BenchmarkTest00346_post():
 		RESPONSE = ""
 
@@ -35,22 +35,21 @@ def init(app):
 		if not param:
 			param = ""
 
-		map43631 = {}
-		map43631['keyA-43631'] = 'a-Value'
-		map43631['keyB-43631'] = param
-		map43631['keyC'] = 'another-Value'
-		bar = "safe!"
-		bar = map43631['keyB-43631']
-		bar = map43631['keyA-43631']
+		import configparser
+		
+		bar = 'safe!'
+		conf43631 = configparser.ConfigParser()
+		conf43631.add_section('section43631')
+		conf43631.set('section43631', 'keyA-43631', 'a_Value')
+		conf43631.set('section43631', 'keyB-43631', param)
+		bar = conf43631.get('section43631', 'keyA-43631')
 
-		import flask
-
-		flask.session[bar] = '12345'
-
-		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
-		)
+		try:
+			exec(bar)
+		except:
+			RESPONSE += (
+				f'Error executing statement \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

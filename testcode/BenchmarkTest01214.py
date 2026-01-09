@@ -20,35 +20,37 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01214', methods=['GET'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01214', methods=['GET'])
 	def BenchmarkTest01214_get():
 		return BenchmarkTest01214_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01214', methods=['POST'])
+	@app.route('/benchmark/pathtraver-02/BenchmarkTest01214', methods=['POST'])
 	def BenchmarkTest01214_post():
 		RESPONSE = ""
 
-		import helpers.utils
-		param = ""
+		import helpers.separate_request
 		
-		for name in request.headers.keys():
-			if name.lower() in helpers.utils.commonHeaderNames:
-				continue
-		
-			if request.headers.get_all(name):
-				param = name
-				break
+		wrapped = helpers.separate_request.request_wrapper(request)
+		param = wrapped.get_query_parameter("BenchmarkTest01214")
+		if not param:
+			param = ""
 
 
 		import pathlib
 		import helpers.utils
 
-		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
-		p = testfiles / param
-		if p.exists():
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
+		try:
+			testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+			p = testfiles / param
+			RESPONSE += (
+				f'The beginning of file: \'{escape_for_html(str(p))}\' is:\n\n'
+				f'{escape_for_html(p.read_text()[:1000])}'
+			)
+		except OSError:
+			RESPONSE += (
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
+			)
 
 		return RESPONSE
 

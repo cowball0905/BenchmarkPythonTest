@@ -35,7 +35,9 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = param
+		bar = ''
+		if param:
+			bar = param.split(' ')[0]
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -52,7 +54,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.sha384()
+		hash = hashlib.sha512()
 		hash.update(input)
 
 		result = hash.digest()

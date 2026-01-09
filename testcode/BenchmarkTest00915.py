@@ -20,51 +20,52 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00915', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00915', methods=['GET'])
 	def BenchmarkTest00915_get():
 		return BenchmarkTest00915_post()
 
-	@app.route('/benchmark/cmdi-00/BenchmarkTest00915', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest00915', methods=['POST'])
 	def BenchmarkTest00915_post():
 		RESPONSE = ""
 
-		import helpers.separate_request
+		import urllib.parse
 		
-		wrapped = helpers.separate_request.request_wrapper(request)
-		param = wrapped.get_query_parameter("BenchmarkTest00915")
-		if not param:
-			param = ""
+		query_string = request.query_string.decode('utf-8')
+		paramLoc = query_string.find("BenchmarkTest00915" + '=')
+		if paramLoc == -1:
+			return f"request.query_string did not contain expected parameter \'{"BenchmarkTest00915"}\'."
+		param = query_string[paramLoc + len("BenchmarkTest00915") + 1:]
+		ampLoc = param.find('&')
+		if ampLoc != -1:
+			param = param[:ampLoc]
+		
+		param = urllib.parse.unquote_plus(param)
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		TestParam = "This should never happen"
+		if 'should' not in TestParam:
+			bar = "Ifnot case passed"
+		else:
+			bar = param
 
-		import platform
-		import subprocess
 		import helpers.utils
 
-		argStr = ""
-		if platform.system() == "Windows":
-			argStr = "cmd.exe /c "
-		else:
-			argStr = "sh -c "
-		argStr += f"echo {bar}"
-
 		try:
-			proc = subprocess.run(argStr, shell=True, capture_output=True, encoding="utf-8")
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'wb')
 			RESPONSE += (
-				helpers.utils.commandOutput(proc)
+				f'Now ready to write to file: {escape_for_html(fileName)}'
 			)
-		except IOError:
+		except IOError as e:
 			RESPONSE += (
-				"Problem executing cmdi - subprocess.run(list) Test Case"
+				f'Problem reading from file \'{escape_for_html(fileName)}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

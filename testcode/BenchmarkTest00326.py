@@ -35,9 +35,14 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' in bar:
-			bar = param
+		import configparser
+		
+		bar = 'safe!'
+		conf85125 = configparser.ConfigParser()
+		conf85125.add_section('section85125')
+		conf85125.set('section85125', 'keyA-85125', 'a-Value')
+		conf85125.set('section85125', 'keyB-85125', param)
+		bar = conf85125.get('section85125', 'keyB-85125')
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -54,7 +59,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha384')
+		hash = hashlib.md5()
 		hash.update(input)
 
 		result = hash.digest()

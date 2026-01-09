@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-01/BenchmarkTest00986', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00986', methods=['GET'])
 	def BenchmarkTest00986_get():
 		return BenchmarkTest00986_post()
 
-	@app.route('/benchmark/xss-01/BenchmarkTest00986', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00986', methods=['POST'])
 	def BenchmarkTest00986_post():
 		RESPONSE = ""
 
@@ -41,17 +41,23 @@ def init(app):
 		
 		param = urllib.parse.unquote_plus(param)
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00986': bar}))
-		
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

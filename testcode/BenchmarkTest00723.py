@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00723', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00723', methods=['GET'])
 	def BenchmarkTest00723_get():
 		return BenchmarkTest00723_post()
 
-	@app.route('/benchmark/hash-01/BenchmarkTest00723', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00723', methods=['POST'])
 	def BenchmarkTest00723_post():
 		RESPONSE = ""
 
@@ -32,35 +32,18 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = ''
+		bar = "alsosafe"
 		if param:
-			bar = param.split(' ')[0]
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[1]
 
-		import hashlib, base64
-		import io, helpers.utils
+		import flask
 
-		input = ''
-		if isinstance(bar, str):
-			input = bar.encode('utf-8')
-		elif isinstance(bar, io.IOBase):
-			input = bar.read(1000)
-
-		if len(input) == 0:
-			RESPONSE += (
-				'Cannot generate hash: Input was empty.'
-			)
-			return RESPONSE
-
-		hash = hashlib.sha384()
-		hash.update(input)
-
-		result = hash.digest()
-		f = open(f'{helpers.utils.TESTFILES_DIR}/passwordFile.txt', 'a')
-		f.write(f'hash_value={base64.b64encode(result)}\n')
-		RESPONSE += (
-			f'Sensitive value \'{helpers.utils.escape_for_html(input.decode('utf-8'))}\' hashed and stored.'
-		)
-		f.close()
+		return flask.redirect(bar)
 
 		return RESPONSE
 

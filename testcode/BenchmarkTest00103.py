@@ -32,9 +32,10 @@ def init(app):
 		if not param:
 			param = ""
 
-		num = 106
+		import helpers.ThingFactory
 		
-		bar = "This_should_always_happen" if 7 * 18 + num > 200 else param
+		thing = helpers.ThingFactory.createThing()
+		bar = thing.doSomething(param)
 
 		import lxml.etree
 		import helpers.utils
@@ -42,7 +43,8 @@ def init(app):
 		try:
 			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
 			root = lxml.etree.parse(fd)
-			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			query = "".join(['/Employees/Employee[@emplid=\'', bar, '\']'])
+
 			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:

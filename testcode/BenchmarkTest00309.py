@@ -35,18 +35,22 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "This should never happen"
-		if 'should' not in bar:
-		        bar = "Ifnot case passed"
+		import configparser
+		
+		bar = 'safe!'
+		conf45195 = configparser.ConfigParser()
+		conf45195.add_section('section45195')
+		conf45195.set('section45195', 'keyA-45195', 'a_Value')
+		conf45195.set('section45195', 'keyB-45195', param)
+		bar = conf45195.get('section45195', 'keyA-45195')
 
 		import random
-		import base64
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00309'[13:]
-		user = f'Barbara{num}'
+		user = f'Randall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(base64.b64encode(random.randbytes(32)))
+		value = str(random.random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

@@ -32,16 +32,23 @@ def init(app):
 		scr = helpers.separate_request.request_wrapper(request)
 		param = scr.get_safe_value("BenchmarkTest01141")
 
-		superstring = f'76541{param}abcd'
-		bar = superstring[len('76541'):len(superstring)-5]
+		bar = ""
+		if param:
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
 		import random
+		import base64
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest01141'[13:]
-		user = f'Randall{num}'
+		user = f'SafeBarbara{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.random())[2:]
+		value = str(base64.b64encode(random.SystemRandom().randbytes(32)))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

@@ -20,40 +20,29 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00451', methods=['GET'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00451', methods=['GET'])
 	def BenchmarkTest00451_get():
 		return BenchmarkTest00451_post()
 
-	@app.route('/benchmark/pathtraver-00/BenchmarkTest00451', methods=['POST'])
+	@app.route('/benchmark/xss-00/BenchmarkTest00451', methods=['POST'])
 	def BenchmarkTest00451_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00451")
+		param = request.headers.get("Referer")
 		if not param:
 		    param = ""
 
-		import helpers.ThingFactory
-		
-		thing = helpers.ThingFactory.createThing()
-		bar = thing.doSomething(param)
+		import base64
+		tmp = base64.b64encode(param.encode('utf-8'))
+		bar = base64.b64decode(tmp).decode('utf-8')
 
-		import helpers.utils
 
-		fileName = None
-		fd = None
-
-		try:
-			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
-			with open(fileName, 'rb') as fd:
-				RESPONSE += (
-					f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
-					f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
-				)
-		except IOError as e:
-			RESPONSE += (
-				f'Problem reading from file \'{fileName}\': '
-				f'{escape_for_html(e.strerror)}'
-			)
+		dict = {}
+		dict['bar'] = bar
+		dict['otherarg'] = 'this is it'
+		RESPONSE += (
+			'bar is \'{0[bar]}\' and otherarg is \'{0[otherarg]}\''.format(dict)
+		)
 
 		return RESPONSE
 

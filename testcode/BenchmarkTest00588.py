@@ -34,9 +34,8 @@ def init(app):
 		if headers:
 			param = headers[0]
 
-		bar = ''
-		if param:
-			bar = param.split(' ')[0]
+		import helpers.utils
+		bar = helpers.utils.escape_for_html(param)
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -53,7 +52,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('sha512')
+		hash = hashlib.sha512()
 		hash.update(input)
 
 		result = hash.digest()

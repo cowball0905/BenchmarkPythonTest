@@ -39,14 +39,13 @@ def init(app):
 				param = name
 				break
 
-		import configparser
-		
-		bar = 'safe!'
-		conf347 = configparser.ConfigParser()
-		conf347.add_section('section347')
-		conf347.set('section347', 'keyA-347', 'a_Value')
-		conf347.set('section347', 'keyB-347', param)
-		bar = conf347.get('section347', 'keyA-347')
+		map347 = {}
+		map347['keyA-347'] = 'a-Value'
+		map347['keyB-347'] = param
+		map347['keyC'] = 'another-Value'
+		bar = "safe!"
+		bar = map347['keyB-347']
+		bar = map347['keyA-347']
 
 		import hashlib, base64
 		import io, helpers.utils
@@ -63,7 +62,7 @@ def init(app):
 			)
 			return RESPONSE
 
-		hash = hashlib.new('md5')
+		hash = hashlib.md5()
 		hash.update(input)
 
 		result = hash.digest()

@@ -33,21 +33,15 @@ def init(app):
 		if values:
 			param = values[0]
 
-		string7308 = ''
-		data12 = ''
-		copy = string7308
-		string7308 = ''
-		string7308 += param
-		copy += 'SomeOKString'
-		bar = copy
+		bar = param
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00241'[13:]
-		user = f'SafeNancy{num}'
+		user = f'SafeIsaac{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().normalvariate())[2:]
+		value = str(random.SystemRandom().randint(0, 2**32))
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

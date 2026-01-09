@@ -20,29 +20,46 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01198', methods=['GET'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01198', methods=['GET'])
 	def BenchmarkTest01198_get():
 		return BenchmarkTest01198_post()
 
-	@app.route('/benchmark/pathtraver-01/BenchmarkTest01198', methods=['POST'])
+	@app.route('/benchmark/xpathi-02/BenchmarkTest01198', methods=['POST'])
 	def BenchmarkTest01198_post():
 		RESPONSE = ""
 
 		param = ""
-		for name in request.form.keys():
-			if "BenchmarkTest01198" in request.form.getlist(name):
-				param = name
-				break
+		headers = request.headers.getlist("BenchmarkTest01198")
+		
+		if headers:
+			param = headers[0]
 
 
-		import os
+		import lxml.etree
 		import helpers.utils
 
-		fileName = f'{helpers.utils.TESTFILES_DIR}/{param}'
-		if os.path.exists(fileName):
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' exists." )
-		else:
-			RESPONSE += ( f"File \'{escape_for_html(fileName)}\' does not exist." )
+		try:
+			if '\'' in param:
+				RESPONSE += (
+					"Employee ID must not contain apostrophes"
+				)
+				return RESPONSE
+
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{param}\']'
+			nodes = root.xpath(query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

@@ -20,35 +20,36 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01110', methods=['GET'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01110', methods=['GET'])
 	def BenchmarkTest01110_get():
 		return BenchmarkTest01110_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest01110', methods=['POST'])
+	@app.route('/benchmark/pathtraver-01/BenchmarkTest01110', methods=['POST'])
 	def BenchmarkTest01110_post():
 		RESPONSE = ""
 
-		parts = request.path.split("/")
-		param = parts[1]
-		if not param:
-			param = ""
+		import helpers.separate_request
+		scr = helpers.separate_request.request_wrapper(request)
+		param = scr.get_safe_value("BenchmarkTest01110")
 
-		bar = ''
+		bar = ""
 		if param:
-			bar = param.split(' ')[0]
+			lst = []
+			lst.append('safe')
+			lst.append(param)
+			lst.append('moresafe')
+			lst.pop(0)
+			bar = lst[0]
 
-		import yaml
+		import pathlib
+		import helpers.utils
 
-		try:
-			yobj = yaml.load(bar, Loader=yaml.Loader)
-
-			RESPONSE += (
-				yobj['text']
-			)
-		except:
-			RESPONSE += (
-				"There was an error loading the configuration"
-			)
+		testfiles = pathlib.Path(helpers.utils.TESTFILES_DIR)
+		p = testfiles / bar
+		if p.exists():
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' exists." )
+		else:
+			RESPONSE += ( f"File \'{escape_for_html(str(p))}\' does not exist." )
 
 		return RESPONSE
 

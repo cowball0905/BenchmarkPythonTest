@@ -32,26 +32,19 @@ def init(app):
 		if not param:
 			param = ""
 
-		possible = "ABC"
-		guess = possible[0]
-		
-		match guess:
-			case 'A':
-				bar = param
-			case 'B':
-				bar = 'bob'
-			case 'C' | 'D':
-				bar = param
-			case _:
-				bar = 'bob\'s your uncle'
+		map14330 = {}
+		map14330['keyA-14330'] = 'a-Value'
+		map14330['keyB-14330'] = param
+		map14330['keyC'] = 'another-Value'
+		bar = map14330['keyB-14330']
 
 		import random
 		from helpers.utils import mysession
 
 		num = 'BenchmarkTest00137'[13:]
-		user = f'SafeIsaac{num}'
+		user = f'SafeRandall{num}'
 		cookie = f'rememberMe{num}'
-		value = str(random.SystemRandom().randint(0, 2**32))
+		value = str(random.SystemRandom().random())[2:]
 
 		if cookie in mysession and request.cookies.get(cookie) == mysession[cookie]:
 			RESPONSE += (

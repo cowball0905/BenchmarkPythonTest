@@ -20,10 +20,10 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00070', methods=['GET'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00070', methods=['GET'])
 	def BenchmarkTest00070_get():
-		response = make_response(render_template('web/redirect-00/BenchmarkTest00070.html'))
-		response.set_cookie('BenchmarkTest00070', 'http%3A%2F%2Flocalhost%3A5000%2F',
+		response = make_response(render_template('web/trustbound-00/BenchmarkTest00070.html'))
+		response.set_cookie('BenchmarkTest00070', 'my_user_id',
 			max_age=60*3,
 			secure=True,
 			path=request.path,
@@ -31,34 +31,30 @@ def init(app):
 		return response
 		return BenchmarkTest00070_post()
 
-	@app.route('/benchmark/redirect-00/BenchmarkTest00070', methods=['POST'])
+	@app.route('/benchmark/trustbound-00/BenchmarkTest00070', methods=['POST'])
 	def BenchmarkTest00070_post():
 		RESPONSE = ""
 
 		import urllib.parse
 		param = urllib.parse.unquote_plus(request.cookies.get("BenchmarkTest00070", "noCookieValueSupplied"))
 
-		import markupsafe
+		import configparser
 		
-		bar = markupsafe.escape(param)
+		bar = 'safe!'
+		conf61831 = configparser.ConfigParser()
+		conf61831.add_section('section61831')
+		conf61831.set('section61831', 'keyA-61831', 'a_Value')
+		conf61831.set('section61831', 'keyB-61831', param)
+		bar = conf61831.get('section61831', 'keyA-61831')
 
 		import flask
-		import urllib.parse
 
-		try:
-			url = urllib.parse.urlparse(bar)
-			if url.netloc not in ['google.com'] or url.scheme != 'https':
-				RESPONSE += (
-					'Invalid URL.'
-				)
-				return RESPONSE
-		except:
-			RESPONSE += (
-				'Error parsing URL.'
-			)
-			return RESPONSE
+		flask.session['userid'] = bar
 
-		return flask.redirect(bar)
+		RESPONSE += (
+			f'Item: \'userid\' with value \'{escape_for_html(bar)}'
+			'\'saved in session.'
+		)
 
 		return RESPONSE
 

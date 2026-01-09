@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00370', methods=['GET'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00370', methods=['GET'])
 	def BenchmarkTest00370_get():
 		return BenchmarkTest00370_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00370', methods=['POST'])
+	@app.route('/benchmark/xpathi-00/BenchmarkTest00370', methods=['POST'])
 	def BenchmarkTest00370_post():
 		RESPONSE = ""
 
@@ -34,16 +34,29 @@ def init(app):
 				param = name
 				break
 
-		string6661 = 'help'
-		string6661 += param
-		string6661 += 'snapes on a plane'
-		bar = string6661[4:-17]
+		num = 106
+		
+		bar = "This should never happen" if (7*42) - num > 200 else param
 
+		import elementpath
+		import xml.etree.ElementTree as ET
+		import helpers.utils
 
-		otherarg = "static text"
-		RESPONSE += (
-			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
-		)
+		try:
+			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
+			query = f"/Employees/Employee[@emplid=\'{bar}\']"
+			nodes = elementpath.select(root, query)
+			node_strings = []
+			for node in nodes:
+				node_strings.append(' '.join([e.text for e in node]))
+
+			RESPONSE += (
+				f'Your XPATH query results are: <br>[ {', '.join(node_strings)} ]'
+			)
+		except:
+			RESPONSE += (
+				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
+			)
 
 		return RESPONSE
 

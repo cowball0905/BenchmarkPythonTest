@@ -32,19 +32,18 @@ def init(app):
 		if not param:
 		    param = ""
 
-		map8357 = {}
-		map8357['keyA-8357'] = 'a-Value'
-		map8357['keyB-8357'] = param
-		map8357['keyC'] = 'another-Value'
-		bar = map8357['keyB-8357']
+		bar = "This should never happen"
+		if 'should' in bar:
+			bar = param
 
-		import elementpath
-		import xml.etree.ElementTree as ET
+		import lxml.etree
 		import helpers.utils
 
 		try:
-			root = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')
-			nodes = elementpath.select(root, f"/Employees/Employee[@emplid=\'{bar.replace('\'', '&apos;')}\']")
+			fd = open(f'{helpers.utils.RES_DIR}/employees.xml', 'rb')
+			root = lxml.etree.parse(fd)
+			query = f'/Employees/Employee[@emplid=\'{bar}\']'
+			nodes = root.xpath(query)
 			node_strings = []
 			for node in nodes:
 				node_strings.append(' '.join([e.text for e in node]))
@@ -56,7 +55,6 @@ def init(app):
 			RESPONSE += (
 				f'Error parsing XPath Query: \'{escape_for_html(query)}\''
 			)
-
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00417', methods=['GET'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00417', methods=['GET'])
 	def BenchmarkTest00417_get():
 		return BenchmarkTest00417_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00417', methods=['POST'])
+	@app.route('/benchmark/redirect-00/BenchmarkTest00417', methods=['POST'])
 	def BenchmarkTest00417_post():
 		RESPONSE = ""
 
@@ -34,15 +34,18 @@ def init(app):
 				param = name
 				break
 
-		bar = param + '_SafeStuff'
-
-
-		RESPONSE += (
-			'The value of the bar parameter is now in a custom header.'
-		)
-
-		RESPONSE = make_response((RESPONSE, {'yourBenchmarkTest00417': bar}))
+		import configparser
 		
+		bar = 'safe!'
+		conf87573 = configparser.ConfigParser()
+		conf87573.add_section('section87573')
+		conf87573.set('section87573', 'keyA-87573', 'a_Value')
+		conf87573.set('section87573', 'keyB-87573', param)
+		bar = conf87573.get('section87573', 'keyA-87573')
+
+		import flask
+
+		return flask.redirect(bar)
 
 		return RESPONSE
 

@@ -20,32 +20,55 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00518', methods=['GET'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00518', methods=['GET'])
 	def BenchmarkTest00518_get():
 		return BenchmarkTest00518_post()
 
-	@app.route('/benchmark/deserialization-00/BenchmarkTest00518', methods=['POST'])
+	@app.route('/benchmark/pathtraver-00/BenchmarkTest00518', methods=['POST'])
 	def BenchmarkTest00518_post():
 		RESPONSE = ""
 
-		param = request.headers.get("BenchmarkTest00518")
-		if not param:
-		    param = ""
+		param = ""
+		headers = request.headers.getlist("BenchmarkTest00518")
+		
+		if headers:
+			param = headers[0]
 
-		bar = param + '_SafeStuff'
+		map10307 = {}
+		map10307['keyA-10307'] = 'a-Value'
+		map10307['keyB-10307'] = param
+		map10307['keyC'] = 'another-Value'
+		bar = map10307['keyB-10307']
 
-		import yaml
+		import helpers.utils
+
+		fileName = None
+		fd = None
+
+		if '../' in bar:
+			RESPONSE += (
+				'File name must not include \'../\''
+			)
+			return RESPONSE
 
 		try:
-			yobj = yaml.safe_load(bar)
-
+			fileName = f'{helpers.utils.TESTFILES_DIR}/{bar}'
+			fd = open(fileName, 'rb')
 			RESPONSE += (
-				yobj['text']
+				f'The beginning of file: \'{escape_for_html(fileName)}\' is:\n\n'
+				f'{escape_for_html(fd.read(1000).decode('utf-8'))}'
 			)
-		except:
+		except IOError as e:
 			RESPONSE += (
-				"There was an error loading the configuration"
+				f'Problem reading from file \'{fileName}\': '
+				f'{escape_for_html(e.strerror)}'
 			)
+		finally:
+			try:
+				if fd is not None:
+					fd.close()
+			except IOError:
+				pass # "// we tried..."
 
 		return RESPONSE
 

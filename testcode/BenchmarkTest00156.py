@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00156', methods=['GET'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00156', methods=['GET'])
 	def BenchmarkTest00156_get():
 		return BenchmarkTest00156_post()
 
-	@app.route('/benchmark/trustbound-00/BenchmarkTest00156', methods=['POST'])
+	@app.route('/benchmark/codeinj-00/BenchmarkTest00156', methods=['POST'])
 	def BenchmarkTest00156_post():
 		RESPONSE = ""
 
@@ -32,20 +32,21 @@ def init(app):
 		if not param:
 			param = ""
 
-		map27248 = {}
-		map27248['keyA-27248'] = 'a-Value'
-		map27248['keyB-27248'] = param
-		map27248['keyC'] = 'another-Value'
-		bar = map27248['keyB-27248']
+		num = 86
+		
+		if 7 * 42 - num > 200:
+			bar = 'This_should_always_happen'
+		else:
+			bar = param
 
-		import flask
-
-		flask.session[bar] = '12345'
-
-		RESPONSE += (
-			f'Item: \'{escape_for_html(bar)}'
-			'\' with value: 12345 saved in session.'
-		)
+		try:
+			RESPONSE += (
+				eval(bar)
+			)
+		except:
+			RESPONSE += (
+				f'Error evaluating expression \'{escape_for_html(bar)}\''
+			)
 
 		return RESPONSE
 

@@ -20,11 +20,11 @@ from helpers.utils import escape_for_html
 
 def init(app):
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00099', methods=['GET'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00099', methods=['GET'])
 	def BenchmarkTest00099_get():
 		return BenchmarkTest00099_post()
 
-	@app.route('/benchmark/xss-00/BenchmarkTest00099', methods=['POST'])
+	@app.route('/benchmark/sqli-00/BenchmarkTest00099', methods=['POST'])
 	def BenchmarkTest00099_post():
 		RESPONSE = ""
 
@@ -32,20 +32,25 @@ def init(app):
 		if not param:
 			param = ""
 
-		bar = "alsosafe"
-		if param:
-			lst = []
-			lst.append('safe')
-			lst.append(param)
-			lst.append('moresafe')
-			lst.pop(0)
-			bar = lst[1]
+		import configparser
+		
+		bar = 'safe!'
+		conf52528 = configparser.ConfigParser()
+		conf52528.add_section('section52528')
+		conf52528.set('section52528', 'keyA-52528', 'a-Value')
+		conf52528.set('section52528', 'keyB-52528', param)
+		bar = conf52528.get('section52528', 'keyB-52528')
 
+		import helpers.db_sqlite
 
-		otherarg = "static text"
+		sql = f'SELECT username from USERS where password = \'{bar}\''
+		con = helpers.db_sqlite.get_connection()
+		cur = con.cursor()
+		cur.execute(sql)
 		RESPONSE += (
-			'bar is \'%s\' and otherarg is \'%s\'' % (bar, otherarg)
+			helpers.db_sqlite.results(cur, sql)
 		)
+		con.close()
 
 		return RESPONSE
 
